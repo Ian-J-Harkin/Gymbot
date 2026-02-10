@@ -1,3 +1,4 @@
 fitbot-admin/node_modules/
 fitbot-admin/.env.example
-
+fitbot-api/node_modules/
+node_modules/

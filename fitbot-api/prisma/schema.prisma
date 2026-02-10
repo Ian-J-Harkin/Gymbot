@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -18,21 +17,26 @@ model User {
   id            String   @id @default(cuid())
   email         String   @unique
   password      String
+  gymName       String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   configuration Configuration?
 }
 
 model Configuration {
-  id            String @id @default(cuid())
-  faqText       String @db.Text
-  widgetColor   String @default("#007bff")
-  openAiApiKey  String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  userId        String   @unique
-  user          User     @relation(fields: [userId], references: [id])
-  apiKey        ApiKey?
+  id               String   @id @default(cuid())
+  faqText          String   @db.Text
+  widgetColor      String   @default("#007bff")
+  openAiApiKey     String?
+  aiProvider       String   @default("openai")   // "openai", "openrouter", "ollama"
+  openRouterApiKey String?
+  ollamaUrl        String?  @default("http://localhost:11434")
+  ollamaModel      String?  @default("llama3")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  apiKey           ApiKey?
 }
 
 model ApiKey {
