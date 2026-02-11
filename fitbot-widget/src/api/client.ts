@@ -1,6 +1,6 @@
 import type { WidgetConfig } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:4000/api';
 
 export class ApiClient {
     private apiKey: string;
@@ -57,6 +57,8 @@ export class ApiClient {
                 if (line.startsWith('data: ')) {
                     const dataText = line.substring(6).trim();
                     if (!dataText) continue;
+
+                    if (dataText === '[DONE]') break;
 
                     try {
                         const parsed = JSON.parse(dataText);
