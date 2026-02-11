@@ -1,0 +1,66 @@
+version: '3.9'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: wp-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass
+    volumes:
+      - db_data:/var/lib/mysql
+
+  wordpress:
+    image: wordpress:latest
+    container_name: wp-site
+    depends_on:
+      - db
+    ports:
+      - "8000:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wpuser
+      WORDPRESS_DB_PASSWORD: wppass
+      WORDPRESS_DB_NAME: wordpress
+
+      WORDPRESS_CONFIG_EXTRA: |
+        define('WP_MAIL_FROM', 'test@example.com');
+        define('WP_MAIL_FROM_NAME', 'Local WP');
+        define('WP_SMTP_HOST', 'mailhog');
+        define('WP_SMTP_PORT', 1025);
+
+    volumes:
+      - ./wp-content:/var/www/html/wp-content
+      - ./fitbot-wordpress-plugin:/var/www/html/wp-content/plugins/fitbot-wordpress-plugin
+      - ./fitbot-widget/dist:/var/www/html/widget-dist
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: wp-phpmyadmin
+    depends_on:
+      - db
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: db
+      MYSQL_ROOT_PASSWORD: root
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: wp-mailhog
+    ports:
+      - "8025:8025"
+
+  mock-api:
+    build: ./tests/mock-server
+    container_name: fitbot-mock-api
+    ports:
+      - "4000:3000"
+
+volumes:
+  db_data:
+
+
