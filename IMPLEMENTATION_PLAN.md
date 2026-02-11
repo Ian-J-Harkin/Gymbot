@@ -25,7 +25,11 @@ This document tracks the progress of the FitBot project implementation against t
     - [x] Implement `decrypt(hash)` using AES-256-GCM.
 - [x] Configure `ENCRYPTION_KEY` and `IV_SECRET` in environment variables.
 
-### Story 2.3: User Configurations CRUD
+### Story 2.4: Stripe Integration (Backend Completed)
+- [x] Create `StripeService`.
+    - [x] Handle missing API keys gracefully (Dev/Test Mode).
+    - [x] Mock checkout session creation in local dev.
+    - [x] Bypass subscription checks if Stripe is not configured.
 - [x] Generate `ConfigurationsModule`, `ConfigurationsService`, `ConfigurationsController`.
 - [x] Implement `GET /configurations/me`.
     - [x] Retrieve config for logged-in user.
@@ -42,15 +46,15 @@ This document tracks the progress of the FitBot project implementation against t
     - [x] Invalidate old keys for user's configuration.
     - [x] Save new key to database.
 
-## 🟡 Epic 3.5: Advanced LLM Configuration (Planned)
+## 🟢 Epic 3.5: Advanced LLM Configuration (Completed)
 ### Story 3.5.1: Configuration UI Refactor
-- [ ] Split single configuration form into tabs: **General**, **AI Model**, **Knowledge Base**.
-- [ ] Move API Keys and Provider selection to the **AI Model** tab.
+- [x] Split single configuration form into tabs: **General**, **AI Model**, **Knowledge Base**.
+- [x] Move API Keys and Provider selection to the **AI Model** tab.
 
 ### Story 3.5.2: Local LLM Support (Ollama)
-- [ ] Implement backend proxy for local Ollama instance (Docker networking).
-- [ ] Add `ollamaBaseUrl` field to Configuration model (default `http://host.docker.internal:11434`).
-- [ ] Update `WidgetService` to route chat requests to Ollama when selected.
+- [x] Implement backend proxy for local Ollama instance (Docker networking not needed for local dev).
+- [x] Add `ollamaBaseUrl` field to Configuration model (default `http://localhost:11434`).
+- [x] Update `WidgetService` to route chat requests to Ollama when selected.
 
 ## 🟢 Epic 4: Public Widget API (Backend Completed)
 ### Story 4.1: Public Widget Configuration
