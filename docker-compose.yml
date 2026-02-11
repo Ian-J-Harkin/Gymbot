@@ -27,10 +27,11 @@ services:
       WORDPRESS_DB_NAME: wordpress
 
       WORDPRESS_CONFIG_EXTRA: |
-        define('WP_MAIL_FROM', 'test@example.com');
+        define('WP_Mail_FROM', 'test@example.com');
         define('WP_MAIL_FROM_NAME', 'Local WP');
         define('WP_SMTP_HOST', 'mailhog');
         define('WP_SMTP_PORT', 1025);
+        define('FITBOT_DEV_MODE', true);
 
     volumes:
       - ./wp-content:/var/www/html/wp-content

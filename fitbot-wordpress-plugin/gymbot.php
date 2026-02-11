@@ -83,9 +83,13 @@ class FitBot_Widget
         }
 
         // In a production environment, this would point to a CDN.
-        // For development/demo, we can assume a known URL or local path.
-        // Local integration test path
-        $script_url = '/widget-dist/gymbot.min.js';
+        // Check for development mode constant (defined in wp-config.php or plugin header)
+        if (defined('FITBOT_DEV_MODE') && FITBOT_DEV_MODE) {
+            $script_url = '/widget-dist/gymbot.min.js';
+        }
+        else {
+            $script_url = 'https://cdn.fitbot.ai/gymbot.min.js';
+        }
 
 ?>
         <script 
