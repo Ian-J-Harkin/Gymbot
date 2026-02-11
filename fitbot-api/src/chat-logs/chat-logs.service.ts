@@ -31,4 +31,17 @@ export class ChatLogsService {
             },
         });
     }
+
+    async findByUserId(userId: string): Promise<ChatLog[]> {
+        return this.prisma.chatLog.findMany({
+            where: {
+                configuration: {
+                    userId
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+    }
 }

@@ -321,6 +321,12 @@ function ExplanationItem({ explanation }: { explanation: any }) {
                         <strong>Context:</strong> <span>{explanation.contextUsed}</span>
                         <strong>Prompt:</strong> <span>{explanation.systemPromptSummary}</span>
                         <strong>Latency:</strong> <span>{explanation.responseTimeMs}ms</span>
+                        {explanation.validationResults?.length > 0 && (
+                            <>
+                                <strong>Safety:</strong>
+                                <span>{explanation.validationResults.map((r: any) => `${r.ruleId} (${r.severity})`).join(', ')}</span>
+                            </>
+                        )}
                     </div>
                     <div style={{ marginTop: '6px', fontSize: '10px', color: '#999', textAlign: 'right' }}>
                         {new Date(explanation.timestamp).toLocaleString()}
