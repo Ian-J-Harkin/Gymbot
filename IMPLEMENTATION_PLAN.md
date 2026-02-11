@@ -42,6 +42,16 @@ This document tracks the progress of the FitBot project implementation against t
     - [x] Invalidate old keys for user's configuration.
     - [x] Save new key to database.
 
+## 🟡 Epic 3.5: Advanced LLM Configuration (Planned)
+### Story 3.5.1: Configuration UI Refactor
+- [ ] Split single configuration form into tabs: **General**, **AI Model**, **Knowledge Base**.
+- [ ] Move API Keys and Provider selection to the **AI Model** tab.
+
+### Story 3.5.2: Local LLM Support (Ollama)
+- [ ] Implement backend proxy for local Ollama instance (Docker networking).
+- [ ] Add `ollamaBaseUrl` field to Configuration model (default `http://host.docker.internal:11434`).
+- [ ] Update `WidgetService` to route chat requests to Ollama when selected.
+
 ## 🟢 Epic 4: Public Widget API (Backend Completed)
 ### Story 4.1: Public Widget Configuration
 - [x] Generate `WidgetModule`, `WidgetService`, `WidgetController`.
