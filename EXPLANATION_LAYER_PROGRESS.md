@@ -7,6 +7,8 @@ This document tracks the implementation progress of the GymBot Explanation Layer
 - **Phase 1: Audit Logging (Backend)** - ✅ Implemented | ✅ Tested
 - **Phase 2: Structured Explanation** - ✅ API Implemented | ✅ Frontend Widget Implemented
 - **Phase 3: Rule-Based Validation (Backend)** - ✅ Backend Implemented | ✅ Tested
+- **Phase 4: Retrieved Context (Mini-RAG)** - ✅ Implemented | ✅ Tech Demo Ready
+- **Phase 5: Admin UI & Exploration** - ✅ Implemented | ✅ Ready for Review
 - **Phase 7: Frontend Widget Build** - ✅ Preact Implementation | ✅ SSE Streaming | ✅ Explanation UI
 
 ## Implementation Details
@@ -26,7 +28,17 @@ This document tracks the implementation progress of the GymBot Explanation Layer
 - **Architecture**: Created validation models and service.
 - **Integration**: Added validation hook to `processChat`.
 - **Rules**: Implemented `MaxMessageLengthRule`.
-- **Testing**: Added unit test for blocking validation in `WidgetService`.
+- **Safety Flags**: Integrated validation results into the Explanation metadata for display in both widget and admin UI.
+
+### Phase 4: Retrieved Context (Mini-RAG)
+- **Logic**: Implemented `RagService` for keyword-based FAQ partitioning and retrieval.
+- **Integration**: `WidgetService` now queries for relevant chunks instead of injecting the full FAQ text.
+- **Transparency**: Context retrieval stats (e.g., "Retrieved 2 chunks") are surfaced in the explanation panel.
+
+### Phase 5: Admin UI (Audit Logs)
+- **API**: Exposed `GET /chat-logs` endpoint with gym owner multi-tenancy support.
+- **Frontend**: Added "Audit Logs" tab to the Admin Dashboard.
+- **Interactive UI**: A detailed list view with an interactive side-drawer to inspect conversation history and AI reasoning.
 
 ## Test Coverage
 - **Backend Unit Tests**:
@@ -34,8 +46,9 @@ This document tracks the implementation progress of the GymBot Explanation Layer
     - `WidgetService`: Tested `processChat` with logging and explanation logic for all providers. Validated that blocking rules stop the chat flow.
 - **Frontend Manual Testing**:
     - Verified `ApiClient` can parse the specific SSE JSON chunk format used by the NestJS backend.
+    - Verified Audit Log UI rendering and responsiveness.
 
 ## Next Steps
-1. **Phase 4: Retrieved Context Display**: Update RAG logic to track specific document citations and show them in the widget's explanation panel.
-2. **Phase 5: Admin UI**: Create the audit log explorer in `fitbot-admin` to help gym owners review chatbot performance and reasoning.
-3. **Embeddable Script**: Finalize the deployment strategy for the `fitbot-widget` bundle.
+1. **Fine-tune RAG**: Adjust chunking logic based on real-world FAQ structures.
+2. **Additional Rules**: Implement profanity filtering and "I don't know" thresholding.
+3. **Distribution**: Finalize the public URL for `gymbot.min.js`.
