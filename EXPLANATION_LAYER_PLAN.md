@@ -58,6 +58,21 @@
 
 ---
 
+## 🛠️ Configuration & LLM Management (UI Overhaul)
+
+### Phase 3.X: Configuration UX Cleanup
+- [ ] **Tabbed Interface**: Split "Configuration" into logical tabs:
+    - **General**: Gym Name, Widget Color, Greeting Message.
+    - **AI Model**: Provider selection (OpenAI, OpenRouter, Ollama), API Keys, Model selection.
+    - **Knowledge Base**: FAQ text input and indexing status.
+
+### Phase 3.Y: Local LLM Support
+- [ ] **Ollama Integration**:
+    - Backend logic to route requests to local Ollama (e.g., `http://host.docker.internal:11434`).
+    - UI toggle to switch to "Use Local LLM".
+
+---
+
 ## �🚀 Outstanding Work (Future Roadmap)
 
 ### Phase 3.X: Advanced Safety Rules
