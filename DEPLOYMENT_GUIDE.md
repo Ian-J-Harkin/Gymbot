@@ -24,7 +24,24 @@ This guide outlines how to deploy the FitBot ecosystem using free-tier services.
 
 ---
 
-## 2. Frontends (`fitbot-admin` & `fitbot-widget`)
+## 2. Azure Free Hosting (Alternative)
+
+### Admin Dashboard & Widget: Azure Static Web Apps
+1.  **Create Static Web App**: In Azure Portal, search for "Static Web Apps".
+2.  **Source**: GitHub. Choose your repo and branch.
+3.  **Build Presets**: 
+    *   **App Location**: `/fitbot-admin` (or `/fitbot-widget`)
+    *   **Output Location**: `dist`
+4.  **Scaling**: Select the **Free F1** tier.
+
+### Backend: Azure App Service (Free F1)
+1.  **Create Web App**: Select "Node.js 20".
+2.  **Deployment**: GitHub Actions (Azure will generate the `.yml` for you).
+3.  **Configuration**: Add your environment variables (`DATABASE_URL`, etc.) in the **Settings > Configuration** blade.
+
+---
+
+## 3. Frontends (`fitbot-admin` & `fitbot-widget`)
 
 ### Admin Dashboard: Netlify
 1.  **Add New Site**: Import from GitHub.

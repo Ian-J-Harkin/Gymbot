@@ -1,6 +1,6 @@
 # GymBot — Explanation Layer: Roadmap & Status
 
-> **Status:** Phase 1-5 Implemented (Core MVP Complete)  
+> **Status:** Phase 1-7 Implemented (Pre-Launch Stable)  
 > **Goal:** Safety, Transparency, and Retrieval for the FitBot pipeline
 
 ---
@@ -32,6 +32,17 @@
 - [x] Dashboard "Audit Logs" tab with tab-navigation
 - [x] Responsive log list with status badges
 - [x] Interactive side-drawer for reasoning drill-down
+
+### Phase 6: Distribution & UI Polish
+- [x] **Animations**: Smooth slide-up window and fade-in bubbles
+- [x] **Typing Indicator**: Animated bouncing dots for AI "thinking" state
+- [x] **Chat Reset**: Ability to clear history and start over via header
+- [x] **Mobile Responsive**: Full-screen mode for small devices
+
+### Phase 7: Billing & Subscriptions (Instrumentation)
+- [x] **Database Scale**: Stripe customer/subscription fields added
+- [x] **Guardrail Check**: Subscription status verified in `ApiKeyAuthGuard`
+- [x] **Kill-switch**: `requireSubscription` toggle for testing mode
 
 ---
 
@@ -71,7 +82,13 @@
 - [ ] **Markdown Sanitization**: Deep audit of `snarkdown` output for XSS prevention.
 - [ ] **Theme Persistence**: Let gym owners toggle themes (Dark/Light) in the dashboard.
 
-### Phase 8: Extra Features (Later)
+### Phase 9: Billing UI & Full Integration
+- [ ] **Stripe Checkout**: "Upgrade" button in Admin Dashboard
+- [ ] **Billing Portal**: Redirect to Stripe customer portal for management
+- [ ] **Subscription Status Page**: UI to show plan details and next payment
+- [ ] **Graceful Failures**: Custom messages in the widget if subscription expires
+
+### Phase 10: Extra Features (Later)
 - [ ] **Advanced Markdown Support**: Add code syntax highlighting and complex table rendering.
 - [ ] **Voice Interaction**: Integrate browser-based speech-to-text for members.
 - [ ] **Analytics Dashboard**: Aggregate metrics on most-asked questions and user satisfaction.

@@ -16,7 +16,11 @@ export class ApiKeyAuthGuard implements CanActivate {
 
         const keyRecord = await this.prisma.apiKey.findUnique({
             where: { key: apiKey },
-            include: { configuration: true },
+            include: {
+                configuration: {
+                    include: { user: true }
+                }
+            },
         });
 
         if (!keyRecord || keyRecord.status !== 'ACTIVE') {
