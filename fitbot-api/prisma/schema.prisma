@@ -14,36 +14,51 @@ datasource db {
 }
 
 model User {
-  id            String   @id @default(cuid())
-  email         String   @unique
+  id            String         @id @default(cuid())
+  email         String         @unique
   password      String
   gymName       String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
   configuration Configuration?
 }
 
 model Configuration {
-  id               String   @id @default(cuid())
-  faqText          String   @db.Text
-  widgetColor      String   @default("#007bff")
+  id               String    @id @default(cuid())
+  faqText          String    @db.Text
+  widgetColor      String    @default("#007bff")
   openAiApiKey     String?
-  aiProvider       String   @default("openai")   // "openai", "openrouter", "ollama"
+  aiProvider       String    @default("openai") // "openai", "openrouter", "ollama"
   openRouterApiKey String?
-  ollamaUrl        String?  @default("http://localhost:11434")
-  ollamaModel      String?  @default("llama3")
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  userId           String   @unique
-  user             User     @relation(fields: [userId], references: [id])
+  ollamaUrl        String?   @default("http://localhost:11434")
+  ollamaModel      String?   @default("llama3")
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  userId           String    @unique
+  user             User      @relation(fields: [userId], references: [id])
   apiKey           ApiKey?
+  logs             ChatLog[]
 }
 
 model ApiKey {
-  id              String   @id @default(cuid())
-  key             String   @unique
-  status          String   @default("ACTIVE")
-  createdAt       DateTime @default(now())
-  configurationId String   @unique
+  id              String        @id @default(cuid())
+  key             String        @unique
+  status          String        @default("ACTIVE")
+  createdAt       DateTime      @default(now())
+  configurationId String        @unique
+  configuration   Configuration @relation(fields: [configurationId], references: [id])
+}
+
+model ChatLog {
+  id              String        @id @default(cuid())
+  configurationId String
+  userMessage     String        @db.Text
+  aiResponse      String        @db.Text
+  provider        String
+  model           String
+  contextLength   Int
+  validationFlags String[]
+  responseTimeMs  Int
+  createdAt       DateTime      @default(now())
   configuration   Configuration @relation(fields: [configurationId], references: [id])
 }

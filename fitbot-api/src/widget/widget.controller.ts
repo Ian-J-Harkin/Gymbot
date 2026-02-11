@@ -15,26 +15,24 @@ export class WidgetController {
 
     @Post('chat')
     async chat(@Request() req, @Body() body: { message: string; history: any[] }, @Res() res: Response) {
-        const result = await this.widgetService.processChat(req.configuration, body.message, body.history || []);
-
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
 
-        // Check if result is an async iterable (streaming response from OpenAI/OpenRouter)
-        if (result && typeof result[Symbol.asyncIterator] === 'function') {
+        try {
+            const result = this.widgetService.processChat(req.configuration, body.message, body.history || []);
+
             for await (const chunk of result) {
-                const content = chunk.choices[0]?.delta?.content || '';
-                if (content) {
-                    res.write(`data: ${JSON.stringify({ content })}\n\n`);
+                if (typeof chunk === 'string') {
+                    res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+                } else if (chunk && typeof chunk === 'object' && 'explanation' in chunk) {
+                    res.write(`data: ${JSON.stringify({ explanation: chunk.explanation })}\n\n`);
                 }
             }
-        } else {
-            // Non-streaming response (Ollama)
-            const content = result.choices?.[0]?.message?.content || '';
-            if (content) {
-                res.write(`data: ${JSON.stringify({ content })}\n\n`);
-            }
+        } catch (error) {
+            console.error('Error in chat stream:', error);
+            // Optionally send an error event to the client
+            res.write(`data: ${JSON.stringify({ content: "I'm sorry, I encountered an error." })}\n\n`);
         }
 
         res.write('data: [DONE]\n\n');
