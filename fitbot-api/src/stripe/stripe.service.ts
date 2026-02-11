@@ -5,19 +5,29 @@ import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class StripeService {
-    private stripe: Stripe;
+    private stripe: Stripe | null = null;
     private readonly logger = new Logger(StripeService.name);
 
     constructor(
         private configService: ConfigService,
         private prisma: PrismaService,
     ) {
-        this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY') || '', {
-            apiVersion: '2025-01-27.acacia',
-        });
+        const apiKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+        if (apiKey) {
+            this.stripe = new Stripe(apiKey, {
+                apiVersion: '2026-01-28.clover',
+            });
+        } else {
+            this.logger.warn('STRIPE_SECRET_KEY not set. Billing features will be disabled or mocked.');
+        }
     }
 
     async isSubscriptionActive(userId: string): Promise<boolean> {
+        // Validation bypass for dev/test without Stripe
+        if (!this.stripe) {
+            return true; // Assume active in dev mode!
+        }
+
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
             select: { subscriptionStatus: true },
@@ -27,6 +37,14 @@ export class StripeService {
     }
 
     async createCheckoutSession(userId: string, email: string) {
+        if (!this.stripe) {
+            this.logger.log('Mocking checkout session creation (No Stripe Key)');
+            const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL') || 'http://localhost:3001/dashboard';
+            // Strip any query params from returnUrl for the base, then append mock param
+            const baseUrl = returnUrl.split('?')[0];
+            return { url: `${baseUrl}?session_id=mock_session_123&mock_success=true` };
+        }
+
         const priceId = this.configService.get<string>('STRIPE_PRICE_ID');
         const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL');
 
@@ -42,7 +60,12 @@ export class StripeService {
     }
 
     async handleWebhook(signature: string, payload: Buffer) {
-        const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+        if (!this.stripe) {
+            this.logger.warn('Received webhook but Stripe is not configured.');
+            return;
+        }
+
+        const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET') || '';
         let event: Stripe.Event;
 
         try {

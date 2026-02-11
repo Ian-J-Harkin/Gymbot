@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  # Main Application Database (Postgres)
+  app-db:
+    image: postgres:15-alpine
+    container_name: fitbot-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: fitbot
+      POSTGRES_PASSWORD: fitbotpassword
+      POSTGRES_DB: fitbot
+    ports:
+      - "5432:5432"
+    volumes:
+      - app_db_data:/var/lib/postgresql/data
+
+  # Optional: PGAdmin to view the DB
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: fitbot-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@fitbot.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - app-db
+
+volumes:
+  app_db_data:

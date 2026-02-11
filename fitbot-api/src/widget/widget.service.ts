@@ -101,9 +101,7 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
                     stream = await this.chatWithOpenRouter(configuration, messages);
                     break;
                 case 'ollama':
-                    const response = await this.chatWithOllama(configuration, messages);
-                    // Standardize Ollama response to behave like a stream chunk
-                    stream = [{ choices: [{ delta: { content: response.choices[0].message.content } }] }];
+                    stream = await this.chatWithOllama(configuration, messages);
                     break;
                 default:
                     throw new InternalServerErrorException(`Unknown AI provider: ${provider}`);
@@ -208,17 +206,20 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
         return stream;
     }
 
-    private async chatWithOllama(configuration: any, messages: any[]) {
+    private async *chatWithOllama(configuration: any, messages: any[]) {
         const ollamaUrl = configuration.ollamaUrl || 'http://localhost:11434';
         const model = configuration.ollamaModel || 'llama3';
 
-        const response = await fetch(`${ollamaUrl}/api/chat`, {
+        // Ensure URL doesn't end with slash
+        const baseUrl = ollamaUrl.replace(/\/$/, '');
+
+        const response = await fetch(`${baseUrl}/api/chat`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 model,
                 messages,
-                stream: false,
+                stream: true, // Enable streaming
             }),
         });
 
@@ -226,16 +227,45 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
             throw new Error(`Ollama request failed: ${response.statusText}`);
         }
 
-        const data = await response.json();
+        if (!response.body) {
+            throw new Error('Ollama response has no body');
+        }
 
-        // Return a simple object matching what the controller expects
-        return {
-            choices: [{
-                message: {
-                    role: 'assistant',
-                    content: data.message?.content || 'No response from Ollama',
-                },
-            }],
-        };
+        // Handle the stream
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+
+        try {
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                const chunk = decoder.decode(value, { stream: true });
+                buffer += chunk;
+                const lines = buffer.split('\n');
+
+                // Keep the last partial line in the buffer
+                buffer = lines.pop() || '';
+
+                for (const line of lines) {
+                    if (!line.trim()) continue;
+                    try {
+                        const json = JSON.parse(line);
+                        if (json.message?.content) {
+                            yield {
+                                choices: [{
+                                    delta: { content: json.message.content }
+                                }]
+                            };
+                        }
+                    } catch (e) {
+                        console.warn('Failed to parse Ollama chunk:', e);
+                    }
+                }
+            }
+        } finally {
+            reader.releaseLock();
+        }
     }
 }
