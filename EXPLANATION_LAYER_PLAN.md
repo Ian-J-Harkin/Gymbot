@@ -35,7 +35,19 @@
 
 ---
 
-## 🚀 Outstanding Work (Future Roadmap)
+## � Key Design Decisions & Conclusions
+
+### RAG-Lite vs. Full Vector Search
+**Decision:** We have opted to stick with Keyword-based "RAG-Lite" retrieval for the MVP.
+**Reasoning:**
+- **Overkill for FAQ Scale:** Most gyms have <100 Q&A pairs. Vector search (embeddings) adds significant latency and overhead for negligible gain at this scale.
+- **Latency & Cost:** Vector search requires an additional API call to an embedding model (e.g., OpenAI `text-embedding-3-small`), adding ~200ms lag.
+- **Infrastructure Simplicity:** Keyword search runs entirely in memory without requiring `pgvector` or complex background indexing jobs.
+- **Future-Proofing:** The architecture is built as a tech demonstration; we can swap out the keyword search for a vector-based one in the future if the FAQ sets grow into the thousands.
+
+---
+
+## �🚀 Outstanding Work (Future Roadmap)
 
 ### Phase 3.X: Advanced Safety Rules
 - [ ] **Profanity Filter**: Add a basic rule to flag/block offensive input.
@@ -47,10 +59,22 @@
 - [ ] **Ollama Embeddings**: Use local models for privacy-preserving search.
 - [ ] **Source Citations**: Record exactly which chunk ID was used and display clickable sources.
 
-### Phase 6: Distribution & Polish
+### Phase 6: Security & Reliability
+- [x] **CI/CD Pipeline**: GitHub Actions for automated testing and builds.
+- [x] **CORS Hardened**: Strict origin policy (MVP level).
+- [x] **XSS Sanitization**: Integrated DOMPurify in the widget.
+- [ ] **Rate Limiting**: Add `throttler` to the backend for API protection.
+- [ ] **Secret Scanning**: Integrate `trufflehog` or similar in CI.
+
+### Phase 7: Distribution & Polish
 - [ ] **CDN Deployment**: Finalize public script URL for `gymbot.min.js`.
 - [ ] **Markdown Sanitization**: Deep audit of `snarkdown` output for XSS prevention.
 - [ ] **Theme Persistence**: Let gym owners toggle themes (Dark/Light) in the dashboard.
+
+### Phase 8: Extra Features (Later)
+- [ ] **Advanced Markdown Support**: Add code syntax highlighting and complex table rendering.
+- [ ] **Voice Interaction**: Integrate browser-based speech-to-text for members.
+- [ ] **Analytics Dashboard**: Aggregate metrics on most-asked questions and user satisfaction.
 
 ---
 

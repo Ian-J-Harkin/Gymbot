@@ -26,6 +26,14 @@ If you prefer to set the API key via JavaScript rather than a data attribute, yo
 <script src="https://cdn.fitbot.ai/gymbot.min.js" async></script>
 ```
 
+### 1a. WordPress Installation
+If you use WordPress, you can use our dedicated plugin:
+1.  Download or copy the `fitbot-wordpress-plugin` folder to your local machine.
+2.  Upload the folder to your WordPress `/wp-content/plugins/` directory.
+3.  Activate the "FitBot Chat Widget" plugin through the 'Plugins' menu in WordPress.
+4.  Navigate to **Settings > FitBot** and paste your API Key.
+5.  The widget will automatically appear on all pages of your site.
+
 ---
 
 ## 2. Sensible Default Settings

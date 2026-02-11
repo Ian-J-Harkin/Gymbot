@@ -10,6 +10,7 @@ export interface ExplanationMetadata {
 
 export interface WidgetConfig {
     widgetColor: string;
+    greetingMessage?: string;
 }
 
 export interface Message {
