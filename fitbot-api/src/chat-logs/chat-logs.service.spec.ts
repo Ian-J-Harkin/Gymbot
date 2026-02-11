@@ -68,4 +68,25 @@ describe('ChatLogsService', () => {
             expect(result).toHaveProperty('id', 'test-log-id');
         });
     });
+
+    describe('findByUserId', () => {
+        it('should return logs for a specific user', async () => {
+            const mockLogs = [{ id: 'log-1' }, { id: 'log-2' }];
+            prismaService.chatLog.findMany = jest.fn().mockResolvedValue(mockLogs);
+
+            const result = await service.findByUserId('user-1');
+
+            expect(prismaService.chatLog.findMany).toHaveBeenCalledWith({
+                where: {
+                    configuration: {
+                        userId: 'user-1'
+                    }
+                },
+                orderBy: {
+                    createdAt: 'desc'
+                }
+            });
+            expect(result).toEqual(mockLogs);
+        });
+    });
 });

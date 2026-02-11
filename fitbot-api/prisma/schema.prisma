@@ -14,13 +14,17 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  password      String
-  gymName       String?
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  configuration Configuration?
+  id                     String         @id @default(cuid())
+  email                  String         @unique
+  password               String
+  gymName                String?
+  stripeCustomerId       String?        @unique
+  stripeSubscriptionId   String?        @unique
+  subscriptionStatus     String?        // "active", "canceled", "incomplete", etc.
+  subscriptionPriceId    String?
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  configuration          Configuration?
 }
 
 model Configuration {
@@ -32,6 +36,11 @@ model Configuration {
   openRouterApiKey String?
   ollamaUrl        String?   @default("http://localhost:11434")
   ollamaModel      String?   @default("llama3")
+  greetingMessage  String?   @default("Hi! I'm FitBot, your gym assistant. How can I help you today?")
+  
+  // Billing Instrumentation
+  requireSubscription Boolean   @default(false)
+  
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   userId           String    @unique

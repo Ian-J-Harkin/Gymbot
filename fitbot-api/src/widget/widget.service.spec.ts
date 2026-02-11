@@ -4,6 +4,7 @@ import { EncryptionService } from '../common/services/encryption.service';
 import OpenAI from 'openai';
 import { ChatLogsService } from '../chat-logs/chat-logs.service';
 import { ValidationService } from '../validation/validation.service';
+import { RagService } from '../rag/rag.service';
 
 jest.mock('openai');
 
@@ -12,6 +13,7 @@ describe('WidgetService', () => {
   let encryptionService: Partial<EncryptionService>;
   let chatLogsService: Partial<ChatLogsService>;
   let validationService: Partial<ValidationService>;
+  let ragService: Partial<RagService>;
 
   beforeEach(async () => {
     encryptionService = {
@@ -30,12 +32,18 @@ describe('WidgetService', () => {
       }),
     };
 
+    ragService = {
+      chunkText: jest.fn().mockReturnValue([]),
+      search: jest.fn().mockReturnValue([]),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WidgetService,
         { provide: EncryptionService, useValue: encryptionService },
         { provide: ChatLogsService, useValue: chatLogsService },
         { provide: ValidationService, useValue: validationService },
+        { provide: RagService, useValue: ragService },
       ],
     }).compile();
 

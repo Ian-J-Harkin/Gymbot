@@ -1,0 +1,108 @@
+name: FitBot CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # 1. API: Build, Test, and Prepare for Deploy
+  api-pipeline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./fitbot-api
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './fitbot-api/package-lock.json'
+      
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Run Unit Tests
+        run: npm test
+        env:
+          JWT_SECRET: test-secret
+          ENCRYPTION_KEY: 12345678901234567890123456789012
+          IV_SECRET: 1234567890123456
+          DATABASE_URL: postgresql://user:pass@localhost:5432/db # Mock for build/gen
+
+      - name: Build API
+        run: npm run build
+
+  # 2. Admin Dashboard: Build and Deploy (Netlify)
+  admin-pipeline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./fitbot-admin
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './fitbot-admin/package-lock.json'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Admin
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      # Deployment to Netlify (Requires NETLIFY_AUTH_TOKEN and NETLIFY_SITE_ID in GitHub Secrets)
+      # - name: Deploy to Netlify
+      #   uses: nwtgck/actions-netlify@v3.0
+      #   with:
+      #     publish-dir: './fitbot-admin/dist'
+      #     production-deploy: true
+      #     github-token: ${{ secrets.GITHUB_TOKEN }}
+      #     deploy-message: "Deploy from GitHub Actions"
+      #     enable-pull-request-comment: false
+      #     enable-commit-comment: true
+      #     over-write-all-builds: true
+      #   env:
+      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+      #     NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID_ADMIN }}
+
+  # 3. Widget: Build and Prepare (CDN/Static Host)
+  widget-pipeline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./fitbot-widget
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './fitbot-widget/package-lock.json'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Build Widget
+        run: npm run build
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+
+      # Usually we'd upload the gymbot.min.js to a public bucket or separate Netlify site
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fitbot-widget-bundle
+          path: ./fitbot-widget/dist/gymbot.min.js
