@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { ConfigurationForm } from '../components/ConfigurationForm';
 import { AuditLogList } from '../components/AuditLogList';
-import { Settings, History } from 'lucide-react';
+import { Settings, History, CreditCard } from 'lucide-react';
+import { BillingSettings } from '../components/BillingSettings';
 
 const DashboardPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'config' | 'logs'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'logs' | 'billing'>('config');
 
   return (
     <DashboardLayout>
@@ -25,8 +26,8 @@ const DashboardPage: React.FC = () => {
           <button
             onClick={() => setActiveTab('config')}
             className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'config'
-                ? 'bg-white text-primary-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              ? 'bg-white text-primary-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
               }`}
           >
             <Settings className="h-4 w-4" />
@@ -35,12 +36,22 @@ const DashboardPage: React.FC = () => {
           <button
             onClick={() => setActiveTab('logs')}
             className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'logs'
-                ? 'bg-white text-primary-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              ? 'bg-white text-primary-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
               }`}
           >
             <History className="h-4 w-4" />
             <span>Audit Logs</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('billing')}
+            className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'billing'
+              ? 'bg-white text-primary-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              }`}
+          >
+            <CreditCard className="h-4 w-4" />
+            <span>Subscription</span>
           </button>
         </div>
 
@@ -52,8 +63,10 @@ const DashboardPage: React.FC = () => {
                 <ConfigurationForm />
               </div>
             </div>
-          ) : (
+          ) : activeTab === 'logs' ? (
             <AuditLogList />
+          ) : (
+            <BillingSettings />
           )}
         </div>
       </div>

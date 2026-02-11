@@ -30,6 +30,12 @@ export class WidgetService {
         const provider = configuration.aiProvider || 'openai';
         const model = configuration.ollamaModel || (provider === 'openai' ? 'gpt-3.5-turbo' : 'openai/gpt-3.5-turbo');
 
+        // --- Subscription Check ---
+        if (configuration.requireSubscription && configuration.user?.subscriptionStatus !== 'active') {
+            yield "Service unavailable, please check with admin.";
+            return;
+        }
+
         // --- Mini-RAG: Context Retrieval ---
         const allChunks = this.ragService.chunkText(configuration.faqText);
         const relevantChunks = this.ragService.search(message, allChunks, 3);
