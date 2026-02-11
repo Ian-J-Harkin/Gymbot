@@ -35,4 +35,7 @@ export interface ConfigurationResponse {
   ollamaModel: string;
   createdAt?: string;
   updatedAt?: string;
+  apiKey?: {
+    key: string;
+  };
 }

@@ -14,6 +14,7 @@ export class ConfigurationsService {
     async getConfig(userId: string) {
         const config = await this.prisma.configuration.findUnique({
             where: { userId },
+            include: { apiKey: true },
         });
 
         if (!config) {
