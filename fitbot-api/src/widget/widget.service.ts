@@ -7,6 +7,7 @@ import { ChatLogsService } from '../chat-logs/chat-logs.service';
 import { ExplanationMetadata } from './explanation-metadata.interface';
 
 import { ValidationService } from '../validation/validation.service';
+import { RagService } from '../rag/rag.service';
 
 @Injectable()
 export class WidgetService {
@@ -14,6 +15,7 @@ export class WidgetService {
         private encryptionService: EncryptionService,
         private chatLogsService: ChatLogsService,
         private validationService: ValidationService,
+        private ragService: RagService,
     ) { }
 
     getPublicConfig(configuration: any) {
@@ -28,10 +30,24 @@ export class WidgetService {
         const provider = configuration.aiProvider || 'openai';
         const model = configuration.ollamaModel || (provider === 'openai' ? 'gpt-3.5-turbo' : 'openai/gpt-3.5-turbo');
 
-        const systemPrompt = `You are a helpful assistant for a gym. Use the following FAQ to answer user questions:
-${configuration.faqText}
+        // --- Mini-RAG: Context Retrieval ---
+        const allChunks = this.ragService.chunkText(configuration.faqText);
+        const relevantChunks = this.ragService.search(message, allChunks, 3);
 
-If the answer is not in the FAQ, politely say you don't know and suggest contacting support.`;
+        // Fallback to full context if no specifically relevant chunks found but FAQ exists
+        const contextContent = relevantChunks.length > 0
+            ? relevantChunks.map(c => c.content).join('\n\n')
+            : (allChunks.length > 0 ? allChunks[0].content : 'No FAQ information available.');
+
+        const contextUsedSummary = relevantChunks.length > 0
+            ? `Retrieved ${relevantChunks.length} relevant sections`
+            : "No specific match found (using general context)";
+
+        const systemPrompt = `You are a helpful assistant for a gym. Use the following EXCERPT from the gym's FAQ to answer user questions:
+---
+${contextContent}
+---
+If the answer is not in this excerpt, politely say you don't know and suggest contacting support.`;
 
         // --- Input Validation ---
         const inputValidation = await this.validationService.validate('input', message, { configuration, userMessage: message });
@@ -102,11 +118,12 @@ If the answer is not in the FAQ, politely say you don't know and suggest contact
             const explanation: ExplanationMetadata = {
                 provider,
                 model,
-                contextUsed: "Entire FAQ",
-                contextLength: systemPrompt.length,
-                systemPromptSummary: `Used entire FAQ (${configuration.faqText.length} chars)`,
+                contextUsed: contextUsedSummary,
+                contextLength: contextContent.length,
+                systemPromptSummary: `Retrieved ${relevantChunks.length} chunks from ${allChunks.length} total blocks.`,
                 responseTimeMs,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                validationResults: inputValidation.results
             };
 
             yield { explanation };

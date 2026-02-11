@@ -193,11 +193,11 @@ This works for small FAQs but doesn't scale, and there are no meaningful "retrie
 - [ ] **4.9** Write tests for chunking, embedding, and retrieval
 - [ ] **4.10** A/B testing or quality comparison: full FAQ vs. retrieved chunks
 
-### Interim Option (No RAG Required)
+### Interim Option (Mini-RAG Implemented)
 
-If full RAG is deferred, a simpler "context display" can be achieved:
-- [ ] **4.A** Report `"context: entire FAQ"` with character count and a truncated preview
-- [ ] **4.B** Hash the FAQ content to detect if it changed between interactions
+- [x] **4.A** Report `"context: retrieved chunks"` with block count and metadata
+- [x] **4.B** Implement simple keyword-based partitioner and searcher
+- [x] **4.C** Update `processChat` to inject only relevant chunks
 
 ### 🔵 Design Decisions Needed (Phase 4)
 

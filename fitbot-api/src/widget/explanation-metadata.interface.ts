@@ -6,4 +6,5 @@ export interface ExplanationMetadata {
     systemPromptSummary: string;
     responseTimeMs: number;
     timestamp: string;
+    validationResults?: any[];  // Flags or results from validation service
 }
