@@ -11,4 +11,9 @@ export const configurationApi = {
     const response = await api.put('/configurations/me', data);
     return response.data;
   },
+
+  generateApiKey: async (): Promise<{ apiKey: string }> => {
+    const response = await api.post('/api-keys');
+    return response.data;
+  },
 };

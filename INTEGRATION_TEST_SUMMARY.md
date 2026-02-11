@@ -1,81 +1,43 @@
-# Integration Test Summary & Environment Setup
+# Manual Integration Test Guide
 
-## Overview
-This document summarizes the local integration testing environment created to validate the FitBot Widget, WordPress Plugin, and Backend API communication. A Docker-based environment was established to simulate a real-world deployment scenario with a WordPress site, a local widget build, and a mock backend server.
+This guide outlines the steps to verify the FitBot integration end-to-end, connecting the local Dockerized WordPress environment to the local FitBot Backend running on the host machine.
 
-## 1. Environment Architecture
+**Prerequisites:**
+- `fitbot-api` running on port 3000 (Host).
+- `fitbot-admin` running on port 3001 (Host).
+- Docker containers (`wordpress`, `db`) running via `docker-compose up`.
+- `fitbot-widget` rebuilt for local api (Completed).
 
-The setup consists of the following Docker services defined in `docker-compose.yml`:
+## Step 1: Configure Backend & Get API Key
+1.  Open [FitBot Admin Dashboard](http://localhost:3001).
+2.  **Login/Register** if needed.
+3.  Navigate to **Configuration**.
+4.  **Knowledge Base Tab**: Enter test data (e.g., "Our gym is open 24/7. Membership is $50/month.").
+5.  **AI Model Tab**: Select "Ollama" (ensure Ollama is running locally).
+6.  **Installation Tab**: 
+    - Click **Generate API Key**.
+    - **Copy** the generated key to your clipboard.
 
-| Service | Type | Port | Description |
-| :--- | :--- | :--- | :--- |
-| **wordpress** | WordPress | `8000` | The host site where the widget is embedded via the plugin. |
-| **db** | MySQL 8.0 | - | Database for the WordPress installation. |
-| **mock-api** | Node.js | `4000` | A lightweight Express server simulating the `fitbot-api` to test chat functionality without the full backend stack. |
-| **phpmyadmin** | Tool | `8080` | DB administration interface. |
-| **mailhog** | Tool | `8025` | Email testing tool. |
+## Step 2: Configure WordPress Plugin
+1.  Open [WordPress Admin](http://localhost:8000/wp-admin).
+2.  Login with your WordPress credentials (if prompted to install, follow the setup).
+3.  Go to **Settings > FitBot**.
+4.  **Paste** the API Key from Step 1 into the "FitBot API Key" field.
+5.  Click **Save Changes**.
 
-### Key Directories & Mounts
-*   **Widget Build**: `./fitbot-widget/dist` is mounted to `/var/www/html/widget-dist` in the WordPress container. This allows the plugin to serve the local widget build directly.
-*   **Plugin Source**: `./fitbot-wordpress-plugin` is mounted to `./wp-content/plugins/fitbot-wordpress-plugin`, allowing live code edits to the plugin to be reflected immediately.
+## Step 3: Test the Chatbot
+1.  Visit the [WordPress Homepage](http://localhost:8000).
+2.  Click the blue **FitBot Chat Bubble** in the bottom-right corner.
+3.  Type a message: *"How much is membership?"*
+4.  **Verify**:
+    - The bot responds with context from your Knowledge Base ("$50/month").
+    - The response streams in real-time.
 
-## 2. Configuration & "Dev Mode"
-
-To ensure the plugin works locally without hardcoding paths that would break production, a feature flag system was implemented:
-
-1.  **Plugin Logic (`gymbot.php`)**:
-    The plugin checks for a constant `FITBOT_DEV_MODE`:
-    ```php
-    if ( defined( 'FITBOT_DEV_MODE' ) && FITBOT_DEV_MODE ) {
-         $script_url = '/widget-dist/gymbot.min.js'; // Local Docker Path
-    } else {
-         $script_url = 'https://cdn.fitbot.ai/gymbot.min.js'; // Production CDN
-    }
-    ```
-
-2.  **Docker Injection**:
-    The constant is injected via `WORDPRESS_CONFIG_EXTRA` in `docker-compose.yml`:
-    ```yaml
-    WORDPRESS_CONFIG_EXTRA: |
-        define('FITBOT_DEV_MODE', true);
-    ```
-
-3.  **Widget API URL**:
-    The widget is configured to point to the mock API (port 4000) instead of the default port 3000 to avoid conflicts with other local services. This is handled in `fitbot-widget/src/api/client.ts` or via build-time environment variables.
-
-## 3. Mock API Server
-
-A simple Node.js server was created in `tests/mock-server` to simulate the backend.
-*   **Config Endpoint**: `GET /api/widget/config` - Returns standard widget styling/text configuration.
-*   **Chat Endpoint**: `POST /api/widget/chat` - Streams a mock response ("This response is coming from the mock server...") using Server-Sent Events (SSE).
-
-## 4. How to Run the Test Environment
-
-1.  **Build the Widget**:
-    ```bash
-    cd fitbot-widget
-    # Build pointing to the Mock API port (4000)
-    # Windows PowerShell:
-    $env:VITE_API_URL="http://localhost:4000/api"; npm run build
-    ```
-
-2.  **Start the Environment**:
-    ```bash
-    docker-compose up -d
-    ```
-    *(Note: Use `docker-compose up -d --build mock-api` if you modified the mock server)*
-
-3.  **Verify**:
-    *   Visit **http://localhost:8000**
-    *   Click the blue chat launcher.
-    *   Send a message ("Hello").
-    *   Verify the streamed response and "Why did I say this?" link appear.
-
-## 5. Troubleshooting Reference
-
-*   **"An error occurred" in Chat**: Usually means the API is unreachable. Check if `mock-api` container is running (`docker ps`) and if the widget was built with the correct `VITE_API_URL`.
-*   **Widget 404**: Ensure the `dist` folder exists (`npm run build`) and the volume mount in `docker-compose.yml` is correct.
-*   **Port Conflicts**: The Mock API was moved to port `4000` to avoid conflicts with local services on port `3000`.
+## Troubleshooting
+- **Connection Failed?** Ensure `fitbot-api` is running on port 3000.
+- **Wrong Response?** Check your Knowledge Base data and ensure "Ollama" is selected.
+- **Widget Not Loading?** Ensure `npm run build` was run in `fitbot-widget` directory (already completed).
+- **Docker Errors?** If you see `error during connect`, ensure **Docker Desktop** is running. Restart it if necessary, then run `docker-compose up -d`.
 
 ---
-**Status**: COMPLETE. The integration test successfully validates the full loop from WordPress Plugin -> Widget -> API -> User Interface.
+*Note: The widget is loaded from local `fitbot-widget/dist` mounted into the WordPress container via Docker volumes. Rebuilding the widget updates the WordPress site instantly.*

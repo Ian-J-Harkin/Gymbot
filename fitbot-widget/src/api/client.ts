@@ -1,6 +1,8 @@
 import type { WidgetConfig } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = 'http://localhost:3002/api';
+console.log('FitBot Widget API URL:', API_BASE_URL);
+
 
 export class ApiClient {
     private apiKey: string;
@@ -17,10 +19,18 @@ export class ApiClient {
         });
 
         if (!response.ok) {
-            throw new Error('Failed to fetch widget configuration');
+            const errorText = await response.text();
+            console.error('API Error Response:', errorText);
+            throw new Error(`Failed to fetch configuration: ${response.status} ${response.statusText}`);
         }
 
-        return response.json();
+        const responseText = await response.text();
+        try {
+            return JSON.parse(responseText);
+        } catch (e) {
+            console.error('Invalid JSON received from server:', responseText.substring(0, 200));
+            throw new Error('Invalid JSON response from server');
+        }
     }
 
     async *streamChat(message: string, history: any[]): AsyncGenerator<string | { explanation: any }> {

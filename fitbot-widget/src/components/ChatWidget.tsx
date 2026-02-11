@@ -12,6 +12,9 @@ interface ChatWidgetProps {
 export function ChatWidget({ apiKey }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [config, setConfig] = useState<WidgetConfig | null>(null);
+  const [currentApiKey, setCurrentApiKey] = useState(apiKey);
+  const [needsKey, setNeedsKey] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
@@ -25,15 +28,43 @@ export function ChatWidget({ apiKey }: ChatWidgetProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    clientRef.current = new ApiClient(apiKey);
+    // Check if we have a valid key (not the default test one)
+    if (currentApiKey === 'test-api-key' || !currentApiKey) {
+      setNeedsKey(true);
+      return;
+    }
+
+    clientRef.current = new ApiClient(currentApiKey);
     clientRef.current.getConfig()
-      .then(setConfig)
-      .catch((err) => console.error('Config load failed:', err));
-  }, [apiKey]);
+      .then((cfg) => {
+        setConfig(cfg);
+        setNeedsKey(false);
+        // Reset welcome message with custom greeting
+        if (cfg.greetingMessage) {
+          setMessages(() => [
+            {
+              id: '1',
+              role: 'assistant',
+              content: cfg.greetingMessage || '' // Fix: Ensure content is always a string
+            }
+          ]);
+        }
+      })
+      .catch((err) => {
+        console.error('Config load failed:', err);
+        setConfigError(err.message || 'Connection failed');
+        setNeedsKey(true);
+      });
+  }, [currentApiKey]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  const handleKeySubmit = (newKey: string) => {
+    setCurrentApiKey(newKey);
+    // Optionally update URL or localStorage here for persistence
+  };
 
   const handleSend = async () => {
     if (!inputValue.trim() || !clientRef.current || isTyping) return;
@@ -335,48 +366,96 @@ export function ChatWidget({ apiKey }: ChatWidgetProps) {
         </div>
 
         <div className="fitbot-messages">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`fitbot-message ${msg.role}`}>
-              <div
-                className="fitbot-bubble"
-                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(snarkdown(msg.content)) }}
-              />
-              {msg.role === 'assistant' && msg.explanation && (
-                <ExplanationItem explanation={msg.explanation} />
-              )}
-            </div>
-          ))}
-          {isTyping && messages[messages.length - 1].isStreaming === false && (
-            <div className="fitbot-message assistant">
-              <div className="fitbot-bubble" style={{ width: 'fit-content' }}>
-                <div className="typing-indicator">
-                  <div className="typing-dot"></div>
-                  <div className="typing-dot"></div>
-                  <div className="typing-dot"></div>
+          {needsKey ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', padding: '20px', textAlign: 'center' }}>
+              <h3 style={{ marginBottom: '16px', color: '#333' }}>{configError ? 'Connection Failed' : 'Setup Required'}</h3>
+
+              {configError && (
+                <div style={{ padding: '8px', backgroundColor: '#FEE2E2', color: '#B91C1C', borderRadius: '4px', fontSize: '12px', marginBottom: '16px', maxWidth: '100%' }}>
+                  Error: {configError}
                 </div>
-              </div>
+              )}
+
+              <p style={{ fontSize: '14px', color: '#666', marginBottom: '20px' }}>
+                {configError ? 'Please check your API Key and try again.' : 'Please enter your Widget API Key to continue.'}
+              </p>
+              <input
+                type="text"
+                placeholder="Paste API Key here..."
+                defaultValue={currentApiKey !== 'test-api-key' ? currentApiKey : ''}
+                style={{ width: '100%', padding: '8px', marginBottom: '12px', border: '1px solid #ddd', borderRadius: '4px' }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleKeySubmit((e.target as HTMLInputElement).value);
+                }}
+              />
+              <button
+                onClick={(e) => {
+                  const input = (e.currentTarget.previousElementSibling as HTMLInputElement);
+                  handleKeySubmit(input.value);
+                }}
+                style={{ backgroundColor: primaryColor, color: 'white', border: 'none', padding: '8px 16px', borderRadius: '4px', cursor: 'pointer' }}
+              >
+                Connect
+              </button>
+              <p style={{ fontSize: '11px', color: '#999', marginTop: '16px' }}>
+                You can find this key in your FitBot Dashboard &gt; Installation.
+              </p>
             </div>
+          ) : (
+            <>
+              {messages.map((msg) => (
+                <div key={msg.id} className={`fitbot-message ${msg.role}`}>
+                  <div className="fitbot-bubble" style={{ minWidth: msg.role === 'assistant' && (!msg.content || !msg.content.trim()) ? '60px' : 'auto' }}>
+                    {msg.role === 'assistant' && (!msg.content || !msg.content.trim()) && msg.isStreaming ? (
+                      <div className="typing-indicator" style={{ justifyContent: 'center' }}>
+                        <div className="typing-dot"></div>
+                        <div className="typing-dot"></div>
+                        <div className="typing-dot"></div>
+                      </div>
+                    ) : (
+                      <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(snarkdown(msg.content)) }} />
+                    )}
+                  </div>
+                  {msg.role === 'assistant' && msg.explanation && (
+                    <ExplanationItem explanation={msg.explanation} />
+                  )}
+                </div>
+              ))}
+              {isTyping && messages[messages.length - 1].isStreaming === false && (
+                <div className="fitbot-message assistant">
+                  <div className="fitbot-bubble" style={{ width: 'fit-content' }}>
+                    <div className="typing-indicator">
+                      <div className="typing-dot"></div>
+                      <div className="typing-dot"></div>
+                      <div className="typing-dot"></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </>
           )}
-          <div ref={messagesEndRef} />
         </div>
 
-        <div className="fitbot-input-area">
-          <input
-            className="fitbot-input"
-            value={inputValue}
-            onInput={(e) => setInputValue((e.target as HTMLInputElement).value)}
-            onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Type a message..."
-            disabled={isTyping}
-          />
-          <button
-            className="fitbot-send-btn"
-            onClick={handleSend}
-            disabled={isTyping || !inputValue.trim()}
-          >
-            <Send size={20} />
-          </button>
-        </div>
+        {!needsKey && (
+          <div className="fitbot-input-area">
+            <input
+              className="fitbot-input"
+              value={inputValue}
+              onInput={(e) => setInputValue((e.target as HTMLInputElement).value)}
+              onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+              placeholder="Type a message..."
+              disabled={isTyping}
+            />
+            <button
+              className="fitbot-send-btn"
+              onClick={handleSend}
+              disabled={isTyping || !inputValue.trim()}
+            >
+              <Send size={20} />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

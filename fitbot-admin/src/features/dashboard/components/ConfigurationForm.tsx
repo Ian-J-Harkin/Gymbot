@@ -16,6 +16,9 @@ export const ConfigurationForm: React.FC = () => {
     faqData: '',
     isActive: true,
   });
+  const [apiKey, setApiKey] = useState<string | null>(null);
+  const [isEditingOpenAi, setIsEditingOpenAi] = useState(true);
+  const [isEditingOpenRouter, setIsEditingOpenRouter] = useState(true);
 
   const {
     register,
@@ -68,6 +71,11 @@ export const ConfigurationForm: React.FC = () => {
         ollamaUrl: config.ollamaUrl || 'http://localhost:11434',
         ollamaModel: config.ollamaModel || 'llama3',
       });
+      if (config.apiKey) {
+        setApiKey(config.apiKey.key);
+      }
+      setIsEditingOpenAi(!config.openAiApiKey);
+      setIsEditingOpenRouter(!config.openRouterApiKey);
     } catch (err: any) {
       if (err.response?.status !== 404) {
         setError('Failed to load configuration');
@@ -93,7 +101,7 @@ export const ConfigurationForm: React.FC = () => {
         ollamaModel: data.ollamaModel,
       });
       setSuccess('Configuration saved successfully!');
-      setTimeout(() => setSuccess(null), 3000);
+      setTimeout(() => setSuccess(null), 5000);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to save configuration');
     } finally {
@@ -106,12 +114,27 @@ export const ConfigurationForm: React.FC = () => {
     { id: 'general', label: 'General' },
     { id: 'ai', label: 'AI Model' },
     { id: 'knowledge', label: 'Knowledge Base' },
+    { id: 'installation', label: 'Installation' },
   ];
 
   const [activeTab, setActiveTab] = useState('general');
 
   const handleColorPresetClick = (color: string) => {
     setValue('primaryColor', color);
+  };
+
+  const handleGenerateApiKey = async () => {
+    try {
+      setIsLoading(true);
+      const data = await configurationApi.generateApiKey();
+      setApiKey(data.apiKey);
+      setSuccess('New API Key generated successfully!');
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      setError('Failed to generate API Key');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (isLoading) {
@@ -153,11 +176,7 @@ export const ConfigurationForm: React.FC = () => {
             </div>
           )}
 
-          {success && (
-            <div className="rounded-md bg-green-50 p-4">
-              <div className="text-sm text-green-700">{success}</div>
-            </div>
-          )}
+          {/* Success message moved to bottom */}
 
           {/* General Tab */}
           {activeTab === 'general' && (
@@ -244,14 +263,29 @@ export const ConfigurationForm: React.FC = () => {
               {/* Provider-specific fields */}
               {selectedProvider === 'openai' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    OpenAI API Key
-                  </label>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      OpenAI API Key
+                    </label>
+                    {!isEditingOpenAi && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsEditingOpenAi(true);
+                          setValue('openaiApiKey', ''); // Clear to force re-entry? Or keep value? Keeping value is better for small edits.
+                        }}
+                        className="text-xs text-primary-600 hover:text-primary-800 font-medium"
+                      >
+                        Edit Key
+                      </button>
+                    )}
+                  </div>
                   <input
                     {...register('openaiApiKey')}
                     type="password"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                    placeholder="sk-..."
+                    disabled={!isEditingOpenAi}
+                    className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 ${!isEditingOpenAi ? 'bg-gray-100 text-gray-500' : 'border-gray-300'}`}
+                    placeholder={!isEditingOpenAi ? '••••••••••••••••••••••••' : 'sk-...'}
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     Your OpenAI API key is encrypted and securely stored.
@@ -264,14 +298,26 @@ export const ConfigurationForm: React.FC = () => {
 
               {selectedProvider === 'openrouter' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    OpenRouter API Key
-                  </label>
+                  <div className="flex justify-between items-center mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      OpenRouter API Key
+                    </label>
+                    {!isEditingOpenRouter && (
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingOpenRouter(true)}
+                        className="text-xs text-primary-600 hover:text-primary-800 font-medium"
+                      >
+                        Edit Key
+                      </button>
+                    )}
+                  </div>
                   <input
                     {...register('openRouterApiKey')}
                     type="password"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                    placeholder="sk-or-..."
+                    disabled={!isEditingOpenRouter}
+                    className={`w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 ${!isEditingOpenRouter ? 'bg-gray-100 text-gray-500' : 'border-gray-300'}`}
+                    placeholder={!isEditingOpenRouter ? '••••••••••••••••••••••••' : 'sk-or-...'}
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     Get your API key from{' '}
@@ -344,11 +390,70 @@ export const ConfigurationForm: React.FC = () => {
             </div>
           )}
 
+          {/* Installation Tab */}
+          {activeTab === 'installation' && (
+            <div className="space-y-6 animate-in fade-in duration-300">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                <h4 className="text-blue-800 font-medium mb-2">Widget Integration</h4>
+                <p className="text-blue-700 text-sm mb-4">
+                  To enable the chatbot on your website, you need a Public API Key. Add this key to your widget configuration.
+                </p>
+
+                {apiKey ? (
+                  <div className="bg-white p-3 rounded border border-blue-100 flex items-center justify-between overflow-hidden">
+                    <code className="text-sm font-mono text-gray-800 truncate mr-2 flex-1" title={apiKey}>{apiKey}</code>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(apiKey);
+                        setSuccess('Copied to clipboard!');
+                        setTimeout(() => setSuccess(null), 2000);
+                      }}
+                      className="text-primary-600 text-xs font-medium hover:underline"
+                    >
+                      Copy
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500 italic">No API Key generated yet.</div>
+                )}
+
+                <div className="mt-4">
+                  <button
+                    type="button"
+                    onClick={handleGenerateApiKey}
+                    className="text-sm px-3 py-2 bg-white border border-gray-300 rounded hover:bg-gray-50 text-gray-700 font-medium transition-colors"
+                  >
+                    {apiKey ? 'Regenerate API Key' : 'Generate API Key'}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <h5 className="font-medium text-gray-900 mb-2">Test with Curl</h5>
+                <div className="bg-gray-800 rounded-lg p-4 overflow-x-auto">
+                  <pre className="text-xs text-gray-300 font-mono">
+                    {`curl -X POST http://localhost:3002/api/widget/chat \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: ${apiKey || 'YOUR_API_KEY'}" \\
+  -d '{"message": "Hello, when are you open?", "history": []}'`}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {success && (
+            <div className="rounded-md bg-green-50 p-4 mb-4">
+              <div className="text-sm text-green-700">{success}</div>
+            </div>
+          )}
+
           {/* Submit Button */}
           <div className="pt-4 border-t border-gray-100">
             <button
               type="submit"
-              disabled={isSaving}
+              disabled={isSaving || !!success}
               className="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSaving ? (

@@ -6,6 +6,8 @@ export default defineConfig({
     build: {
         rollupOptions: {
             output: {
+                format: 'iife',
+                name: 'FitBot',
                 manualChunks: undefined,
                 entryFileNames: 'gymbot.min.js',
                 assetFileNames: 'gymbot.[ext]',
