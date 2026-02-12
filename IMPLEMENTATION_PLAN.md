@@ -67,7 +67,7 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **5.5 Mini-RAG Integration**: Keyword-based context retrieval implemented in `RagService`.
 
 ## 🟡 Epic 6: Knowledge Base & Security Hardening (Current Branch)
-- [ ] **6.1 Advanced Document Support**: Support for .pdf and .docx file uploads.
+- [x] **6.1 Advanced Document Support**: Support for .pdf and .docx file uploads; automatic chunking and indexing.
 - [x] **6.2 Security Hardening**: Restrict CORS, harden JWT, and finalize sanitization.
 - [ ] **6.3 RAG Optimization**: Improve chunking and retrieval logic for uploaded documents.
 - [ ] **6.4 Vector Search Evaluation**: Investigate `pgvector` in PostgreSQL (Neon) for semantic search vs. current basic keyword logic; assess alignment with MCP patterns.

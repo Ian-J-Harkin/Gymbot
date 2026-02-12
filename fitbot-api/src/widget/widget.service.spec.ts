@@ -5,6 +5,7 @@ import OpenAI from 'openai';
 import { ChatLogsService } from '../chat-logs/chat-logs.service';
 import { ValidationService } from '../validation/validation.service';
 import { RagService } from '../rag/rag.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 jest.mock('openai');
 
@@ -14,6 +15,7 @@ describe('WidgetService', () => {
   let chatLogsService: Partial<ChatLogsService>;
   let validationService: Partial<ValidationService>;
   let ragService: Partial<RagService>;
+  let prismaService: Partial<PrismaService>;
 
   beforeEach(async () => {
     encryptionService = {
@@ -34,7 +36,13 @@ describe('WidgetService', () => {
 
     ragService = {
       chunkText: jest.fn().mockReturnValue([]),
-      search: jest.fn().mockReturnValue([]),
+      search: jest.fn().mockImplementation((q, chunks) => chunks.slice(0, 2)), // Mock search behavior
+    };
+
+    prismaService = {
+      documentChunk: {
+        findMany: jest.fn().mockResolvedValue([]),
+      } as any,
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -44,6 +52,7 @@ describe('WidgetService', () => {
         { provide: ChatLogsService, useValue: chatLogsService },
         { provide: ValidationService, useValue: validationService },
         { provide: RagService, useValue: ragService },
+        { provide: PrismaService, useValue: prismaService },
       ],
     }).compile();
 

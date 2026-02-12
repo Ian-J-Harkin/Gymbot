@@ -8,6 +8,7 @@ import { ExplanationMetadata } from './explanation-metadata.interface';
 
 import { ValidationService } from '../validation/validation.service';
 import { RagService } from '../rag/rag.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class WidgetService {
@@ -16,6 +17,7 @@ export class WidgetService {
         private chatLogsService: ChatLogsService,
         private validationService: ValidationService,
         private ragService: RagService,
+        private prisma: PrismaService,
     ) { }
 
     getPublicConfig(configuration: any) {
@@ -37,13 +39,28 @@ export class WidgetService {
         }
 
         // --- Mini-RAG: Context Retrieval ---
-        const allChunks = this.ragService.chunkText(configuration.faqText);
-        const relevantChunks = this.ragService.search(message, allChunks, 3);
+        const faqChunks = this.ragService.chunkText(configuration.faqText);
 
-        // Fallback to full context if no specifically relevant chunks found but FAQ exists
+        // Fetch document chunks from the database
+        const documentChunks = await this.prisma.documentChunk.findMany({
+            where: {
+                document: {
+                    configurationId: configuration.id,
+                },
+            },
+        });
+
+        const allChunks = [
+            ...faqChunks.map((c, i) => ({ id: `faq-${i}`, content: c.content })),
+            ...documentChunks.map(c => ({ id: c.id, content: c.content })),
+        ];
+
+        const relevantChunks = this.ragService.search(message, allChunks as any, 5);
+
+        // Fallback or aggregate context
         const contextContent = relevantChunks.length > 0
             ? relevantChunks.map(c => c.content).join('\n\n')
-            : (allChunks.length > 0 ? allChunks[0].content : 'No FAQ information available.');
+            : (faqChunks.length > 0 ? faqChunks[0].content : 'No FAQ information available.');
 
         const contextUsedSummary = relevantChunks.length > 0
             ? `Retrieved ${relevantChunks.length} relevant sections`
