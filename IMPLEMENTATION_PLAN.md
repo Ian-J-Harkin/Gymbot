@@ -59,7 +59,14 @@ This document tracks the progress of the FitBot project implementation against t
     - [x] Forward request to OpenAI API.
     - [x] Stream response back to client (SSE).
 
-## 🟡 Epic 5: Admin Portal Setup (Frontend Partial)
+## � Epic 5: Admin Portal & Explanation Layer (Completed)
 - [x] **5.1 Initialize Vite React Project**.
-- [x] **Components & UI**: Basic structures for Login, Register, and Dashboard exist.
-- [x] **Integration**: Connect frontend forms to the backend API (Code Updated).
+- [x] **5.2 Audit Logs UI**: Detailed list view and side-drawer for chat history.
+- [x] **5.3 AI Reasoning Visibility**: Surfaced provider, model, and latency in Admin UI.
+- [x] **5.4 Widget Explanation**: Added "Why did I say this?" toggle to the Preact widget.
+- [x] **5.5 Mini-RAG Integration**: Keyword-based context retrieval implemented in `RagService`.
+
+## 🟡 Epic 6: Knowledge Base & Security Hardening (Current Branch)
+- [ ] **6.1 Advanced Document Support**: Support for .pdf and .docx file uploads.
+- [x] **6.2 Security Hardening**: Restrict CORS, harden JWT, and finalize sanitization.
+- [ ] **6.3 RAG Optimization**: Improve chunking and retrieval logic for uploaded documents.

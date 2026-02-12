@@ -8,8 +8,12 @@ async function bootstrap() {
 
   // Restricted CORS - For MVP we allow all but this should be 
   // narrowed down to admin dashboard and the widget origins in production.
+  // Restricted CORS - Whitelist the admin dashboard and allow widget origins
   app.enableCors({
-    origin: true, // Allow all origins for now, but with credentials support if needed
+    origin: [
+      'http://localhost:5173', // Vite default local port (Admin Dashboard)
+      'http://localhost:3001', // Local testing widget origin
+    ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
   });
