@@ -47,6 +47,7 @@ model Configuration {
   user             User      @relation(fields: [userId], references: [id])
   apiKey           ApiKey?
   logs             ChatLog[]
+  documents        Document[]
 }
 
 model ApiKey {
@@ -70,4 +71,24 @@ model ChatLog {
   responseTimeMs  Int
   createdAt       DateTime      @default(now())
   configuration   Configuration @relation(fields: [configurationId], references: [id])
+}
+
+model Document {
+  id              String         @id @default(cuid())
+  fileName        String
+  fileType        String         // "pdf", "docx", "txt"
+  content         String         @db.Text
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  configurationId String
+  configuration   Configuration  @relation(fields: [configurationId], references: [id])
+  chunks          DocumentChunk[]
+}
+
+model DocumentChunk {
+  id              String    @id @default(cuid())
+  content         String    @db.Text
+  tokenCount      Int?
+  documentId      String
+  document        Document  @relation(fields: [documentId], references: [id])
 }

@@ -9,6 +9,7 @@ import { ConfigurationsModule } from './configurations/configurations.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { WidgetModule } from './widget/widget.module';
 import { StripeModule } from './stripe/stripe.module';
+import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { StripeModule } from './stripe/stripe.module';
     ApiKeysModule,
     WidgetModule,
     StripeModule,
+    KnowledgeBaseModule,
   ],
   controllers: [AppController],
   providers: [AppService],
