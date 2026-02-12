@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
-const pdf = require('pdf-parse');
 import * as mammoth from 'mammoth';
 
 @Injectable()
@@ -27,7 +26,20 @@ export class KnowledgeBaseService {
         const fileType = file.originalname.split('.').pop()?.toLowerCase();
 
         if (fileType === 'pdf') {
-            const data = await pdf(file.buffer);
+            // Conditionally require to handle commonjs/esm interop
+            const pdfParser = require('pdf-parse');
+            this.logger.debug(`Type of pdfParser: ${typeof pdfParser}`);
+
+            let parser: any = pdfParser;
+            if (typeof pdfParser !== 'function' && pdfParser && typeof pdfParser.default === 'function') {
+                parser = pdfParser.default;
+            }
+
+            if (typeof parser !== 'function') {
+                throw new Error(`PDF parser initialization failed. Type: ${typeof parser}`);
+            }
+
+            const data = await parser(file.buffer);
             content = data.text;
         } else if (fileType === 'docx') {
             const result = await mammoth.extractRawText({ buffer: file.buffer });
@@ -96,7 +108,7 @@ export class KnowledgeBaseService {
 
         if (!doc) throw new Error('Document not found');
 
-        // Delete chunks first (though cascade might be set up, better to be explicit or let Prisma handle)
+        // Delete chunks first
         await this.prisma.documentChunk.deleteMany({
             where: { documentId },
         });

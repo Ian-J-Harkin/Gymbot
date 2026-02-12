@@ -12,7 +12,12 @@ export class StripeService {
         private configService: ConfigService,
         private prisma: PrismaService,
     ) {
-        this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY') || '', {
+        const stripeKey = this.configService.get<string>('STRIPE_SECRET_KEY');
+        if (!stripeKey) {
+            this.logger.warn('STRIPE_SECRET_KEY is not defined. Stripe integration will be disabled.');
+        }
+
+        this.stripe = new Stripe(stripeKey || 'mock_key', {
             apiVersion: '2026-01-28.clover' as any,
         });
     }

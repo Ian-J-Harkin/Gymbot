@@ -11,8 +11,10 @@ async function bootstrap() {
   // Restricted CORS - Whitelist the admin dashboard and allow widget origins
   app.enableCors({
     origin: [
-      'http://localhost:5173', // Vite default local port (Admin Dashboard)
-      'http://localhost:3001', // Local testing widget origin
+      'http://localhost:5173',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://localhost:8000',
     ],
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,

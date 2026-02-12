@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../auth/context/AuthContext';
-import { Dumbbell, Settings, LogOut } from 'lucide-react';
+import { Dumbbell, LogOut } from 'lucide-react';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -21,12 +21,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) =>
                 <span className="text-2xl font-bold text-gray-900">FitBot</span>
               </div>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <span className="text-sm text-gray-700">
                 Welcome, {user?.gymName || 'Admin'}
               </span>
-              
+
               <button
                 onClick={logout}
                 className="flex items-center space-x-2 text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
