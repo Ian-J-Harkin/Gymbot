@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'preact/hooks';
-import { MessageCircle, X, Send, Info, RotateCcw } from 'lucide-preact';
+import { MessageCircle, X, Send, Info, RotateCcw, FileText } from 'lucide-preact';
 import { ApiClient } from '../api/client';
-import type { Message, WidgetConfig } from '../types';
+import type { Message, WidgetConfig, ExplanationMetadata } from '../types';
 import snarkdown from 'snarkdown';
 import DOMPurify from 'dompurify';
 
@@ -285,6 +285,91 @@ export function ChatWidget({ apiKey }: ChatWidgetProps) {
           animation: fadeIn 0.2s ease-out;
         }
 
+        .explanation-stats {
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 8px;
+          font-size: 9px;
+          font-weight: 600;
+          color: #999;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+        }
+        .sources-container {
+          margin-top: 8px;
+        }
+        .sources-label {
+          font-size: 10px;
+          font-weight: 700;
+          color: #666;
+          margin-bottom: 6px;
+        }
+        .sources-scroll {
+          display: flex;
+          gap: 12px;
+          overflow-x: auto;
+          padding: 4px 0 12px 0;
+          -webkit-overflow-scrolling: touch;
+          mask-image: linear-gradient(to right, black 85%, transparent 100%);
+        }
+        .sources-scroll::-webkit-scrollbar {
+          height: 4px;
+        }
+        .sources-scroll::-webkit-scrollbar-track {
+          background: #f1f1f1;
+          border-radius: 10px;
+        }
+        .sources-scroll::-webkit-scrollbar-thumb {
+          background: #cbd5e1;
+          border-radius: 10px;
+        }
+        .sources-scroll::-webkit-scrollbar-thumb:hover {
+          background: ${primaryColor};
+        }
+        .source-card {
+          flex: 0 0 200px;
+          min-width: 200px;
+          background: white;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          padding: 10px;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+          transition: all 0.2s ease;
+        }
+        .source-card:hover {
+          border-color: ${primaryColor};
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .source-card-header {
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          margin-bottom: 4px;
+        }
+        .source-filename {
+          font-size: 10px;
+          font-weight: 600;
+          color: #333;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .source-snippet {
+          font-size: 9px;
+          line-height: 1.3;
+          color: #777;
+          margin: 0;
+          display: -webkit-box;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+        .no-sources {
+          font-style: italic;
+          opacity: 0.7;
+        }
+
         @media (max-width: 480px) {
           .fitbot-chat-window {
             width: 100vw;
@@ -382,7 +467,7 @@ export function ChatWidget({ apiKey }: ChatWidgetProps) {
   );
 }
 
-function ExplanationItem({ explanation }: { explanation: any }) {
+function ExplanationItem({ explanation }: { explanation: ExplanationMetadata }) {
   const [show, setShow] = useState(false);
 
   return (
@@ -392,26 +477,43 @@ function ExplanationItem({ explanation }: { explanation: any }) {
         onClick={() => setShow(!show)}
       >
         <Info size={12} />
-        {show ? 'Hide reasoning' : 'Why did I say this?'}
+        {show ? 'Hide sources & reasoning' : 'Why did I say this?'}
       </button>
+
       {show && (
         <div className="explanation-content">
-          <div style={{ marginBottom: '4px', textDecoration: 'underline', fontWeight: 600 }}>Source & Reasoning</div>
-          <div style={{ display: 'grid', gridTemplateColumns: '80px 1fr', gap: '4px' }}>
-            <strong>Provider:</strong> <span>{explanation.provider}</span>
-            <strong>Model:</strong> <span>{explanation.model}</span>
-            <strong>Context:</strong> <span>{explanation.contextUsed}</span>
-            <strong>Prompt:</strong> <span>{explanation.systemPromptSummary}</span>
-            <strong>Latency:</strong> <span>{explanation.responseTimeMs}ms</span>
-            {explanation.validationResults?.length > 0 && (
-              <>
-                <strong>Safety:</strong>
-                <span>{explanation.validationResults.map((r: any) => `${r.ruleId} (${r.severity})`).join(', ')}</span>
-              </>
-            )}
+          {/* Summary Stats */}
+          <div className="explanation-stats">
+            <span>{explanation.provider}/{explanation.model}</span>
+            <span>{explanation.responseTimeMs}ms</span>
           </div>
-          <div style={{ marginTop: '6px', fontSize: '10px', color: '#999', textAlign: 'right' }}>
-            {new Date(explanation.timestamp).toLocaleString()}
+
+          {/* Source Cards */}
+          {explanation.sources && explanation.sources.length > 0 && (
+            <div className="sources-container">
+              <div className="sources-label">Cited Documents:</div>
+              <div className="sources-scroll">
+                {explanation.sources.map((source) => (
+                  <div key={source.id} className="source-card" title={source.fileName}>
+                    <div className="source-card-header">
+                      <FileText size={12} className="text-primary" />
+                      <span className="source-filename">{source.fileName}</span>
+                    </div>
+                    <p className="source-snippet">
+                      "{source.content.length > 100 ? source.content.substring(0, 100) + '...' : source.content}"
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!explanation.sources?.length && (
+            <div className="no-sources">No specific document was cited (using general gym knowledge).</div>
+          )}
+
+          <div style={{ marginTop: '8px', fontSize: '9px', color: '#bbb', textAlign: 'right' }}>
+            Reference: {new Date(explanation.timestamp).toLocaleTimeString()}
           </div>
         </div>
       )}

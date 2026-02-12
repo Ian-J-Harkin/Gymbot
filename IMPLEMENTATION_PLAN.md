@@ -65,11 +65,13 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **5.3 AI Reasoning Visibility**: Surfaced provider, model, and latency in Admin UI.
 - [x] **5.4 Widget Explanation**: Added "Why did I say this?" toggle to the Preact widget.
 - [x] **5.5 Mini-RAG Integration**: Keyword-based context retrieval implemented in `RagService`.
+- [x] **5.6 Advanced Explanation UI**: Implemented "Source Cards" in the widget to cite specific documents used in AI responses.
+- [ ] **5.7 Source Card Refinement**: (LOGGED BUG) Current display of source cards is unsatisfactory and needs layout/visibility improvements.
 
-## 🟡 Epic 6: Knowledge Base & Security Hardening (Current Branch)
+## 🟢 Epic 6: Knowledge Base & Security Hardening (Completed)
 - [x] **6.1 Advanced Document Support**: Support for .pdf and .docx file uploads; automatic chunking and indexing.
 - [x] **6.2 Security Hardening**: Restrict CORS, harden JWT, and finalize sanitization.
-- [ ] **6.3 RAG Optimization**: Improve chunking and retrieval logic for uploaded documents.
+- [x] **6.3 Source Attribution**: API and Widget now support metadata tracking for cited documents.
 - [ ] **6.4 Vector Search Evaluation**: Investigate `pgvector` in PostgreSQL (Neon) for semantic search vs. current basic keyword logic; assess alignment with MCP patterns.
 
 ## 🟡 Epic 7: Quality Assurance & Testing
