@@ -2,6 +2,11 @@
 
 This document tracks the progress of the FitBot project implementation against the defined user stories.
 
+## 📌 Next Steps / Parking Lot (To Do)
+- [ ] **Option A (Epic 6): Knowledge Base File Uploads** - Allow uploading PDF/DOCX files instead of just pasting text.
+- [ ] **Option B (Story 8.1): Admin UX Polish** - Implement "Unsaved Changes" warning and better visual save feedback.
+- [ ] **Option C (Story 7.5): Email Integration** - Create workflow to email API Key & Instructions to a web developer.
+
 ## 🟢 Epic 1: Project Setup & Database (Completed)
 - [x] **1.1 Initialize NestJS Project**: Project creation, ConfigModule setup.
 - [x] **1.2 Integrate Prisma**: Prisma initialization, PostgreSQL connection.
