@@ -31,7 +31,6 @@ export class KnowledgeBaseController {
             new ParseFilePipe({
                 validators: [
                     new MaxFileSizeValidator({ maxSize: 1024 * 1024 * 5 }), // 5MB
-                    new FileTypeValidator({ fileType: /(pdf|docx|txt)$/ }),
                 ],
             }),
         )

@@ -64,3 +64,6 @@ Ask the Bot these specific questions to verify it is reading the document accura
 
 ---
 *Updated on: 2026-02-12*
+
+## 4. UI/UX Feedback & Known Issues
+- [ ] **Identical/Buggy Source Cards**: The display of citation cards is currently unsatisfactory. Issues include layout squashing, name truncation, and potential duplicate cards despite deduplication efforts. Needs a visual overhaul and more robust testing across different browsers.

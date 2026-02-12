@@ -1,3 +1,9 @@
+export interface Source {
+    id: string;
+    fileName: string;
+    content: string;
+}
+
 export interface ExplanationMetadata {
     provider: string;
     model: string;
@@ -6,6 +12,7 @@ export interface ExplanationMetadata {
     systemPromptSummary: string;
     responseTimeMs: number;
     timestamp: string;
+    sources?: Source[];
 }
 
 export interface WidgetConfig {

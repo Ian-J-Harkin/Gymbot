@@ -50,6 +50,20 @@ export class KnowledgeBaseService {
             throw new Error('Unsupported file type');
         }
 
+        // Sanitize content: Preserve common text characters and basic punctuation
+        // This is more robust against weird PDF ligatures and artifacts
+        const originalLength = content.length;
+        content = content
+            .replace(/[^\x20-\x7E\n\r\t\u00A0-\u00FF\u2010-\u201F\u2022]/g, " ") // Keep ASCII, common symbols, bullets
+            .replace(/\s+/g, " ")                                              // Collapse multiple whitespaces/newlines
+            .trim();
+
+        this.logger.log(`Extracted content from ${file.originalname}: ${originalLength} chars (Sanitized to ${content.length} chars)`);
+
+        if (content.length < 10 && originalLength > 0) {
+            this.logger.warn(`PDF extraction for ${file.originalname} seems poor. Only ${content.length} chars found.`);
+        }
+
         // 1. Create Document
         const document = await this.prisma.document.create({
             data: {

@@ -1,3 +1,9 @@
+export interface Source {
+    id: string;
+    fileName: string;
+    content: string; // The text snippet used
+}
+
 export interface ExplanationMetadata {
     provider: string;           // "openai" | "openrouter" | "ollama"
     model: string;              // "gpt-3.5-turbo", "llama3", etc.
@@ -7,4 +13,5 @@ export interface ExplanationMetadata {
     responseTimeMs: number;
     timestamp: string;
     validationResults?: any[];  // Flags or results from validation service
+    sources?: Source[];         // Document snippets retrieved
 }

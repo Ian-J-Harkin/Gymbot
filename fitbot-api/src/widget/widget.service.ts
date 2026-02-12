@@ -41,21 +41,34 @@ export class WidgetService {
         // --- Mini-RAG: Context Retrieval ---
         const faqChunks = this.ragService.chunkText(configuration.faqText);
 
-        // Fetch document chunks from the database
+        // Fetch document chunks from the database with document info
         const documentChunks = await this.prisma.documentChunk.findMany({
             where: {
                 document: {
                     configurationId: configuration.id,
                 },
             },
+            include: {
+                document: {
+                    select: { fileName: true }
+                }
+            }
         });
 
         const allChunks = [
-            ...faqChunks.map((c, i) => ({ id: `faq-${i}`, content: c.content })),
-            ...documentChunks.map(c => ({ id: c.id, content: c.content })),
+            ...faqChunks.map((c, i) => ({
+                id: `faq-${i}`,
+                content: c.content,
+                fileName: 'Gym FAQ'
+            })),
+            ...documentChunks.map(c => ({
+                id: c.id,
+                content: c.content,
+                fileName: c.document.fileName
+            })),
         ];
 
-        const relevantChunks = this.ragService.search(message, allChunks as any, 5);
+        const relevantChunks = this.ragService.search(message, allChunks as any, 4);
 
         // Fallback or aggregate context
         const contextContent = relevantChunks.length > 0
@@ -146,7 +159,14 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
                 systemPromptSummary: `Retrieved ${relevantChunks.length} chunks from ${allChunks.length} total blocks.`,
                 responseTimeMs,
                 timestamp: new Date().toISOString(),
-                validationResults: inputValidation.results
+                validationResults: inputValidation.results,
+                sources: Array.from(
+                    new Map((relevantChunks as any).map(c => [c.fileName, {
+                        id: c.id,
+                        fileName: c.fileName,
+                        content: c.content
+                    }])).values()
+                ) as any[]
             };
 
             yield { explanation };
