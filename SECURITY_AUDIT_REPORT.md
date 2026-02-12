@@ -64,6 +64,17 @@ This report evaluates the security posture of the FitBot system and identifies v
 
 ---
 
+## 5. Planned Web-First Security Review
+*   **Scope**: Full end-to-end audit of the Preact widget, API authentication flow, and data sanitization.
+*   **Focus**: 
+    *   Validation of `DOMPurify` implementation in edge cases.
+    *   Verification of CORS enforcement across different gym subdomains.
+    *   Audit of SSE (Server-Sent Events) stream for potential data leakage.
+    *   CSRF protection review for the Admin Dashboard.
+    *   **Secret Integrity**: Verification that no sensitive keys exist in source control and environmental secrets are purely injected.
+
+---
+
 ## 🛡️ Immediate Fixes Required
 1.  **Restrict CORS** in `fitbot-api/src/main.ts` (Done).
 2.  **Harden JWT Config** to ensure it fails if no secret is provided (Done).
