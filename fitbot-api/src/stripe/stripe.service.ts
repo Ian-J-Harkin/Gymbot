@@ -13,7 +13,7 @@ export class StripeService {
         private prisma: PrismaService,
     ) {
         this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY') || '', {
-            apiVersion: '2025-01-27.acacia',
+            apiVersion: '2026-01-28.clover' as any,
         });
     }
 
@@ -27,8 +27,8 @@ export class StripeService {
     }
 
     async createCheckoutSession(userId: string, email: string) {
-        const priceId = this.configService.get<string>('STRIPE_PRICE_ID');
-        const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL');
+        const priceId = this.configService.get<string>('STRIPE_PRICE_ID')!;
+        const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL')!;
 
         return this.stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -42,7 +42,7 @@ export class StripeService {
     }
 
     async handleWebhook(signature: string, payload: Buffer) {
-        const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+        const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET')!;
         let event: Stripe.Event;
 
         try {

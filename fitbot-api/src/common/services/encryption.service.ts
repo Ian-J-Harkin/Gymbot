@@ -10,8 +10,15 @@ export class EncryptionService {
     private readonly ivSecret: Buffer;
 
     constructor(private configService: ConfigService) {
-        const key = this.configService.get<string>('ENCRYPTION_KEY') || '12345678901234567890123456789012'; // 32 characters
-        const iv = this.configService.get<string>('IV_SECRET') || '1234567890123456'; // 16 characters
+        const key = this.configService.get<string>('ENCRYPTION_KEY');
+        const iv = this.configService.get<string>('IV_SECRET');
+
+        if (!key || key.length !== 32) {
+            throw new Error('ENCRYPTION_KEY must be a 32-character string');
+        }
+        if (!iv || iv.length !== 16) {
+            throw new Error('IV_SECRET must be a 16-character string');
+        }
 
         this.key = Buffer.from(key);
         this.ivSecret = Buffer.from(iv);
