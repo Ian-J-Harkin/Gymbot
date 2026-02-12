@@ -1,6 +1,6 @@
 import type { WidgetConfig } from '../types';
 
-const API_BASE_URL = 'http://localhost:4000/api';
+const API_BASE_URL = 'http://localhost:3000/api';
 
 export class ApiClient {
     private apiKey: string;

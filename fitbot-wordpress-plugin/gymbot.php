@@ -2,7 +2,7 @@
 /**
  * Plugin Name: FitBot Chat Widget
  * Description: Embed the FitBot AI assistant on your gym's website.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: FitBot AI Team
  */
 
@@ -54,7 +54,7 @@ class FitBot_Widget
     {
         $value = get_option('fitbot_api_key');
 ?>
-        <input type='text' name='fitbot_api_key' value='<?php echo esc_attr($value); ?>' class='regular-text'>
+        <input type='text' name='fitbot_api_key' value='<?php echo esc_attr($value); ?>' class='regular-text' style="width: 100%;">
         <p class='description'>Find your API key in the FitBot Admin Dashboard.</p>
         <?php
     }
@@ -82,10 +82,8 @@ class FitBot_Widget
             return;
         }
 
-        // In a production environment, this would point to a CDN.
-        // For development/demo, we can assume a known URL or local path.
-        // Local integration test path
-        $script_url = '/widget-dist/gymbot.min.js';
+        // Use a timestamp to bust browser cache and ensure Docker volume changes are picked up
+        $script_url = '/widget-dist/gymbot.min.js?v=' . time();
 
 ?>
         <script 

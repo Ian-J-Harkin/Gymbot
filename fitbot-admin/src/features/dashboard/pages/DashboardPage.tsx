@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { DashboardLayout } from '../components/DashboardLayout';
 import { ConfigurationForm } from '../components/ConfigurationForm';
 import { AuditLogList } from '../components/AuditLogList';
-import { Settings, History, CreditCard } from 'lucide-react';
+import { Settings, History, CreditCard, Database } from 'lucide-react';
 import { BillingSettings } from '../components/BillingSettings';
+import { KnowledgeBase } from '../components/KnowledgeBase';
 
 const DashboardPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'config' | 'logs' | 'billing'>('config');
+  const [activeTab, setActiveTab] = useState<'config' | 'knowledge' | 'logs' | 'billing'>('config');
 
   return (
     <DashboardLayout>
@@ -32,6 +33,16 @@ const DashboardPage: React.FC = () => {
           >
             <Settings className="h-4 w-4" />
             <span>AI Configuration</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('knowledge')}
+            className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'knowledge'
+              ? 'bg-white text-primary-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              }`}
+          >
+            <Database className="h-4 w-4" />
+            <span>Knowledge Base</span>
           </button>
           <button
             onClick={() => setActiveTab('logs')}
@@ -61,6 +72,12 @@ const DashboardPage: React.FC = () => {
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="p-8">
                 <ConfigurationForm />
+              </div>
+            </div>
+          ) : activeTab === 'knowledge' ? (
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+              <div className="p-8">
+                <KnowledgeBase />
               </div>
             </div>
           ) : activeTab === 'logs' ? (
