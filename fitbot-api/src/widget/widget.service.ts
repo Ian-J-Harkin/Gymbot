@@ -30,7 +30,7 @@ export class WidgetService {
     async *processChat(configuration: any, message: string, history: any[]): AsyncGenerator<string | { explanation: ExplanationMetadata }> {
         const startTime = Date.now();
         const provider = configuration.aiProvider || 'openai';
-        const model = configuration.ollamaModel || (provider === 'openai' ? 'gpt-3.5-turbo' : 'openai/gpt-3.5-turbo');
+        const model = configuration.ollamaModel || (provider === 'ollama' ? 'llama3' : (provider === 'openai' ? 'gpt-3.5-turbo' : 'openai/gpt-3.5-turbo'));
 
         // --- Subscription Check ---
         if (configuration.requireSubscription && configuration.user?.subscriptionStatus !== 'active') {

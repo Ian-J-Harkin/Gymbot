@@ -9,6 +9,7 @@ export class ApiKeysController {
 
     @Post()
     createApiKey(@Request() req) {
-        return this.apiKeysService.createApiKey(req.user.userId);
+        const userId = req.user.id || req.user.userId;
+        return this.apiKeysService.createApiKey(userId);
     }
 }

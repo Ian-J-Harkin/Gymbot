@@ -65,7 +65,7 @@ export class ConfigurationsService {
             : null;
 
         const data = {
-            faqText: dto.faqText,
+            faqText: dto.faqText || '',
             widgetColor: dto.widgetColor,
             aiProvider: dto.aiProvider,
             openAiApiKey: encryptedOpenAiKey,

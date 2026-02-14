@@ -3,6 +3,9 @@ export interface User {
   email: string;
   gymName: string;
   createdAt: string;
+  subscriptionStatus?: string;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
 }
 
 export interface LoginRequest {

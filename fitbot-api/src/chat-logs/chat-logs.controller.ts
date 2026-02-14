@@ -9,6 +9,7 @@ export class ChatLogsController {
 
     @Get()
     async getLogs(@Req() req) {
-        return this.chatLogsService.findByUserId(req.user.userId);
+        const userId = req.user.id || req.user.userId;
+        return this.chatLogsService.findByUserId(userId);
     }
 }

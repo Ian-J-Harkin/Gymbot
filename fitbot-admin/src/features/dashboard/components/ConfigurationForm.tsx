@@ -29,7 +29,7 @@ export const ConfigurationForm: React.FC = () => {
     defaultValues: {
       primaryColor: '#2563EB',
       faqData: 'Welcome to our gym! Here are some frequently asked questions:\n\nQ: What are your opening hours?\nA: We are open Monday to Friday 6 AM - 10 PM, Saturday 8 AM - 8 PM, Sunday 9 AM - 6 PM.\n\nQ: Do you offer personal training?\nA: Yes, we have certified personal trainers available. Please ask at the front desk to schedule a session.\n\nQ: What equipment do you have?\nA: We have a full range of cardio equipment, free weights, resistance machines, and a functional training area.',
-      aiProvider: 'openai',
+      aiProvider: 'ollama',
       openaiApiKey: '',
       openRouterApiKey: '',
       ollamaUrl: 'http://localhost:11434',
@@ -85,7 +85,7 @@ export const ConfigurationForm: React.FC = () => {
     try {
       await configurationApi.updateConfiguration({
         widgetColor: data.primaryColor,
-        faqText: data.faqData,
+        faqText: data.faqData || '',
         aiProvider: data.aiProvider,
         openAiApiKey: data.openaiApiKey,
         openRouterApiKey: data.openRouterApiKey,
@@ -140,8 +140,8 @@ export const ConfigurationForm: React.FC = () => {
                 <label
                   key={provider.id}
                   className={`flex items-start p-3 border rounded-lg cursor-pointer transition-all ${selectedProvider === provider.id
-                      ? 'border-primary-500 bg-blue-50 ring-1 ring-primary-500'
-                      : 'border-gray-200 hover:border-gray-300'
+                    ? 'border-primary-500 bg-blue-50 ring-1 ring-primary-500'
+                    : 'border-gray-200 hover:border-gray-300'
                     }`}
                 >
                   <input

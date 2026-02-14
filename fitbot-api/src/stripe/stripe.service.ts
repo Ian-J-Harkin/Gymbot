@@ -17,9 +17,7 @@ export class StripeService {
             this.logger.warn('STRIPE_SECRET_KEY is not defined. Stripe integration will be disabled.');
         }
 
-        this.stripe = new Stripe(stripeKey || 'mock_key', {
-            apiVersion: '2026-01-28.clover' as any,
-        });
+        this.stripe = new Stripe(stripeKey || 'mock_key');
     }
 
     async isSubscriptionActive(userId: string): Promise<boolean> {
@@ -35,15 +33,47 @@ export class StripeService {
         const priceId = this.configService.get<string>('STRIPE_PRICE_ID')!;
         const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL')!;
 
-        return this.stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: [{ price: priceId, quantity: 1 }],
-            mode: 'subscription',
-            success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: returnUrl,
-            customer_email: email,
-            client_reference_id: userId,
+        try {
+            return await this.stripe.checkout.sessions.create({
+                payment_method_types: ['card'],
+                line_items: [{ price: priceId, quantity: 1 }],
+                mode: 'subscription',
+                success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
+                cancel_url: returnUrl,
+                customer_email: email,
+                client_reference_id: userId,
+            });
+        } catch (err) {
+            this.logger.error(`Stripe Session Creation Failed: ${err.message}`);
+            throw err;
+        }
+    }
+
+    async createPortalSession(userId: string) {
+        const user = await this.prisma.user.findUnique({
+            where: { id: userId },
+            select: { stripeCustomerId: true },
         });
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        if (!user.stripeCustomerId) {
+            throw new Error('User does not have a Stripe customer ID');
+        }
+
+        const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL')!;
+
+        try {
+            return await this.stripe.billingPortal.sessions.create({
+                customer: user.stripeCustomerId,
+                return_url: returnUrl,
+            });
+        } catch (err) {
+            this.logger.error(`Stripe Portal Session Creation Failed: ${err.message}`);
+            throw err;
+        }
     }
 
     async handleWebhook(signature: string, payload: Buffer) {
@@ -58,14 +88,55 @@ export class StripeService {
         }
 
         switch (event.type) {
+            case 'checkout.session.completed':
+                const session = event.data.object as Stripe.Checkout.Session;
+                this.logger.log(`Processing checkout.session.completed for ${session.id}`);
+                await this.handleCheckoutSessionCompleted(session);
+                break;
+            case 'invoice.payment_succeeded':
             case 'customer.subscription.created':
             case 'customer.subscription.updated':
             case 'customer.subscription.deleted':
-                const subscription = event.data.object as Stripe.Subscription;
-                await this.updateSubscriptionStatus(subscription);
+                this.logger.log(`Processing subscription event: ${event.type}`);
+                if (event.type === 'invoice.payment_succeeded') {
+                    const invoice = event.data.object as any; // Cast to any to avoid lint error on 'subscription'
+                    if (invoice.subscription) {
+                        const sub = await this.stripe.subscriptions.retrieve(invoice.subscription as string);
+                        await this.updateSubscriptionStatus(sub);
+                    }
+                } else {
+                    const subscription = event.data.object as Stripe.Subscription;
+                    await this.updateSubscriptionStatus(subscription);
+                }
                 break;
             default:
                 this.logger.log(`Unhandled event type ${event.type}`);
+        }
+    }
+
+    private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
+        const userId = session.client_reference_id;
+        const customerId = session.customer as string;
+
+        if (!userId) {
+            this.logger.error('No userId found in checkout session client_reference_id');
+            return;
+        }
+
+        this.logger.log(`Checkout completed for user ${userId} with customer ${customerId}`);
+
+        await this.prisma.user.update({
+            where: { id: userId },
+            data: {
+                stripeCustomerId: customerId,
+            },
+        });
+
+        // The subscription status will be updated by the customer.subscription.created event
+        // or we can fetch the subscription here if it exists in the session.
+        if (session.subscription) {
+            const subscription = await this.stripe.subscriptions.retrieve(session.subscription as string);
+            await this.updateSubscriptionStatus(subscription);
         }
     }
 

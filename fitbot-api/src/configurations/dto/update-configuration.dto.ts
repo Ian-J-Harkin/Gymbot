@@ -3,11 +3,10 @@ import { IsString, IsNotEmpty, IsHexColor, IsOptional, IsIn } from 'class-valida
 
 export class UpdateConfigurationDto {
     @IsString()
-    @IsNotEmpty()
-    faqText: string;
+    @IsOptional()
+    faqText?: string;
 
     @IsString()
-    @IsNotEmpty()
     @IsHexColor()
     widgetColor: string;
 
