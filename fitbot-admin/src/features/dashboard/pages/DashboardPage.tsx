@@ -1,13 +1,20 @@
 import React, { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { DashboardLayout } from '../components/DashboardLayout';
-import { ConfigurationForm } from '../components/ConfigurationForm';
+import { AISettings } from '../components/AISettings';
+import { WidgetSettings } from '../components/WidgetSettings';
 import { AuditLogList } from '../components/AuditLogList';
-import { Settings, History, CreditCard, Database } from 'lucide-react';
+import { OverviewTab } from '../components/OverviewTab';
+import { Brain, Layout, History, CreditCard, Database, Home } from 'lucide-react';
 import { BillingSettings } from '../components/BillingSettings';
 import { KnowledgeBase } from '../components/KnowledgeBase';
 
+type TabType = 'overview' | 'brain' | 'knowledge' | 'widget' | 'logs' | 'billing';
+
 const DashboardPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'config' | 'knowledge' | 'logs' | 'billing'>('config');
+  const [searchParams] = useSearchParams();
+  const initialTab = (searchParams.get('tab') as TabType) || 'overview';
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
   return (
     <DashboardLayout>
@@ -18,22 +25,34 @@ const DashboardPage: React.FC = () => {
             Gym Management Portal
           </h1>
           <p className="mt-2 text-lg text-gray-600">
-            Configure your AI assistant and review recent member interactions.
+            Configure your AI assistant, manage knowledge, and review interactions.
           </p>
         </div>
 
         {/* Tab Navigation */}
-        <div className="flex space-x-1 bg-gray-200/50 p-1 rounded-xl w-fit mb-8">
+        <div className="flex space-x-1 bg-gray-200/50 p-1 rounded-xl w-fit mb-8 overflow-x-auto">
           <button
-            onClick={() => setActiveTab('config')}
-            className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'config'
+            onClick={() => setActiveTab('overview')}
+            className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'overview'
               ? 'bg-white text-primary-600 shadow-sm'
               : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
               }`}
           >
-            <Settings className="h-4 w-4" />
-            <span>AI Configuration</span>
+            <Home className="h-4 w-4" />
+            <span>Overview</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('brain')}
+            className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'brain'
+              ? 'bg-white text-primary-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              }`}
+          >
+            <Brain className="h-4 w-4" />
+            <span>AI Brain</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('knowledge')}
             className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'knowledge'
@@ -44,6 +63,18 @@ const DashboardPage: React.FC = () => {
             <Database className="h-4 w-4" />
             <span>Knowledge Base</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab('widget')}
+            className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'widget'
+              ? 'bg-white text-primary-600 shadow-sm'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+              }`}
+          >
+            <Layout className="h-4 w-4" />
+            <span>Widget</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('logs')}
             className={`flex items-center space-x-2 px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${activeTab === 'logs'
@@ -68,16 +99,24 @@ const DashboardPage: React.FC = () => {
 
         {/* Tab Content */}
         <div className="animate-in fade-in duration-500">
-          {activeTab === 'config' ? (
+          {activeTab === 'overview' ? (
+            <OverviewTab onNavigate={(tab: TabType) => setActiveTab(tab)} />
+          ) : activeTab === 'brain' ? (
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="p-8">
-                <ConfigurationForm />
+                <AISettings />
               </div>
             </div>
           ) : activeTab === 'knowledge' ? (
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
               <div className="p-8">
                 <KnowledgeBase />
+              </div>
+            </div>
+          ) : activeTab === 'widget' ? (
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+              <div className="p-8">
+                <WidgetSettings />
               </div>
             </div>
           ) : activeTab === 'logs' ? (
