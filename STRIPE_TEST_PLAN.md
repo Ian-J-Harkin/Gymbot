@@ -74,17 +74,35 @@ Since Stripe cannot reach your `localhost` directly, you must use the Stripe CLI
 
 ---
 
+## 🛠️ Step 5: Customer Portal ("Manage Billing")
+ 
+This verifies the user's ability to self-manage their subscription via Stripe's hosted portal.
+ 
+1.  **Management Loop**:
+    *   Log in as a **Subscribed** user.
+    *   Click **"Manage Billing"**.
+    *   *Verification*: Redirects to `billing.stripe.com`. Ensure you see your active plan.
+    *   *Verification*: Click **"Return to [Gym Name]"** and ensure you land back on the Subscription tab.
+2.  **Payment Method Update**:
+    *   In the portal, add a new test card (`4242...`).
+    *   *Verification*: Return to GymBot and ensure status remains "Active".
+3.  **Cancellation Sync**:
+    *   In the portal, cancel the plan.
+    *   *Verification*: Check the dashboard status after returning. It should flip to **"Free Trial / Internal Testing"** once the webhook processes.
+4.  **Security Guard**:
+    *   Log in as a **Non-Subscribed** user.
+    *   *Verification*: The "Manage Billing" button should be hidden.
+    *   *Verification*: (Optional) Attempting a direct API call to `/stripe/create-portal-session` should return a 400/500 error regarding a missing Stripe Customer ID.
+ 
+---
+ 
 ## 🚀 Post-Integration TODOs
-
+ 
 ### 1. Guardrail Visibility & Environment Testing
 - [ ] **Verify Production Behavior**: Build the application (`npm run build`) and run the preview (`npm run preview`) to confirm that "Guardrail Settings (Internal Only)" are hidden for all users in production.
 - [ ] **Logic Audit**: Re-verify visibility. *Clarification*: The goal is to ensure that in a "Staff/Dev" environment, we can see these toggles, but a pro-customer in production doesn't get distracted by them.
 - [ ] **Test AND vs OR logic**: Currently, we are using an "AND" condition in the requested refinement to ensure they only appear in `DEV` **AND** for `non-subscribers`.
-
-### 2. Stripe Customer Portal ("Manage Billing")
-- [x] **Backend Endpoint**: Implement a `POST /stripe/create-portal-session` in `stripe.service.ts` that uses `this.stripe.billingPortal.sessions.create`.
-- [x] **Link Dashboard**: Connect the "Manage Billing" button in `BillingSettings.tsx` to this new endpoint to allow users to manage their own subscriptions (cancel, update card, etc.).
-
-### 3. Subscription State Edge Cases
+ 
+### 2. Subscription State Edge Cases
 - [ ] **Testing Webhook Retries**: Simulate a server outage and verify Stripe's automatic webhook retry logic.
 - [ ] **Trial Expiration**: Verify that the widget correctly flips to "blocked" mode when a subscription status changes to `past_due` or `unpaid`.
