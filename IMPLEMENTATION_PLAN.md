@@ -72,33 +72,26 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **6.1 Advanced Document Support**: Support for .pdf and .docx file uploads; automatic chunking and indexing.
 - [x] **6.2 Security Hardening**: Restrict CORS, harden JWT, and finalize sanitization.
 - [x] **6.3 Source Attribution**: API and Widget now support metadata tracking for cited documents.
-- [ ] **6.4 Vector Search Evaluation**: Investigate `pgvector` in PostgreSQL (Neon) for semantic search vs. current basic keyword logic; assess alignment with MCP patterns.
+- [x] **6.4 Quick Start Data**: "System Prompt" fallback UI with "Binary Choice" logic (disabled when docs exist).
+- [ ] **6.5 Vector Search Evaluation**: Investigate `pgvector` in PostgreSQL (Neon) for semantic search vs. current basic keyword logic.
 
-## 🟢 Epic 7: Billing & Subscription Module (Completed)
-- [x] **7.1 Stripe Integration**: `StripeService`, `StripeController`, and webhook handling implemented.
-- [x] **7.2 Subscription UI**: `BillingSettings` component implemented with real-time user profile sync; Pricing hidden for active subscribers.
-- [x] **7.3 Feature Gating**: Backend logic implemented in `WidgetService` to restrict AI features based on `subscriptionStatus`.
-- [x] **7.4 Checkout Flow**: Fixed Price ID mismatches, robust naming consistency for User ID, and automated status flip via Webhooks.
-- [x] **7.5 Environment-Aware UI**: Guardrail settings conditionally hidden for production users (AND logic: DEV + !Subscribed).
-- [x] **7.6 Customer Portal**: Implemented "Manage Billing" redirection to Stripe Customer Portal with unit/integration tests.
-
-## 🟡 Epic 8: Quality Assurance & Testing
-- [ ] **8.1 Security Integration Tests**: Verify CORS restrictions and JWT safety failure states.
+## 🟡 Epic 8: Quality Assurance & Testing (NEXT PRIORITY)
+- [x] **8.0 Frontend Unit Testing**: Configured Vitest + React Testing Library; implemented `KnowledgeBase` logic tests.
+- [x] **8.1 Backend Unit Testing**: Verified Configuration controller logic for new fields.
 - [ ] **8.2 End-to-End Widget Test**: Automated flow from widget chat to backend RAG response.
-- [ ] **8.3 Security-First Code Review**: Comprehensive "Web-First" audit of frontend/API communication and data sanitization.
-- [ ] **8.4 Cloud-First Architecture Review**: Evaluate system portability (Docker, secrets, statelessness) for Azure/AWS deployment vs. local-first bias.
-- [ ] **8.5 Secret Sanitization & Hardening**: Audit codebase to ensure zero hardcoded secrets/sensitive values; verify `.gitignore` integrity for all env files.
+- [ ] **8.3 Security Integration Tests**: Verify CORS restrictions and JWT safety failure states.
+- [ ] **8.4 Security-First Code Review**: Comprehensive "Web-First" audit of frontend/API communication and data sanitization.
+- [ ] **8.5 Cloud-First Architecture Review**: Evaluate system portability (Docker, secrets, statelessness).
 
-## 🟡 Epic 9: UX Polish & Admin Features
-- [ ] **9.1 Admin UX Improvements**: "Unsaved Changes" warnings and better save feedback.
+## 🟡 Epic 9: UX Polish & Admin Features (Pending Epic 8)
+- [ ] **9.1 Dashboard Analytics**: Basic charts for chat volume and common inquiries (Show Value).
 - [ ] **9.2 Rate Limiting**: Implement per-API-key rate limiting for AI usage.
-- [ ] **9.3 Dashboard Analytics**: Basic charts for chat volume and common inquiries.
-- [x] **9.4 Local-First Development**: Priortized Ollama integration for zero-cost local testing and development.
-- [ ] **9.5 Online Demo (Cloud-Ready)**: Deploy a "free demo" version using a HuggingFace/OpenRouter free model for zero-cost evaluation.
+- [ ] **9.3 Admin UX Improvements**: "Unsaved Changes" warnings and better save feedback.
+- [ ] **9.4 Online Demo (Cloud-Ready)**: Deploy a "free demo" version using a HuggingFace/OpenRouter free model.
 
-## 🟡 Epic 10: CI/CD & Deployment (Theo.gg Inspired)
-- [ ] **10.1 CI/CD Pipeline Investigation**: Research GitHub Actions for automated deployment to Neon (DB) and Vercel/Railway/Render (API/Web).
-- [ ] **10.2 Database Migration Automation**: Integrate Prisma migrations into the CI/CD flow with Neon.
+## 🟡 Epic 10: CI/CD & Deployment (Pending Epic 9)
+- [ ] **10.1 CI/CD Pipeline Investigation**: Research GitHub Actions for automated deployment.
+- [ ] **10.2 Database Migration Automation**: Integrate Prisma migrations into the CI/CD flow.
 - [ ] **10.3 Staging Environment**: Setup a "free-tier" preview environment for pull requests.
 
 ## 🟡 Epic 11: Ecosystem Integration & Pluggability
