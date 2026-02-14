@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CreditCard, CheckCircle, AlertCircle, ExternalLink } from 'lucide-react';
 import { useAuth } from '../../../features/auth/context/AuthContext';
 import { stripeApi } from '../services/stripeApi';
+import { StripeEmbeddedModal } from './StripeEmbeddedModal';
 
 export const BillingSettings: React.FC = () => {
     const { user } = useAuth();
@@ -10,6 +11,7 @@ export const BillingSettings: React.FC = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isPortalLoading, setIsPortalLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [checkoutClientSecret, setCheckoutClientSecret] = useState<string | null>(null);
 
     const handleToggleRequirement = () => {
         // Mock update to backend
@@ -20,21 +22,11 @@ export const BillingSettings: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const { url } = await stripeApi.createCheckoutSession();
-            if (url) {
-                // PREMIUM POPUP: Open in centered window
-                const width = 600;
-                const height = 800;
-                const left = window.screenX + (window.outerWidth - width) / 2;
-                const top = window.screenY + (window.outerHeight - height) / 2;
-
-                window.open(
-                    url,
-                    'StripeCheckout',
-                    `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,status=yes`
-                );
+            const { clientSecret } = await stripeApi.createCheckoutSession();
+            if (clientSecret) {
+                setCheckoutClientSecret(clientSecret);
             } else {
-                throw new Error("No checkout URL received");
+                throw new Error("No checkout secret received");
             }
         } catch (err: any) {
             console.error('Checkout error:', err);
@@ -50,7 +42,7 @@ export const BillingSettings: React.FC = () => {
         try {
             const { url } = await stripeApi.createPortalSession();
             if (url) {
-                // PREMIUM POPUP: Open in centered window
+                // PREMIUM POPUP: Best for Portal since Iframes are blocked
                 const width = 600;
                 const height = 800;
                 const left = window.screenX + (window.outerWidth - width) / 2;
@@ -74,6 +66,12 @@ export const BillingSettings: React.FC = () => {
 
     return (
         <div className="space-y-8">
+            {checkoutClientSecret && (
+                <StripeEmbeddedModal
+                    clientSecret={checkoutClientSecret}
+                    onClose={() => setCheckoutClientSecret(null)}
+                />
+            )}
             <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
                 <div className="p-8">
                     <div className="flex items-center justify-between mb-6">
