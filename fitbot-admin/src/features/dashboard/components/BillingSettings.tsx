@@ -8,6 +8,7 @@ export const BillingSettings: React.FC = () => {
     const isSubscribed = user?.subscriptionStatus === 'active';
     const [requireSubscription, setRequireSubscription] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isPortalLoading, setIsPortalLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handleToggleRequirement = () => {
@@ -29,6 +30,23 @@ export const BillingSettings: React.FC = () => {
             console.error('Checkout error:', err);
             setError(err.message || "An error occurred during checkout initialization.");
             setIsLoading(false);
+        }
+    };
+
+    const handleManageBilling = async () => {
+        setIsPortalLoading(true);
+        setError(null);
+        try {
+            const { url } = await stripeApi.createPortalSession();
+            if (url) {
+                window.location.href = url;
+            } else {
+                throw new Error("No portal URL received");
+            }
+        } catch (err: any) {
+            console.error('Portal error:', err);
+            setError(err.message || "An error occurred while opening the billing portal.");
+            setIsPortalLoading(false);
         }
     };
 
@@ -68,10 +86,11 @@ export const BillingSettings: React.FC = () => {
                                 Your gym is currently enjoying all premium AI features, including unlimited messages and priority RAG context.
                             </p>
                             <button
-                                onClick={() => { /* This results in opening the Stripe Customer Portal */ }}
-                                className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all"
+                                onClick={handleManageBilling}
+                                disabled={isPortalLoading}
+                                className="inline-flex items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-xl text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-all disabled:opacity-50"
                             >
-                                Manage Billing
+                                {isPortalLoading ? 'Opening Portal...' : 'Manage Billing'}
                                 <ExternalLink className="ml-2 h-4 w-4" />
                             </button>
                         </div>

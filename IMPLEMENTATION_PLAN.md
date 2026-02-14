@@ -80,6 +80,7 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **7.3 Feature Gating**: Backend logic implemented in `WidgetService` to restrict AI features based on `subscriptionStatus`.
 - [x] **7.4 Checkout Flow**: Fixed Price ID mismatches, robust naming consistency for User ID, and automated status flip via Webhooks.
 - [x] **7.5 Environment-Aware UI**: Guardrail settings conditionally hidden for production users (AND logic: DEV + !Subscribed).
+- [x] **7.6 Customer Portal**: Implemented "Manage Billing" redirection to Stripe Customer Portal with unit/integration tests.
 
 ## 🟡 Epic 8: Quality Assurance & Testing
 - [ ] **8.1 Security Integration Tests**: Verify CORS restrictions and JWT safety failure states.
