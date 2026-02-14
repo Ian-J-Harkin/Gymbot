@@ -10,11 +10,13 @@ export class ConfigurationsController {
 
     @Get('me')
     getConfig(@Request() req) {
-        return this.configurationsService.getConfig(req.user.userId);
+        const userId = req.user.id || req.user.userId;
+        return this.configurationsService.getConfig(userId);
     }
 
     @Put('me')
     updateConfig(@Request() req, @Body() updateConfigDto: UpdateConfigurationDto) {
-        return this.configurationsService.updateConfig(req.user.userId, updateConfigDto);
+        const userId = req.user.id || req.user.userId;
+        return this.configurationsService.updateConfig(userId, updateConfigDto);
     }
 }

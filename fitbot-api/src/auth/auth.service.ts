@@ -30,6 +30,7 @@ export class AuthService {
                 email: user.email,
                 gymName: user.gymName,
                 createdAt: user.createdAt,
+                subscriptionStatus: user.subscriptionStatus,
             }
         };
     }

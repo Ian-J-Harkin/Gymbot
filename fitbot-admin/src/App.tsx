@@ -4,6 +4,8 @@ import { ProtectedRoute } from './features/auth/components/ProtectedRoute'
 import LoginPage from './features/auth/pages/LoginPage'
 import RegisterPage from './features/auth/pages/RegisterPage'
 import DashboardPage from './features/dashboard/pages/DashboardPage'
+import { SubscriptionSuccess } from './features/dashboard/pages/billing/SubscriptionSuccess'
+import { SubscriptionCancel } from './features/dashboard/pages/billing/SubscriptionCancel'
 
 function App() {
   return (
@@ -13,12 +15,14 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          
+
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/billing/success" element={<SubscriptionSuccess />} />
+            <Route path="/billing/cancel" element={<SubscriptionCancel />} />
           </Route>
-          
+
           {/* Redirect root to dashboard */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
         </Routes>

@@ -7,8 +7,8 @@ export const configurationSchema = z.object({
     .regex(/^#[0-9A-F]{6}$/i, 'Please enter a valid hex color (e.g., #FF5733)'),
   faqData: z
     .string()
-    .min(1, 'FAQ data is required')
-    .min(50, 'FAQ data must be at least 50 characters to provide useful information'),
+    .optional()
+    .or(z.string().min(0)),
   aiProvider: z.enum(['openai', 'openrouter', 'ollama']),
   openaiApiKey: z.string().optional(),
   openRouterApiKey: z.string().optional(),

@@ -37,7 +37,8 @@ export class KnowledgeBaseController {
         file: Express.Multer.File,
     ) {
         try {
-            return await this.kbService.processFile(req.user.userId, file);
+            const userId = req.user.id || req.user.userId;
+            return await this.kbService.processFile(userId, file);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.BAD_REQUEST);
         }
@@ -45,13 +46,15 @@ export class KnowledgeBaseController {
 
     @Get()
     async getDocuments(@Req() req: any) {
-        return await this.kbService.getDocuments(req.user.userId);
+        const userId = req.user.id || req.user.userId;
+        return await this.kbService.getDocuments(userId);
     }
 
     @Delete(':id')
     async deleteDocument(@Req() req: any, @Param('id') id: string) {
         try {
-            return await this.kbService.deleteDocument(req.user.userId, id);
+            const userId = req.user.id || req.user.userId;
+            return await this.kbService.deleteDocument(userId, id);
         } catch (error) {
             throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
