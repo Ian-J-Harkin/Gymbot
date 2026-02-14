@@ -82,8 +82,8 @@ Since Stripe cannot reach your `localhost` directly, you must use the Stripe CLI
 - [ ] **Test AND vs OR logic**: Currently, we are using an "AND" condition in the requested refinement to ensure they only appear in `DEV` **AND** for `non-subscribers`.
 
 ### 2. Stripe Customer Portal ("Manage Billing")
-- [ ] **Backend Endpoint**: Implement a `POST /stripe/create-portal-session` in `stripe.service.ts` that uses `this.stripe.billingPortal.sessions.create`.
-- [ ] **Link Dashboard**: Connect the "Manage Billing" button in `BillingSettings.tsx` to this new endpoint to allow users to manage their own subscriptions (cancel, update card, etc.).
+- [x] **Backend Endpoint**: Implement a `POST /stripe/create-portal-session` in `stripe.service.ts` that uses `this.stripe.billingPortal.sessions.create`.
+- [x] **Link Dashboard**: Connect the "Manage Billing" button in `BillingSettings.tsx` to this new endpoint to allow users to manage their own subscriptions (cancel, update card, etc.).
 
 ### 3. Subscription State Edge Cases
 - [ ] **Testing Webhook Retries**: Simulate a server outage and verify Stripe's automatic webhook retry logic.
