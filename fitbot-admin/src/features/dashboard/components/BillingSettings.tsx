@@ -22,13 +22,24 @@ export const BillingSettings: React.FC = () => {
         try {
             const { url } = await stripeApi.createCheckoutSession();
             if (url) {
-                window.location.href = url;
+                // PREMIUM POPUP: Open in centered window
+                const width = 600;
+                const height = 800;
+                const left = window.screenX + (window.outerWidth - width) / 2;
+                const top = window.screenY + (window.outerHeight - height) / 2;
+
+                window.open(
+                    url,
+                    'StripeCheckout',
+                    `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,status=yes`
+                );
             } else {
                 throw new Error("No checkout URL received");
             }
         } catch (err: any) {
             console.error('Checkout error:', err);
             setError(err.message || "An error occurred during checkout initialization.");
+        } finally {
             setIsLoading(false);
         }
     };
@@ -39,13 +50,24 @@ export const BillingSettings: React.FC = () => {
         try {
             const { url } = await stripeApi.createPortalSession();
             if (url) {
-                window.location.href = url;
+                // PREMIUM POPUP: Open in centered window
+                const width = 600;
+                const height = 800;
+                const left = window.screenX + (window.outerWidth - width) / 2;
+                const top = window.screenY + (window.outerHeight - height) / 2;
+
+                window.open(
+                    url,
+                    'StripePortal',
+                    `width=${width},height=${height},left=${left},top=${top},scrollbars=yes,status=yes`
+                );
             } else {
                 throw new Error("No portal URL received");
             }
         } catch (err: any) {
             console.error('Portal error:', err);
             setError(err.message || "An error occurred while opening the billing portal.");
+        } finally {
             setIsPortalLoading(false);
         }
     };
