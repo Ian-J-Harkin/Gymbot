@@ -34,15 +34,15 @@ export class StripeService {
         const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL')!;
 
         try {
-            return await this.stripe.checkout.sessions.create({
-                payment_method_types: ['card'],
+            const session = await this.stripe.checkout.sessions.create({
+                ui_mode: 'embedded',
                 line_items: [{ price: priceId, quantity: 1 }],
                 mode: 'subscription',
-                success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
-                cancel_url: returnUrl,
+                return_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
                 customer_email: email,
                 client_reference_id: userId,
             });
+            return { clientSecret: session.client_secret };
         } catch (err) {
             this.logger.error(`Stripe Session Creation Failed: ${err.message}`);
             throw err;
@@ -64,12 +64,20 @@ export class StripeService {
         }
 
         const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL')!;
+        // Ensure portal returns to our dedicated bridge page that closes the popup
+        const portalReturnUrl = returnUrl.replace('/billing/success', '/billing/portal-return');
 
         try {
-            return await this.stripe.billingPortal.sessions.create({
+            // NOTE: Embedded Portal requires ui_mode toggle
+            const session = await this.stripe.billingPortal.sessions.create({
                 customer: user.stripeCustomerId,
-                return_url: returnUrl,
+                return_url: portalReturnUrl,
             });
+            // For Portal, we still use the URL but we will render it in an IFRAME-like component
+            // Or use the recently released Embedded Portal if the SDK version allows.
+            // If the user wants a MODAL we can use an Iframe if we use the specific Portal session URL.
+            // Stripe generally allows the Portal to be in an Iframe if configured.
+            return { url: session.url };
         } catch (err) {
             this.logger.error(`Stripe Portal Session Creation Failed: ${err.message}`);
             throw err;

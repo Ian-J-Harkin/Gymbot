@@ -6,6 +6,7 @@ import RegisterPage from './features/auth/pages/RegisterPage'
 import DashboardPage from './features/dashboard/pages/DashboardPage'
 import { SubscriptionSuccess } from './features/dashboard/pages/billing/SubscriptionSuccess'
 import { SubscriptionCancel } from './features/dashboard/pages/billing/SubscriptionCancel'
+import { PortalReturn } from './features/dashboard/pages/billing/PortalReturn'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
           {/* Public routes */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/billing/portal-return" element={<PortalReturn />} />
 
           {/* Protected routes */}
           <Route element={<ProtectedRoute />}>

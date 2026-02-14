@@ -20,7 +20,7 @@ export class StripeController {
         }
 
         const session = await this.stripeService.createCheckoutSession(userId, email);
-        return { url: session.url };
+        return session; // returns { clientSecret: '...' }
     }
 
     @UseGuards(JwtAuthGuard)
