@@ -55,7 +55,7 @@ export class StripeController {
             await this.stripeService.handleWebhook(signature, req.rawBody);
             return res.status(HttpStatus.OK).send({ received: true });
         } catch (err) {
-            return res.status(HttpStatus.BAD_REQUEST).send(`Webhook Error: ${err.message}`);
+            return res.status(HttpStatus.BAD_REQUEST).send('Webhook processing failed');
         }
     }
 }
