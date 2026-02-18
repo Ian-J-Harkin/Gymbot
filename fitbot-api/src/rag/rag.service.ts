@@ -70,18 +70,4 @@ export class RagService {
                 .filter(word => word.length > 2 && !stopWords.has(word))
         );
     }
-
-    private calculateOverlap(setA: Set<string>, setB: Set<string>): number {
-        if (setA.size === 0) return 0;
-
-        let intersection = 0;
-        for (const term of setA) {
-            if (setB.has(term)) {
-                intersection++;
-            }
-        }
-
-        // Simple intersection count normalized by query terms
-        return intersection / setA.size;
-    }
 }

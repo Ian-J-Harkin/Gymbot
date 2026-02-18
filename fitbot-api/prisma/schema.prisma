@@ -30,7 +30,7 @@ model User {
 model Configuration {
   id               String    @id @default(cuid())
   faqText          String    @db.Text
-  widgetColor      String    @default("#007bff")
+  widgetColor      String    @default("#2563EB")
   openAiApiKey     String?
   aiProvider       String    @default("openai") // "openai", "openrouter", "ollama"
   openRouterApiKey String?
