@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { AiProvider } from './ai-provider.interface';
+import { AiProvider, WidgetHistoryItem } from './ai-provider.interface';
 import { Configuration } from '@prisma/client';
-import { WidgetHistoryItem } from '../widget.service';
 import { DEFAULT_OLLAMA_MODEL, DEFAULT_OLLAMA_URL } from '../../common/constants';
 
 @Injectable()
