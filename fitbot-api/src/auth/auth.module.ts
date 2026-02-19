@@ -7,6 +7,8 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './jwt.strategy';
+import { JWT_EXPIRY } from '../common/constants';
+import { RecaptchaService } from './recaptcha.service';
 
 @Module({
   imports: [
@@ -21,14 +23,14 @@ import { JwtStrategy } from './jwt.strategy';
         }
         return {
           secret,
-          signOptions: { expiresIn: '60m' },
+          signOptions: { expiresIn: JWT_EXPIRY },
         };
       },
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, RecaptchaService],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, RecaptchaService],
 })
 export class AuthModule { }

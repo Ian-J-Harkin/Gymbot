@@ -31,7 +31,7 @@ describe('StripeController', () => {
     describe('createCheckoutSession', () => {
         it('should return checkout session url', async () => {
             const req = { user: { id: 'user-1', email: 'test@example.com' } };
-            const result = await controller.createCheckoutSession(req);
+            const result = await controller.createCheckoutSession('user-1', req);
             expect(result).toEqual({ url: 'https://stripe.com/checkout' });
             expect(service.createCheckoutSession).toHaveBeenCalledWith('user-1', 'test@example.com');
         });
@@ -42,7 +42,7 @@ describe('StripeController', () => {
             const req = { user: { id: 'user-1' } };
             (service.createPortalSession as jest.Mock).mockResolvedValue({ url: 'https://stripe.com/portal' });
 
-            const result = await controller.createPortalSession(req);
+            const result = await controller.createPortalSession('user-1');
 
             expect(result).toEqual({ url: 'https://stripe.com/portal' });
             expect(service.createPortalSession).toHaveBeenCalledWith('user-1');

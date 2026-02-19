@@ -1,7 +1,8 @@
-import { Controller, Post, Body, Headers, Req, Res, HttpStatus, UseGuards, RawBodyRequest } from '@nestjs/common';
+import { Controller, Post, Body, Headers, Req, Res, HttpStatus, UseGuards, RawBodyRequest, BadRequestException } from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request, Response } from 'express';
+import { CurrentUserId } from '../common/decorators/current-user-id.decorator';
 
 @Controller('stripe')
 export class StripeController {
@@ -9,27 +10,22 @@ export class StripeController {
 
     @UseGuards(JwtAuthGuard)
     @Post('create-checkout-session')
-    async createCheckoutSession(@Req() req: any) {
-        // req.user is populated by JwtAuthGuard
-        // We handle both 'id' (new strategy) and 'userId' (old strategy) for robustness
-        const userId = req.user.id || req.user.userId;
+    async createCheckoutSession(@CurrentUserId() userId: string, @Req() req: any) {
         const email = req.user.email;
 
         if (!userId) {
-            throw new Error('User ID not found in request');
+            throw new BadRequestException('User ID not found in request');
         }
 
         const session = await this.stripeService.createCheckoutSession(userId, email);
-        return session; // returns { clientSecret: '...' }
+        return session;
     }
 
     @UseGuards(JwtAuthGuard)
     @Post('create-portal-session')
-    async createPortalSession(@Req() req: any) {
-        const userId = req.user.id || req.user.userId;
-
+    async createPortalSession(@CurrentUserId() userId: string) {
         if (!userId) {
-            throw new Error('User ID not found in request');
+            throw new BadRequestException('User ID not found in request');
         }
 
         const session = await this.stripeService.createPortalSession(userId);

@@ -1,15 +1,35 @@
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { EncryptionService } from '../common/services/encryption.service';
 import { UpdateConfigurationDto } from './dto/update-configuration.dto';
+import { DEFAULT_WIDGET_COLOR, DEFAULT_OLLAMA_URL, DEFAULT_OLLAMA_MODEL, AI_PROVIDERS } from '../common/constants';
 
 @Injectable()
 export class ConfigurationsService {
+    private readonly logger = new Logger(ConfigurationsService.name);
+
     constructor(
         private prisma: PrismaService,
         private encryptionService: EncryptionService,
     ) { }
+
+    /**
+     * Masks a key for safe display, e.g. "sk-abc...xyz".
+     * Returns empty string for empty/null keys.
+     */
+    private maskKey(key: string): string {
+        if (!key || key.length < 8) return key ? '••••••••' : '';
+        return `${key.substring(0, 5)}...${key.substring(key.length - 3)}`;
+    }
+
+    /**
+     * Returns true if the value looks like a masked key (from maskKey()).
+     */
+    private isMaskedValue(value: string): boolean {
+        if (!value) return false;
+        return value === '••••••••' || /^.{5}\.\.\..{3}$/.test(value);
+    }
 
     async getConfig(userId: string) {
         const config = await this.prisma.configuration.findUnique({
@@ -19,13 +39,13 @@ export class ConfigurationsService {
         if (!config) {
             return {
                 userId,
-                widgetColor: '#2563EB',
+                widgetColor: DEFAULT_WIDGET_COLOR,
                 faqText: '',
                 openAiApiKey: '',
-                aiProvider: 'openai',
+                aiProvider: AI_PROVIDERS.OPENAI,
                 openRouterApiKey: '',
-                ollamaUrl: 'http://localhost:11434',
-                ollamaModel: 'llama3',
+                ollamaUrl: DEFAULT_OLLAMA_URL,
+                ollamaModel: DEFAULT_OLLAMA_MODEL,
             };
         }
 
@@ -36,7 +56,8 @@ export class ConfigurationsService {
             if (config.openAiApiKey) {
                 decryptedOpenAiKey = this.encryptionService.decrypt(config.openAiApiKey);
             }
-        } catch {
+        } catch (err) {
+            this.logger.warn(`Failed to decrypt OpenAI key for user ${userId}: ${err.message}`);
             decryptedOpenAiKey = '';
         }
 
@@ -44,25 +65,44 @@ export class ConfigurationsService {
             if (config.openRouterApiKey) {
                 decryptedOpenRouterKey = this.encryptionService.decrypt(config.openRouterApiKey);
             }
-        } catch {
+        } catch (err) {
+            this.logger.warn(`Failed to decrypt OpenRouter key for user ${userId}: ${err.message}`);
             decryptedOpenRouterKey = '';
         }
 
         return {
             ...config,
-            openAiApiKey: decryptedOpenAiKey,
-            openRouterApiKey: decryptedOpenRouterKey,
+            openAiApiKey: this.maskKey(decryptedOpenAiKey),
+            openRouterApiKey: this.maskKey(decryptedOpenRouterKey),
         };
     }
 
     async updateConfig(userId: string, dto: UpdateConfigurationDto) {
-        const encryptedOpenAiKey = dto.openAiApiKey
-            ? this.encryptionService.encrypt(dto.openAiApiKey)
-            : null;
+        // If user submitted a masked value, preserve the existing encrypted key
+        let encryptedOpenAiKey: string | null = null;
+        let encryptedOpenRouterKey: string | null = null;
 
-        const encryptedOpenRouterKey = dto.openRouterApiKey
-            ? this.encryptionService.encrypt(dto.openRouterApiKey)
-            : null;
+        if (dto.openAiApiKey && !this.isMaskedValue(dto.openAiApiKey)) {
+            // New key submitted — encrypt it
+            encryptedOpenAiKey = this.encryptionService.encrypt(dto.openAiApiKey);
+        } else if (dto.openAiApiKey && this.isMaskedValue(dto.openAiApiKey)) {
+            // Masked value — keep existing encrypted key
+            const existing = await this.prisma.configuration.findUnique({
+                where: { userId },
+                select: { openAiApiKey: true },
+            });
+            encryptedOpenAiKey = existing?.openAiApiKey || null;
+        }
+
+        if (dto.openRouterApiKey && !this.isMaskedValue(dto.openRouterApiKey)) {
+            encryptedOpenRouterKey = this.encryptionService.encrypt(dto.openRouterApiKey);
+        } else if (dto.openRouterApiKey && this.isMaskedValue(dto.openRouterApiKey)) {
+            const existing = await this.prisma.configuration.findUnique({
+                where: { userId },
+                select: { openRouterApiKey: true },
+            });
+            encryptedOpenRouterKey = existing?.openRouterApiKey || null;
+        }
 
         const data = {
             faqText: dto.faqText || '',
@@ -70,8 +110,8 @@ export class ConfigurationsService {
             aiProvider: dto.aiProvider,
             openAiApiKey: encryptedOpenAiKey,
             openRouterApiKey: encryptedOpenRouterKey,
-            ollamaUrl: dto.ollamaUrl || 'http://localhost:11434',
-            ollamaModel: dto.ollamaModel || 'llama3',
+            ollamaUrl: dto.ollamaUrl || DEFAULT_OLLAMA_URL,
+            ollamaModel: dto.ollamaModel || DEFAULT_OLLAMA_MODEL,
         };
 
         const config = await this.prisma.configuration.upsert({
@@ -82,8 +122,9 @@ export class ConfigurationsService {
 
         return {
             ...config,
-            openAiApiKey: dto.openAiApiKey || '',
-            openRouterApiKey: dto.openRouterApiKey || '',
+            openAiApiKey: this.maskKey(dto.openAiApiKey || ''),
+            openRouterApiKey: this.maskKey(dto.openRouterApiKey || ''),
         };
     }
 }
+

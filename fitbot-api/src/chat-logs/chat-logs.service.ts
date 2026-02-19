@@ -32,16 +32,22 @@ export class ChatLogsService {
         });
     }
 
-    async findByUserId(userId: string): Promise<ChatLog[]> {
-        return this.prisma.chatLog.findMany({
-            where: {
-                configuration: {
-                    userId
-                }
-            },
-            orderBy: {
-                createdAt: 'desc'
-            }
-        });
+    async findByUserId(userId: string, page = 1, pageSize = 50): Promise<{ data: ChatLog[]; total: number }> {
+        const where = {
+            configuration: { userId },
+        };
+
+        const [data, total] = await Promise.all([
+            this.prisma.chatLog.findMany({
+                where,
+                orderBy: { createdAt: 'desc' },
+                skip: (page - 1) * pageSize,
+                take: pageSize,
+            }),
+            this.prisma.chatLog.count({ where }),
+        ]);
+
+        return { data, total };
     }
 }
+

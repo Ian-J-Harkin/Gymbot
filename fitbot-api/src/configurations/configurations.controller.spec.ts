@@ -37,7 +37,7 @@ describe('ConfigurationsController', () => {
     };
     (service.getConfig as jest.Mock).mockResolvedValue(mockConfig);
 
-    const result = await controller.getConfig({ user: { userId: 'user-1' } } as any);
+    const result = await controller.getConfig('user-1');
     expect(result).toEqual(mockConfig);
     expect(service.getConfig).toHaveBeenCalledWith('user-1');
   });
@@ -62,7 +62,7 @@ describe('ConfigurationsController', () => {
     (service.updateConfig as jest.Mock).mockResolvedValue(mockUpdatedConfig);
 
     const result = await controller.updateConfig(
-      { user: { userId: 'user-1' } } as any,
+      'user-1',
       updateDto
     );
 
