@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, UseGuards, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { WidgetService, WidgetHistoryItem } from './widget.service';
+import { WidgetService } from './widget.service';
+import { WidgetHistoryItem } from './providers/ai-provider.interface';
 import { ApiKeyAuthGuard } from '../common/guards/api-key-auth.guard';
 import { ApiKeyRequest } from '../common/interfaces/auth.interfaces';
 import { IsString, MaxLength, IsArray, IsOptional } from 'class-validator';

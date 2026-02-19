@@ -43,17 +43,32 @@ describe('UsersService', () => {
 
   describe('create', () => {
     it('should create a user with hashed password', async () => {
-      const dto = { email: 'new@example.com', password: 'password', confirmPassword: 'password' };
-      const user = { id: '2', email: 'new@example.com', password: 'hashed' };
+      const dto = {
+        email: 'new@example.com',
+        password: 'password',
+        confirmPassword: 'password',
+        gymName: 'Test Gym',
+        recaptchaToken: 'token'
+      };
+      const user = {
+        id: '2',
+        email: 'new@example.com',
+        password: 'hashed',
+        gymName: 'Test Gym'
+      };
 
       prismaService.user.create.mockResolvedValue(user);
       jest.spyOn(bcrypt, 'hash').mockImplementation(() => Promise.resolve('hashed'));
 
       const result = await service.create(dto);
 
-      expect(bcrypt.hash).toHaveBeenCalledWith('password', 10); // Check salt rounds used in implementation (10)
+      expect(bcrypt.hash).toHaveBeenCalledWith('password', 10);
       expect(prismaService.user.create).toHaveBeenCalledWith({
-        data: { email: 'new@example.com', password: 'hashed' },
+        data: {
+          email: 'new@example.com',
+          password: 'hashed',
+          gymName: 'Test Gym'
+        },
       });
       expect(result).toEqual(user);
     });
