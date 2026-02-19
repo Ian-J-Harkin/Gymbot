@@ -130,9 +130,9 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **14.9 Chat Message Length Validation**: Added `ChatMessageDto` with `@MaxLength(4000)` in `widget.controller.ts`.
 - [x] **14.10 Validate File Upload by MIME Type**: Added MIME check against `ALLOWED_MIME_TYPES` map before processing in `knowledge-base.controller.ts`.
 - [ ] **14.11 Open Registration Protection**:
-    - [x] **14.11a [NEXT] Add Google reCAPTCHA**: Required `recaptchaToken` added to registration and verified against Google's API.
+    - [x] **14.11a [NEXT] Add Google reCAPTCHA**: Completed. Backend verification enforced in `AuthService.register`.
     - [ ] **14.11b Email Verification**: [DEFERRED] Require email confirmation before account activation.
-    - [ ] **14.11c Admin Approval**: [DEFERRED] deeply restictive mode for private Beta.
+    - [ ] **14.11c Admin Approval**: [DEFERRED] deeply restictive mode for private Beta. (High friction, manual process).
 
 ### P2 — Improvement
 
@@ -140,12 +140,12 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **14.13 Refactor WidgetService**: Extract AI provider calls into an `AiProviderService` (Strategy pattern); move explanation assembly into a helper.
 - [x] **14.14 Create `@CurrentUserId()` Decorator**: Created `current-user-id.decorator.ts` and refactored all 5 controllers (9 methods) to use it.
 - [x] **14.15 Add Pagination to Chat Logs**: `findByUserId()` now accepts `page`/`pageSize` params, returns `{ data, total }`. Controller reads `?page=&pageSize=` query params.
-- [ ] **14.16 Register Validation Rules**: `ValidationService.registerRule()` exists but is never called — no rules are active. Register at least basic rules (profanity filter, prompt-injection guard).
+- [x] **14.16 Register Validation Rules**: Implemented `ProfanityRule` and `PromptInjectionRule`. Registered in `ValidationModule`.
 - [x] **14.17 Use NestJS Exceptions Consistently**: Replaced all generic `throw new Error()` in `StripeService` (→ `NotFoundException`, `BadRequestException`) and `KnowledgeBaseService` (→ `NotFoundException`, `BadRequestException`).
 - [x] **14.18 Fix Swallowed Errors**: `ConfigurationsService` now logs a `Logger.warn()` with the error message on decryption failures instead of silently swallowing.
-- [ ] **14.19 Docker Secrets**: Move plaintext MySQL credentials out of `docker-compose.yml` into `env_file` or Docker secrets.
+- [x] **14.19 Docker Secrets**: Moved plaintext MySQL credentials out of `docker-compose.yml` into `.env` file.
 - [ ] **14.20 Widget `API_BASE_URL` from Config**: `fitbot-widget/src/api/client.ts` hardcodes `http://localhost:3000/api`. Read from a build-time env var or the script tag's `data-*` attribute.
-- [ ] **14.21 Write Unit Tests for All Services**: Zero `.spec.ts` files exist. Write tests for `AuthService`, `WidgetService`, `StripeService`, `ConfigurationsService`, `KnowledgeBaseService`, `RagService`, `ApiKeysService`.
+- [x] **14.21 Write Unit Tests for All Services**: All core services (`AuthService`, `WidgetService`, `StripeService`, `ConfigurationsService`, `KnowledgeBaseService`, `RagService`, `ApiKeysService`) now have passing unit tests.
 
 ### P3 — Housekeeping
 
