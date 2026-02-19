@@ -110,49 +110,44 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] **13.2 End-User Terms (AUP)**: Draft "Acceptable Use Policies" based on cloud provider restrictions to protect the system from violation-driven shutdowns.
 - [ ] **13.3 Subscription Guardrails**: Map cloud usage limits to Stripe subscription tiers (preventing overage).
 
-## 🔴 Epic 14: Code Quality & Security Remediation (from 2026-02-18 Code Review)
+## � Epic 14: Code Quality & Security Remediation (Completed)
 
-> Items below were identified during the comprehensive code review (8.4) and are not covered by any other epic. Grouped by priority.
+> All P0/P1/P2 items complete. Passed items listed below.
 
-### P0 — Critical / Immediate
+- [x] **14.1 Remove Secrets from Git History**
+- [x] **14.2 Fix `.gitignore`**
+- [x] **14.3 Stop Returning Decrypted API Keys**
+- [x] **14.4 Stripe Mock-Key Guard**
+- [x] **14.5 Extract Magic Strings/Numbers to Constants**
+- [x] **14.6 Fix Default Widget Colour Mismatch**
+- [x] **14.7 Add Helmet Middleware**
+- [x] **14.8 Environment-Driven CORS**
+- [x] **14.9 Chat Message Length Validation**
+- [x] **14.10 Validate File Upload by MIME Type**
+- [x] **14.11a [NEXT] Add Google reCAPTCHA**
+- [x] **14.12 Replace `any` Types with Interfaces**
+- [x] **14.13 Refactor WidgetService**
+- [x] **14.14 Create `@CurrentUserId()` Decorator**
+- [x] **14.15 Add Pagination to Chat Logs**
+- [x] **14.16 Register Validation Rules**
+- [x] **14.17 Use NestJS Exceptions Consistently**
+- [x] **14.18 Fix Swallowed Errors**
+- [x] **14.19 Docker Secrets**
+- [x] **14.20 Configurable Widget API URL**
+- [x] **14.21 Write Unit Tests for All Services**
+- [x] **14.25 Webhook Error Leakage**
 
-- [x] **14.1 Remove Secrets from Git History**: Deleted `check-key.ts`, `fix-db.js`, `db-check.js`. Git history scrub (BFG) deferred.
-- [x] **14.2 Fix `.gitignore`**: Added `.env*`, `dist/`, `*.exe`, `*.log`, IDE folders, and debug scripts. Removed `stripe.exe` reference.
-- [x] **14.3 Stop Returning Decrypted API Keys**: `getConfig()` now returns masked values (e.g. `sk-12...abc`). `updateConfig()` detects masked vs new keys and preserves existing encrypted values.
-- [x] **14.4 Stripe Mock-Key Guard**: `StripeService` now uses `getStripeClient()` — returns `ServiceUnavailableException` when `STRIPE_SECRET_KEY` is unset. No more `'mock_key'` fallback.
+## 🔴 Epic 15: Production Readiness & Demo Ecosystem (NEW - High Priority)
 
-### P1 — Important
+> Focus: Delivering a "box-ready" suite of applications — Admin, React Demo, and WP Demo — with a clear DevOps path.
 
-- [x] **14.5 Extract Magic Strings/Numbers to Constants**: Created `constants.ts` with ~30 named values. Applied across `widget.service.ts`, `configurations.service.ts`, `knowledge-base.service.ts`, `auth.module.ts`, `users.service.ts`.
-- [x] **14.6 Fix Default Widget Colour Mismatch**: Prisma schema changed from `#007bff` to `#2563EB` to match service layer and frontend.
-- [x] **14.7 Add Helmet Middleware**: Installed `helmet` and applied as global middleware in `main.ts`.
-- [x] **14.8 Environment-Driven CORS**: `ALLOWED_ORIGINS` env var (comma-separated) replaces hardcoded localhost array. Falls back to `localhost:5173` in dev.
-- [x] **14.9 Chat Message Length Validation**: Added `ChatMessageDto` with `@MaxLength(4000)` in `widget.controller.ts`.
-- [x] **14.10 Validate File Upload by MIME Type**: Added MIME check against `ALLOWED_MIME_TYPES` map before processing in `knowledge-base.controller.ts`.
-- [ ] **14.11 Open Registration Protection**:
-    - [x] **14.11a [NEXT] Add Google reCAPTCHA**: Completed. Backend verification enforced in `AuthService.register`.
-    - [ ] **14.11b Email Verification**: [DEFERRED] Require email confirmation before account activation.
-    - [ ] **14.11c Admin Approval**: [DEFERRED] deeply restictive mode for private Beta. (High friction, manual process).
-
-### P2 — Improvement
-
-- [x] **14.12 Replace `any` Types with Interfaces**: Created `AuthenticatedRequest`, `ApiKeyRequest`, and `WidgetHistoryItem`. Removed `any` from `WidgetService`, `AuthService`, `JwtStrategy`, `WidgetController`, and `StripeController`.
-- [x] **14.13 Refactor WidgetService**: Extract AI provider calls into an `AiProviderService` (Strategy pattern); move explanation assembly into a helper.
-- [x] **14.14 Create `@CurrentUserId()` Decorator**: Created `current-user-id.decorator.ts` and refactored all 5 controllers (9 methods) to use it.
-- [x] **14.15 Add Pagination to Chat Logs**: `findByUserId()` now accepts `page`/`pageSize` params, returns `{ data, total }`. Controller reads `?page=&pageSize=` query params.
-- [x] **14.16 Register Validation Rules**: Implemented `ProfanityRule` and `PromptInjectionRule`. Registered in `ValidationModule`.
-- [x] **14.17 Use NestJS Exceptions Consistently**: Replaced all generic `throw new Error()` in `StripeService` (→ `NotFoundException`, `BadRequestException`) and `KnowledgeBaseService` (→ `NotFoundException`, `BadRequestException`).
-- [x] **14.18 Fix Swallowed Errors**: `ConfigurationsService` now logs a `Logger.warn()` with the error message on decryption failures instead of silently swallowing.
-- [x] **14.19 Docker Secrets**: Moved plaintext MySQL credentials out of `docker-compose.yml` into `.env` file.
-- [ ] **14.20 Widget `API_BASE_URL` from Config**: `fitbot-widget/src/api/client.ts` hardcodes `http://localhost:3000/api`. Read from a build-time env var or the script tag's `data-*` attribute.
-- [x] **14.21 Write Unit Tests for All Services**: All core services (`AuthService`, `WidgetService`, `StripeService`, `ConfigurationsService`, `KnowledgeBaseService`, `RagService`, `ApiKeysService`) now have passing unit tests.
-
-### P3 — Housekeeping
-
-- [x] **14.22 Remove Dead Code**: Deleted unused `EncryptionService.ivSecret` field, unused `RagService.calculateOverlap()` method, Vite scaffold files (`counter.ts`, `main.ts` in widget).
-- [ ] **14.23 Harmonise Naming Conventions**: Frontend uses `openaiApiKey` (camelCase) while backend/Prisma uses `openAiApiKey`. Pick one and align.
-- [x] **14.24 Remove Stale Comments**: Deleted `// Final Restart for Stripe Linking Fix` from `main.ts`.
-- [x] **14.25 Webhook Error Leakage**: `StripeController` now returns generic `'Webhook processing failed'` instead of `err.message`.
+- [ ] **15.1 React Functionality Equivalent**: Create a standalone React demo app (`fitbot-react-demo`) that consumes the widget via the "Universal Component" approach (Story 11.4), proving the widget works outside WordPress.
+- [ ] **15.2 Functional Parity Audit**: Ensure the React demo has feature parity with the WordPress plugin (configuration injections, user context, style overrides).
+- [ ] **15.3 Containerization Strategy (The "DevOps Route")**:
+    - [ ] **15.3a Production Docker Compose**: Create `docker-compose.prod.yml` with strict security (non-root users, secrets, restart policies, Traefik/Nginx reverse proxy).
+    - [ ] **15.3b Demo Site Container**: Containerize the Request Demo App and WordPress Demo Site so they can be spun up with a single command alongside the API.
+- [ ] **15.4 Deployment SOP**: Create a comprehensive guide for deploying the full stack to a VPS/Cloud Provider.
+- [ ] **15.5 End-to-End "Smoke Test"**: Verify the GymBot Admin -> API -> React/WP Demo flow works in the production container setup.
 
 ## ❓ Future Queries & Clarifications
 - [ ] **Data Import Logic**: Do we need to test Sales/customer import logic — is this in the context of bulk testing more customers for Stripe integration?
