@@ -1,7 +1,5 @@
 
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { EncryptionService } from '../common/services/encryption.service';
-import OpenAI from 'openai';
+import { Injectable } from '@nestjs/common';
 
 import { ChatLogsService } from '../chat-logs/chat-logs.service';
 import { ExplanationMetadata } from './explanation-metadata.interface';
@@ -15,26 +13,21 @@ import {
     DEFAULT_OPENAI_MODEL,
     DEFAULT_OPENROUTER_MODEL,
     DEFAULT_OLLAMA_MODEL,
-    DEFAULT_OLLAMA_URL,
-    OPENROUTER_BASE_URL,
-    OPENROUTER_REFERER,
-    OPENROUTER_TITLE,
     RAG_TOP_K,
 } from '../common/constants';
-
-export interface WidgetHistoryItem {
-    role: 'user' | 'assistant' | 'system';
-    content: string;
-}
+import { AiProviderService } from './providers/ai-provider.service';
+import { ExplanationHelper } from './explanation.helper';
+import { WidgetHistoryItem } from './providers/ai-provider.interface';
 
 @Injectable()
 export class WidgetService {
     constructor(
-        private encryptionService: EncryptionService,
         private chatLogsService: ChatLogsService,
         private validationService: ValidationService,
         private ragService: RagService,
         private prisma: PrismaService,
+        private aiProviderService: AiProviderService,
+        private explanationHelper: ExplanationHelper,
     ) { }
 
     getPublicConfig(configuration: Configuration) {
@@ -50,8 +43,8 @@ export class WidgetService {
         history: WidgetHistoryItem[]
     ): AsyncGenerator<string | { explanation: ExplanationMetadata }> {
         const startTime = Date.now();
-        const provider = configuration.aiProvider || AI_PROVIDERS.OPENAI;
-        const model = configuration.ollamaModel || (provider === AI_PROVIDERS.OLLAMA ? DEFAULT_OLLAMA_MODEL : (provider === AI_PROVIDERS.OPENAI ? DEFAULT_OPENAI_MODEL : DEFAULT_OPENROUTER_MODEL));
+        const providerName = configuration.aiProvider || AI_PROVIDERS.OPENAI;
+        const model = configuration.ollamaModel || (providerName === AI_PROVIDERS.OLLAMA ? DEFAULT_OLLAMA_MODEL : (providerName === AI_PROVIDERS.OPENAI ? DEFAULT_OPENAI_MODEL : DEFAULT_OPENROUTER_MODEL));
 
         // --- Subscription Check ---
         if (configuration.requireSubscription && configuration.user?.subscriptionStatus !== 'active') {
@@ -65,14 +58,10 @@ export class WidgetService {
         // Fetch document chunks from the database with document info
         const documentChunks = await this.prisma.documentChunk.findMany({
             where: {
-                document: {
-                    configurationId: configuration.id,
-                },
+                document: { configurationId: configuration.id },
             },
             include: {
-                document: {
-                    select: { fileName: true }
-                }
+                document: { select: { fileName: true } }
             }
         });
 
@@ -118,7 +107,7 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
                     configurationId: configuration.id,
                     userMessage: message,
                     aiResponse: blockingMsg,
-                    provider,
+                    provider: providerName,
                     model,
                     contextLength: 0,
                     validationFlags: inputValidation.results.map(r => r.ruleId),
@@ -142,53 +131,26 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
         let errorOccurred = false;
 
         try {
-            let stream: AsyncIterable<any> | any;
-
-            switch (provider) {
-                case 'openai':
-                    stream = await this.chatWithOpenAI(configuration, messages);
-                    break;
-                case 'openrouter':
-                    stream = await this.chatWithOpenRouter(configuration, messages);
-                    break;
-                case 'ollama':
-                    const response = await this.chatWithOllama(configuration, messages);
-                    // Standardize Ollama response to behave like a stream chunk
-                    stream = [{ choices: [{ delta: { content: response.choices[0].message.content } }] }];
-                    break;
-                default:
-                    throw new InternalServerErrorException(`Unknown AI provider: ${provider}`);
-            }
+            const providerStrategy = this.aiProviderService.getProvider(providerName);
+            const stream = providerStrategy.generateResponse(configuration, messages);
 
             for await (const chunk of stream) {
-                const content = chunk.choices[0]?.delta?.content || '';
-                if (content) {
-                    fullResponse += content;
-                    yield content;
-                }
+                fullResponse += chunk;
+                yield chunk;
             }
 
             // Stream completed successfully
-            const endTime = Date.now();
-            const responseTimeMs = endTime - startTime;
+            const responseTimeMs = Date.now() - startTime;
 
-            const explanation: ExplanationMetadata = {
-                provider,
+            const explanation = this.explanationHelper.build(
+                providerName,
                 model,
-                contextUsed: contextUsedSummary,
-                contextLength: contextContent.length,
-                systemPromptSummary: `Retrieved ${relevantChunks.length} chunks from ${allChunks.length} total blocks.`,
+                contextContent,
+                relevantChunks,
+                allChunks.length,
                 responseTimeMs,
-                timestamp: new Date().toISOString(),
-                validationResults: inputValidation.results,
-                sources: Array.from(
-                    new Map((relevantChunks as any).map(c => [c.fileName, {
-                        id: c.id,
-                        fileName: c.fileName,
-                        content: c.content
-                    }])).values()
-                ) as any[]
-            };
+                inputValidation.results
+            );
 
             yield { explanation };
 
@@ -198,7 +160,7 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
                     configurationId: configuration.id,
                     userMessage: message,
                     aiResponse: fullResponse,
-                    provider,
+                    provider: providerName,
                     model,
                     contextLength: systemPrompt.length,
                     validationFlags: inputValidation.results.map(r => r.ruleId),
@@ -209,7 +171,7 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
             }
 
         } catch (error) {
-            console.error(`Error processing chat with ${provider}:`, error);
+            console.error(`Error processing chat with ${providerName}:`, error);
             errorOccurred = true;
 
             const responseTimeMs = Date.now() - startTime;
@@ -219,7 +181,7 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
                     configurationId: configuration.id,
                     userMessage: message,
                     aiResponse: fullResponse + " [ERROR INTERRUPTED]",
-                    provider,
+                    provider: providerName,
                     model,
                     contextLength: systemPrompt.length,
                     validationFlags: ['ERROR'],
@@ -231,69 +193,5 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
 
             throw error;
         }
-    }
-
-    private async chatWithOpenAI(configuration: Configuration, messages: WidgetHistoryItem[]) {
-        const apiKey = this.encryptionService.decrypt(configuration.openAiApiKey!);
-        const openai = new OpenAI({ apiKey });
-
-        const stream = await openai.chat.completions.create({
-            model: DEFAULT_OPENAI_MODEL,
-            messages: messages as any,
-            stream: true,
-        });
-
-        return stream;
-    }
-
-    private async chatWithOpenRouter(configuration: Configuration, messages: WidgetHistoryItem[]) {
-        const apiKey = this.encryptionService.decrypt(configuration.openRouterApiKey!);
-        const openai = new OpenAI({
-            apiKey,
-            baseURL: OPENROUTER_BASE_URL,
-            defaultHeaders: {
-                'HTTP-Referer': OPENROUTER_REFERER,
-                'X-Title': OPENROUTER_TITLE,
-            },
-        });
-
-        const stream = await openai.chat.completions.create({
-            model: DEFAULT_OPENROUTER_MODEL,
-            messages: messages as any,
-            stream: true,
-        });
-
-        return stream;
-    }
-
-    private async chatWithOllama(configuration: Configuration, messages: WidgetHistoryItem[]) {
-        const ollamaUrl = configuration.ollamaUrl || DEFAULT_OLLAMA_URL;
-        const model = configuration.ollamaModel || DEFAULT_OLLAMA_MODEL;
-
-        const response = await fetch(`${ollamaUrl}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model,
-                messages,
-                stream: false,
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ollama request failed: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        // Return a simple object matching what the controller expects
-        return {
-            choices: [{
-                message: {
-                    role: 'assistant',
-                    content: data.message?.content || 'No response from Ollama',
-                },
-            }],
-        };
     }
 }

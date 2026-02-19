@@ -1,5 +1,9 @@
 import { Configuration } from '@prisma/client';
-import { WidgetHistoryItem } from '../widget.service';
+
+export interface WidgetHistoryItem {
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+}
 
 export interface AiProvider {
     generateResponse(configuration: Configuration, messages: WidgetHistoryItem[]): AsyncGenerator<string>;
