@@ -3,6 +3,7 @@ import { StripeService } from './stripe.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Request, Response } from 'express';
 import { CurrentUserId } from '../common/decorators/current-user-id.decorator';
+import { AuthenticatedRequest } from '../common/interfaces/auth.interfaces';
 
 @Controller('stripe')
 export class StripeController {
@@ -10,7 +11,7 @@ export class StripeController {
 
     @UseGuards(JwtAuthGuard)
     @Post('create-checkout-session')
-    async createCheckoutSession(@CurrentUserId() userId: string, @Req() req: any) {
+    async createCheckoutSession(@CurrentUserId() userId: string, @Req() req: AuthenticatedRequest) {
         const email = req.user.email;
 
         if (!userId) {

@@ -1,3 +1,5 @@
+import { ValidationResult } from '../validation/validation.models';
+
 export interface Source {
     id: string;
     fileName: string;
@@ -12,6 +14,6 @@ export interface ExplanationMetadata {
     systemPromptSummary: string;
     responseTimeMs: number;
     timestamp: string;
-    validationResults?: any[];  // Flags or results from validation service
+    validationResults?: ValidationResult[];  // Flags or results from validation service
     sources?: Source[];         // Document snippets retrieved
 }

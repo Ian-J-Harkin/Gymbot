@@ -9,6 +9,7 @@ import { ExplanationMetadata } from './explanation-metadata.interface';
 import { ValidationService } from '../validation/validation.service';
 import { RagService } from '../rag/rag.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { Configuration, User } from '@prisma/client';
 import {
     AI_PROVIDERS,
     DEFAULT_OPENAI_MODEL,
@@ -21,6 +22,11 @@ import {
     RAG_TOP_K,
 } from '../common/constants';
 
+export interface WidgetHistoryItem {
+    role: 'user' | 'assistant' | 'system';
+    content: string;
+}
+
 @Injectable()
 export class WidgetService {
     constructor(
@@ -31,14 +37,18 @@ export class WidgetService {
         private prisma: PrismaService,
     ) { }
 
-    getPublicConfig(configuration: any) {
+    getPublicConfig(configuration: Configuration) {
         return {
             widgetColor: configuration.widgetColor,
             greetingMessage: configuration.greetingMessage || 'How can I help you?',
         };
     }
 
-    async *processChat(configuration: any, message: string, history: any[]): AsyncGenerator<string | { explanation: ExplanationMetadata }> {
+    async *processChat(
+        configuration: Configuration & { user?: User },
+        message: string,
+        history: WidgetHistoryItem[]
+    ): AsyncGenerator<string | { explanation: ExplanationMetadata }> {
         const startTime = Date.now();
         const provider = configuration.aiProvider || AI_PROVIDERS.OPENAI;
         const model = configuration.ollamaModel || (provider === AI_PROVIDERS.OLLAMA ? DEFAULT_OLLAMA_MODEL : (provider === AI_PROVIDERS.OPENAI ? DEFAULT_OPENAI_MODEL : DEFAULT_OPENROUTER_MODEL));
@@ -122,11 +132,11 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
             return;
         }
 
-        const messages = [
+        const messages: WidgetHistoryItem[] = [
             { role: 'system', content: systemPrompt },
             ...history,
             { role: 'user', content: message },
-        ];
+        ] as WidgetHistoryItem[];
 
         let fullResponse = '';
         let errorOccurred = false;
@@ -223,8 +233,8 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
         }
     }
 
-    private async chatWithOpenAI(configuration: any, messages: any[]) {
-        const apiKey = this.encryptionService.decrypt(configuration.openAiApiKey);
+    private async chatWithOpenAI(configuration: Configuration, messages: WidgetHistoryItem[]) {
+        const apiKey = this.encryptionService.decrypt(configuration.openAiApiKey!);
         const openai = new OpenAI({ apiKey });
 
         const stream = await openai.chat.completions.create({
@@ -236,8 +246,8 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
         return stream;
     }
 
-    private async chatWithOpenRouter(configuration: any, messages: any[]) {
-        const apiKey = this.encryptionService.decrypt(configuration.openRouterApiKey);
+    private async chatWithOpenRouter(configuration: Configuration, messages: WidgetHistoryItem[]) {
+        const apiKey = this.encryptionService.decrypt(configuration.openRouterApiKey!);
         const openai = new OpenAI({
             apiKey,
             baseURL: OPENROUTER_BASE_URL,
@@ -256,7 +266,7 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
         return stream;
     }
 
-    private async chatWithOllama(configuration: any, messages: any[]) {
+    private async chatWithOllama(configuration: Configuration, messages: WidgetHistoryItem[]) {
         const ollamaUrl = configuration.ollamaUrl || DEFAULT_OLLAMA_URL;
         const model = configuration.ollamaModel || DEFAULT_OLLAMA_MODEL;
 

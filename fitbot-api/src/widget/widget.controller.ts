@@ -1,7 +1,8 @@
 import { Controller, Get, Post, Body, UseGuards, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { WidgetService } from './widget.service';
+import { WidgetService, WidgetHistoryItem } from './widget.service';
 import { ApiKeyAuthGuard } from '../common/guards/api-key-auth.guard';
+import { ApiKeyRequest } from '../common/interfaces/auth.interfaces';
 import { IsString, MaxLength, IsArray, IsOptional } from 'class-validator';
 import { MAX_CHAT_MESSAGE_LENGTH } from '../common/constants';
 
@@ -12,7 +13,7 @@ class ChatMessageDto {
 
     @IsOptional()
     @IsArray()
-    history: any[];
+    history: WidgetHistoryItem[];
 }
 
 @Controller('widget')
@@ -21,12 +22,12 @@ export class WidgetController {
     constructor(private readonly widgetService: WidgetService) { }
 
     @Get('config')
-    getConfig(@Request() req) {
+    getConfig(@Request() req: ApiKeyRequest) {
         return this.widgetService.getPublicConfig(req.configuration);
     }
 
     @Post('chat')
-    async chat(@Request() req, @Body() body: ChatMessageDto, @Res() res: Response) {
+    async chat(@Request() req: ApiKeyRequest, @Body() body: ChatMessageDto, @Res() res: Response) {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
