@@ -7,9 +7,10 @@ import DOMPurify from 'dompurify';
 
 interface ChatWidgetProps {
   apiKey: string;
+  apiUrl: string;
 }
 
-export function ChatWidget({ apiKey }: ChatWidgetProps) {
+export function ChatWidget({ apiKey, apiUrl }: ChatWidgetProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [config, setConfig] = useState<WidgetConfig | null>(null);
   const [messages, setMessages] = useState<Message[]>([
@@ -25,11 +26,11 @@ export function ChatWidget({ apiKey }: ChatWidgetProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    clientRef.current = new ApiClient(apiKey);
+    clientRef.current = new ApiClient(apiKey, apiUrl);
     clientRef.current.getConfig()
       .then(setConfig)
       .catch((err) => console.error('Config load failed:', err));
-  }, [apiKey]);
+  }, [apiKey, apiUrl]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -1,16 +1,16 @@
 import type { WidgetConfig } from '../types';
 
-const API_BASE_URL = 'http://localhost:3000/api';
-
 export class ApiClient {
     private apiKey: string;
+    private baseUrl: string;
 
-    constructor(apiKey: string) {
+    constructor(apiKey: string, baseUrl: string) {
         this.apiKey = apiKey;
+        this.baseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     }
 
     async getConfig(): Promise<WidgetConfig> {
-        const response = await fetch(`${API_BASE_URL}/widget/config`, {
+        const response = await fetch(`${this.baseUrl}/widget/config`, {
             headers: {
                 'X-API-Key': this.apiKey,
             },
@@ -24,7 +24,7 @@ export class ApiClient {
     }
 
     async *streamChat(message: string, history: any[]): AsyncGenerator<string | { explanation: any }> {
-        const response = await fetch(`${API_BASE_URL}/widget/chat`, {
+        const response = await fetch(`${this.baseUrl}/widget/chat`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
