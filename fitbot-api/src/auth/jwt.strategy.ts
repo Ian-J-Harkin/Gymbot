@@ -5,6 +5,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 
+import { JwtPayload, AuthenticatedUser } from '../common/interfaces/auth.interfaces';
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
     constructor(
@@ -22,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         });
     }
 
-    async validate(payload: any) {
+    async validate(payload: JwtPayload): Promise<AuthenticatedUser | null> {
         const user = await this.prisma.user.findUnique({
             where: { id: payload.sub },
             select: {

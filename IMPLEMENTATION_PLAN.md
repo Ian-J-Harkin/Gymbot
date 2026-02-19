@@ -136,7 +136,7 @@ This document tracks the progress of the FitBot project implementation against t
 
 ### P2 — Improvement
 
-- [ ] **14.12 Replace `any` Types with Interfaces**: Create `AuthenticatedRequest`, `ConfigurationEntity`, typed chat message arrays. Eliminate `any` from `widget.service.ts`, `auth.service.ts`, `validation.models.ts`, all controllers.
+- [x] **14.12 Replace `any` Types with Interfaces**: Created `AuthenticatedRequest`, `ApiKeyRequest`, and `WidgetHistoryItem`. Removed `any` from `WidgetService`, `AuthService`, `JwtStrategy`, `WidgetController`, and `StripeController`.
 - [ ] **14.13 Refactor WidgetService**: Extract AI provider calls into an `AiProviderService` (Strategy pattern); move explanation assembly into a helper.
 - [x] **14.14 Create `@CurrentUserId()` Decorator**: Created `current-user-id.decorator.ts` and refactored all 5 controllers (9 methods) to use it.
 - [x] **14.15 Add Pagination to Chat Logs**: `findByUserId()` now accepts `page`/`pageSize` params, returns `{ data, total }`. Controller reads `?page=&pageSize=` query params.
