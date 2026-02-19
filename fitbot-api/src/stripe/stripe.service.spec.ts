@@ -81,21 +81,60 @@ describe('StripeService', () => {
     });
 
     describe('createCheckoutSession', () => {
-        it('should create a checkout session and return it', async () => {
+        it('should create a checkout session and return clientSecret', async () => {
             const userId = 'user-1';
             const email = 'test@example.com';
+
+            mockStripeInstance.checkout.sessions.create.mockResolvedValue({
+                client_secret: 'cs_test_secret',
+            });
+
             const result = await service.createCheckoutSession(userId, email);
 
-            expect(mockStripeInstance.checkout.sessions.create).toHaveBeenCalledWith({
-                payment_method_types: ['card'],
-                line_items: [{ price: 'price_123', quantity: 1 }],
-                mode: 'subscription',
-                success_url: 'http://localhost:3000/billing?session_id={CHECKOUT_SESSION_ID}',
-                cancel_url: 'http://localhost:3000/billing',
-                customer_email: email,
-                client_reference_id: userId,
-            });
-            expect(result).toEqual({ url: 'https://checkout.stripe.com/test' });
+            expect(mockStripeInstance.checkout.sessions.create).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    line_items: [{ price: 'price_123', quantity: 1 }],
+                    mode: 'subscription',
+                    customer_email: email,
+                    client_reference_id: userId,
+                }),
+            );
+            expect(result).toEqual({ clientSecret: 'cs_test_secret' });
+        });
+    });
+
+    describe('when STRIPE_SECRET_KEY is not set', () => {
+        let disabledService: StripeService;
+
+        beforeEach(async () => {
+            const disabledConfigService = {
+                get: jest.fn((key: string) => {
+                    if (key === 'STRIPE_SECRET_KEY') return undefined;
+                    return 'some-value';
+                }),
+            };
+
+            const module: TestingModule = await Test.createTestingModule({
+                providers: [
+                    StripeService,
+                    { provide: ConfigService, useValue: disabledConfigService },
+                    { provide: PrismaService, useValue: prismaService },
+                ],
+            }).compile();
+
+            disabledService = module.get<StripeService>(StripeService);
+        });
+
+        it('should throw ServiceUnavailableException from createCheckoutSession', async () => {
+            await expect(
+                disabledService.createCheckoutSession('user-1', 'test@test.com'),
+            ).rejects.toThrow('Stripe integration is not configured');
+        });
+
+        it('should still allow isSubscriptionActive (DB-only method)', async () => {
+            prismaService.user.findUnique.mockResolvedValue({ subscriptionStatus: 'active' });
+            const result = await disabledService.isSubscriptionActive('user-1');
+            expect(result).toBe(true);
         });
     });
 

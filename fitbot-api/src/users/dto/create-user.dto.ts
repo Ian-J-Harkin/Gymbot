@@ -15,4 +15,7 @@ export class CreateUserDto {
 
   @IsOptional()
   gymName?: string;
+
+  @IsNotEmpty()
+  recaptchaToken: string;
 }

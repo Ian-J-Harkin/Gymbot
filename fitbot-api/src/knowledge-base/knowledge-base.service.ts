@@ -1,14 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import * as mammoth from 'mammoth';
+import { RAG_CHUNK_SIZE, RAG_CHUNK_OVERLAP, MIN_EXTRACTED_CONTENT_LENGTH } from '../common/constants';
 
 @Injectable()
 export class KnowledgeBaseService {
     private readonly logger = new Logger(KnowledgeBaseService.name);
     private readonly splitter = new RecursiveCharacterTextSplitter({
-        chunkSize: 1000,
-        chunkOverlap: 200,
+        chunkSize: RAG_CHUNK_SIZE,
+        chunkOverlap: RAG_CHUNK_OVERLAP,
     });
 
     constructor(private prisma: PrismaService) { }
@@ -19,7 +20,7 @@ export class KnowledgeBaseService {
         });
 
         if (!config) {
-            throw new Error('User configuration not found');
+            throw new NotFoundException('User configuration not found');
         }
 
         let content = '';
@@ -36,7 +37,7 @@ export class KnowledgeBaseService {
             }
 
             if (typeof parser !== 'function') {
-                throw new Error(`PDF parser initialization failed. Type: ${typeof parser}`);
+                throw new BadRequestException(`PDF parser initialization failed. Type: ${typeof parser}`);
             }
 
             const data = await parser(file.buffer);
@@ -47,7 +48,7 @@ export class KnowledgeBaseService {
         } else if (fileType === 'txt') {
             content = file.buffer.toString('utf-8');
         } else {
-            throw new Error('Unsupported file type');
+            throw new BadRequestException('Unsupported file type');
         }
 
         // Sanitize content: Preserve common text characters and basic punctuation
@@ -60,7 +61,7 @@ export class KnowledgeBaseService {
 
         this.logger.log(`Extracted content from ${file.originalname}: ${originalLength} chars (Sanitized to ${content.length} chars)`);
 
-        if (content.length < 10 && originalLength > 0) {
+        if (content.length < MIN_EXTRACTED_CONTENT_LENGTH && originalLength > 0) {
             this.logger.warn(`PDF extraction for ${file.originalname} seems poor. Only ${content.length} chars found.`);
         }
 
@@ -120,7 +121,7 @@ export class KnowledgeBaseService {
             },
         });
 
-        if (!doc) throw new Error('Document not found');
+        if (!doc) throw new NotFoundException('Document not found');
 
         // Delete chunks first
         await this.prisma.documentChunk.deleteMany({

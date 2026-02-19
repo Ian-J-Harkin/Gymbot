@@ -4,12 +4,15 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginDto } from './dto/login.dto';
+import { BCRYPT_SALT_ROUNDS } from '../common/constants';
+import { RecaptchaService } from './recaptcha.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
+        private recaptchaService: RecaptchaService,
     ) { }
 
     async validateUser(email: string, pass: string): Promise<any> {
@@ -36,6 +39,12 @@ export class AuthService {
     }
 
     async register(createUserDto: CreateUserDto) {
+        // Verify reCAPTCHA
+        const isHuman = await this.recaptchaService.verify(createUserDto.recaptchaToken);
+        if (!isHuman) {
+            throw new UnauthorizedException('reCAPTCHA verification failed');
+        }
+
         const existingUser = await this.usersService.findOne(createUserDto.email);
         if (existingUser) {
             throw new ConflictException('User already exists');

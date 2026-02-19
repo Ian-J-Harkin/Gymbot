@@ -2,6 +2,18 @@ import { Controller, Get, Post, Body, UseGuards, Request, Res } from '@nestjs/co
 import { Response } from 'express';
 import { WidgetService } from './widget.service';
 import { ApiKeyAuthGuard } from '../common/guards/api-key-auth.guard';
+import { IsString, MaxLength, IsArray, IsOptional } from 'class-validator';
+import { MAX_CHAT_MESSAGE_LENGTH } from '../common/constants';
+
+class ChatMessageDto {
+    @IsString()
+    @MaxLength(MAX_CHAT_MESSAGE_LENGTH)
+    message: string;
+
+    @IsOptional()
+    @IsArray()
+    history: any[];
+}
 
 @Controller('widget')
 @UseGuards(ApiKeyAuthGuard)
@@ -14,7 +26,7 @@ export class WidgetController {
     }
 
     @Post('chat')
-    async chat(@Request() req, @Body() body: { message: string; history: any[] }, @Res() res: Response) {
+    async chat(@Request() req, @Body() body: ChatMessageDto, @Res() res: Response) {
         res.setHeader('Content-Type', 'text/event-stream');
         res.setHeader('Cache-Control', 'no-cache');
         res.setHeader('Connection', 'keep-alive');
@@ -31,7 +43,6 @@ export class WidgetController {
             }
         } catch (error) {
             console.error('Error in chat stream:', error);
-            // Optionally send an error event to the client
             res.write(`data: ${JSON.stringify({ content: "I'm sorry, I encountered an error." })}\n\n`);
         }
 

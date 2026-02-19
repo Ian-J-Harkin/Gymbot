@@ -9,6 +9,17 @@ import { ExplanationMetadata } from './explanation-metadata.interface';
 import { ValidationService } from '../validation/validation.service';
 import { RagService } from '../rag/rag.service';
 import { PrismaService } from '../prisma/prisma.service';
+import {
+    AI_PROVIDERS,
+    DEFAULT_OPENAI_MODEL,
+    DEFAULT_OPENROUTER_MODEL,
+    DEFAULT_OLLAMA_MODEL,
+    DEFAULT_OLLAMA_URL,
+    OPENROUTER_BASE_URL,
+    OPENROUTER_REFERER,
+    OPENROUTER_TITLE,
+    RAG_TOP_K,
+} from '../common/constants';
 
 @Injectable()
 export class WidgetService {
@@ -29,8 +40,8 @@ export class WidgetService {
 
     async *processChat(configuration: any, message: string, history: any[]): AsyncGenerator<string | { explanation: ExplanationMetadata }> {
         const startTime = Date.now();
-        const provider = configuration.aiProvider || 'openai';
-        const model = configuration.ollamaModel || (provider === 'ollama' ? 'llama3' : (provider === 'openai' ? 'gpt-3.5-turbo' : 'openai/gpt-3.5-turbo'));
+        const provider = configuration.aiProvider || AI_PROVIDERS.OPENAI;
+        const model = configuration.ollamaModel || (provider === AI_PROVIDERS.OLLAMA ? DEFAULT_OLLAMA_MODEL : (provider === AI_PROVIDERS.OPENAI ? DEFAULT_OPENAI_MODEL : DEFAULT_OPENROUTER_MODEL));
 
         // --- Subscription Check ---
         if (configuration.requireSubscription && configuration.user?.subscriptionStatus !== 'active') {
@@ -68,7 +79,7 @@ export class WidgetService {
             })),
         ];
 
-        const relevantChunks = this.ragService.search(message, allChunks as any, 4);
+        const relevantChunks = this.ragService.search(message, allChunks as any, RAG_TOP_K);
 
         // Fallback or aggregate context
         const contextContent = relevantChunks.length > 0
@@ -217,7 +228,7 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
         const openai = new OpenAI({ apiKey });
 
         const stream = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
+            model: DEFAULT_OPENAI_MODEL,
             messages: messages as any,
             stream: true,
         });
@@ -229,15 +240,15 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
         const apiKey = this.encryptionService.decrypt(configuration.openRouterApiKey);
         const openai = new OpenAI({
             apiKey,
-            baseURL: 'https://openrouter.ai/api/v1',
+            baseURL: OPENROUTER_BASE_URL,
             defaultHeaders: {
-                'HTTP-Referer': 'https://fitbot.app',
-                'X-Title': 'FitBot',
+                'HTTP-Referer': OPENROUTER_REFERER,
+                'X-Title': OPENROUTER_TITLE,
             },
         });
 
         const stream = await openai.chat.completions.create({
-            model: 'openai/gpt-3.5-turbo',
+            model: DEFAULT_OPENROUTER_MODEL,
             messages: messages as any,
             stream: true,
         });
@@ -246,8 +257,8 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
     }
 
     private async chatWithOllama(configuration: any, messages: any[]) {
-        const ollamaUrl = configuration.ollamaUrl || 'http://localhost:11434';
-        const model = configuration.ollamaModel || 'llama3';
+        const ollamaUrl = configuration.ollamaUrl || DEFAULT_OLLAMA_URL;
+        const model = configuration.ollamaModel || DEFAULT_OLLAMA_MODEL;
 
         const response = await fetch(`${ollamaUrl}/api/chat`, {
             method: 'POST',
