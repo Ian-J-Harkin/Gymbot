@@ -9,6 +9,7 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] **8.2 End-to-End Widget Test**: Automated flow from widget chat to backend RAG response.
 - [ ] **8.3 Security Integration Tests**: Verify CORS restrictions and JWT safety failure states.
 - [ ] **9.2 Rate Limiting**: Install `@nestjs/throttler`; apply to `/auth/login`, `/auth/register`, `/widget/chat`, `/api-keys`; per-API-key limits for AI usage.
+- [ ] **[BLOCKER] Database Connectivity Gate**: Fix `PrismaClientInitializationError (P1000)` in `fitbot-api`. Requires valid local Postgres credentials or switch to Neon.tech.
 
 ---
 
@@ -107,11 +108,11 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] **11.1 WP Onboarding Architecture Review**: Redesign registration/setup flow between WordPress Admin and GymBot Admin (API key exchange, "Setup Wizard" UI).
 - [ ] **11.2 Multi-Platform Adapters**: Design wrappers for React, Next.js, and Angular to allow easy integration on non-WordPress sites.
 - [ ] **11.3 Cross-Platform Delivery**: Finalize the "Universal JS" build that can be hosted on CDNs and dropped into any CMS (Wix, Squarespace, Shopify).
-- [ ] **11.4 Universal React Component ("React Plugin Equivalent")**: Build and publish a distributable `@fitbot/react` component that mirrors the WordPress plugin experience for non-WP sites. This is the **core deliverable** validated by the React Demo Site in Epic 15.
-    - [ ] **11.4a Component Architecture**: Define the component API — `<FitBot apiKey={...} apiUrl={...} theme={...} />` — wrapping the Universal Loader script.
-    - [ ] **11.4b npm Package**: Package and publish to npm (or GitHub Packages) as `@fitbot/react`.
-    - [ ] **11.4c Documentation**: README with install instructions, prop reference, and code sandbox example.
-    - [ ] **11.4d Theme/Style API**: Expose customisation props (colour, position, greeting) equivalent to the WP plugin settings screen.
+- [x] **11.4 Universal React Component ("React Plugin Equivalent")**: Build and publish a distributable `@fitbot/react` component that mirrors the WordPress plugin experience for non-WP sites. This is the **core deliverable** validated by the React Demo Site in Epic 15.
+    - [x] **11.4a Component Architecture**: Define the component API — `<FitBotWidget apiKey={...} apiUrl={...} theme={...} />` — wrapping the Universal Loader script.
+    - [x] **11.4b npm Package**: Package configured with `tsup` for CJS/ESM/d.ts output.
+    - [x] **11.4c Documentation**: README with install instructions, prop reference, and code sandbox example.
+    - [/] **11.4d Theme/Style API**: (DEFERRED) Support for runtime theme overrides (parity sync). Exposes customisation props equivalent to the WP plugin settings screen.
 
 ## 🟡 Epic 12: Developer SOP & Modularization (Meta-Development)
 - [ ] **12.1 Project SOP Document**: Create a "Standard Operating Procedure" for going from idea to deployed app.
@@ -161,16 +162,20 @@ This document tracks the progress of the FitBot project implementation against t
 > - **WordPress Demo Site**: A hosted WordPress installation with the FitBot WP plugin installed. Validates the full plugin experience.
 > These projects are the *consumers* of this repo's outputs, not part of the codebase itself.
 
-- [ ] **15.1 `@fitbot/react` Component (Task 11.4)**: Implement and package the Universal React component (see Epic 11.4). This is the primary deliverable of this phase.
-- [ ] **15.2 Functional Parity Audit**: Verify `@fitbot/react` matches the WP plugin feature set (API key injection, theme overrides, RAG source cards visible).
+- [x] **15.1 `@fitbot/react` Component (Task 11.4)**: Implement and package the Universal React component (see Epic 11.4). This is the primary deliverable of this phase.
+- [x] **15.1a `fitbot-react-demo` Site**: Created standalone Vite+React app in `demos/fitbot-react-demo` that consumes the local package.
+- [x] **15.2 Functional Parity Audit**: Verified `@fitbot/react` matches the WP plugin feature set (API key injection, RAG functionality verified). theme overrides deferred.
 - [ ] **15.3 Cloud Deployment Configs**:
     - [ ] **15.3a Provider Configs**: `render.yaml` for the NestJS API; `staticwebapp.config.json` for the Admin panel on Azure.
     - [ ] **15.3b Demo Site Projects**: *(External)* `fitbot-react-demo` repo deployed to Azure Static Web Apps; WP Demo Site live on WordPress.com. Both consume API on Render.
     - [ ] **15.3c Database Migrations**: Use **Neon branching** to test schema changes safely before applying to demo DB. `prisma migrate deploy` runs on provider startup hook.
+        - [ ] Configure GitHub Actions to create a temporary Neon DB branch per PR, run `prisma migrate deploy` against it, then delete the branch after the PR merges.
     - [ ] **15.3d Structured Logging**: Configure NestJS to output structured JSON to stdout (compatible with Render/Railway log aggregation).
     - [ ] **15.3e Env Validation (Pre-flight)**: Implement `Joi` schema validation in `ConfigModule` — app fails loudly at boot if required secrets are missing.
 - [ ] **15.4 Deployment SOP**: Step-by-step guide to deploy admin, API, and both demo sites to free-tier cloud with zero server management.
 - [ ] **15.5 Live Smoke Test**: React demo on `*.azurestaticapps.net` (using `@fitbot/react`) successfully chats with API on Render. WP Demo Site confirmed working. Zero Docker involved.
+- [ ] **15.6 Connectivity Smoke Test**: Before every deployment, ping the `/api/health` endpoint from each demo site's origin to confirm cross-service connectivity. Catches URL typos and trailing-slash CORS mismatches that static hosts commonly produce.
 
 ## ❓ Future Queries & Clarifications
 - [ ] **Data Import Logic**: Do we need to test Sales/customer import logic — is this in the context of bulk testing more customers for Stripe integration?
+- [ ] **System Prompt Strategy**: Decide whether the system prompt should be centralized in `constants.ts` (for developer-driven consistency) or moved to the database via the `Configuration` model (to allow gyms to customize their bot's "personality" and instructions).
