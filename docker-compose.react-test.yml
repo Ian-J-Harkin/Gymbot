@@ -1,0 +1,53 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: fitbot-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: fitbot
+    ports:
+      - "5433:5432" # Use a different host port to avoid conflict with local postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: ./fitbot-api
+      dockerfile: Dockerfile
+    container_name: fitbot-api
+    depends_on:
+      - postgres
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:admin@postgres:5432/fitbot?schema=public"
+      JWT_SECRET: "superSecretKey123"
+      ENCRYPTION_KEY: "thisis32charslongsecretkeyphrase"
+      IV_SECRET: "thisis16charsiv!"
+    volumes:
+      - ./fitbot-api:/usr/src/app
+      - /usr/src/app/node_modules
+
+  react-demo:
+    image: node:20-alpine
+    container_name: fitbot-react-demo
+    working_dir: /usr/src/app
+    volumes:
+      - ./demos/fitbot-react-demo:/usr/src/app
+      - ./packages/fitbot-react:/usr/src/packages/fitbot-react
+      - /usr/src/app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_FITBOT_API_URL=http://localhost:3000
+    depends_on:
+      - api
+    command: >
+      sh -c "npm install && npm run dev -- --host"
+
+volumes:
+  postgres_data:
