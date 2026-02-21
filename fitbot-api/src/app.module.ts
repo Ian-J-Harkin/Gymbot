@@ -10,6 +10,7 @@ import { ApiKeysModule } from './api-keys/api-keys.module';
 import { WidgetModule } from './widget/widget.module';
 import { StripeModule } from './stripe/stripe.module';
 import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
@@ -17,6 +18,10 @@ import { KnowledgeBaseModule } from './knowledge-base/knowledge-base.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60000,
+      limit: 100,
+    }]),
     UsersModule,
     AuthModule,
     PrismaModule,
