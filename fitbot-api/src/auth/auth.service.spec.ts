@@ -100,7 +100,17 @@ describe('AuthService', () => {
         stripeSubscriptionId: null
       };
       const result = await service.login(user);
-      expect(result).toEqual({ access_token: 'token', user: user });
+      expect(result).toEqual({
+        access_token: 'token',
+        user: {
+          id: user.id,
+          email: user.email,
+          gymName: user.gymName,
+          createdAt: undefined,
+          subscriptionStatus: user.subscriptionStatus,
+        }
+      });
+
       expect(jwtService.sign).toHaveBeenCalledWith({ email: user.email, sub: user.id });
     });
   });
@@ -135,9 +145,8 @@ describe('AuthService', () => {
           id: createdUser.id,
           email: createdUser.email,
           gymName: null,
-          stripeCustomerId: null,
+          createdAt: undefined,
           subscriptionStatus: null,
-          stripeSubscriptionId: null
         }
       });
       expect(recaptchaService.verify).toHaveBeenCalledWith('valid-token');

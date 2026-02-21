@@ -3,7 +3,7 @@ import { FitBotWidget } from '@fitbot/react'
 function App() {
     // In a real app, this would come from an environment variable:
     // const API_KEY = import.meta.env.VITE_FITBOT_API_KEY;
-    const API_KEY = 'demo-api-key';
+    const API_KEY = 'demo-api-key-123';
     const API_URL = import.meta.env.VITE_FITBOT_API_URL || 'http://localhost:3000';
 
     return (

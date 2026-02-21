@@ -46,10 +46,10 @@ export const FitBotWidget: React.FC<FitBotWidgetProps> = ({
         }
 
         return () => {
-            // Cleanup
-            if (scriptRef.current && scriptRef.current.parentNode) {
-                scriptRef.current.parentNode.removeChild(scriptRef.current);
-            }
+            // We intentionally do NOT remove the script on unmount to avoid 
+            // redeclaration errors (e.g. "const go has already been declared") 
+            // when the component remounts in development (React Strict Mode).
+            // The script check on line 35 ensures we don't inject it twice.
 
             const widgetRoot = document.getElementById('fitbot-widget-root');
             if (widgetRoot && widgetRoot.parentNode) {

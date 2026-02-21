@@ -1,7 +1,6 @@
 import { render } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { FitBotWidget } from './FitBotWidget';
-import React from 'react';
 
 describe('FitBotWidget', () => {
     const API_KEY = 'test-api-key';

@@ -13,7 +13,7 @@ export const AI_PROVIDERS = {
 
 export const DEFAULT_OPENAI_MODEL = 'gpt-3.5-turbo';
 export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-3.5-turbo';
-export const DEFAULT_OLLAMA_MODEL = 'llama3';
+export const DEFAULT_OLLAMA_MODEL = 'mistral:7b';
 export const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
 export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
 export const OPENROUTER_REFERER = 'https://fitbot.app';
