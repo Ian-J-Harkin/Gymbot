@@ -6,7 +6,7 @@ This document tracks the progress of the FitBot project implementation against t
 
 > **Goal**: Harden the system before containerization. Ensure the API is secure before deploying to the public internet.
 
-- [/] **9.2 Rate Limiting**: Install `@nestjs/throttler`; apply to `/auth/login`, `/auth/register`, `/widget/chat`, `/api-keys`.
+- [x] **9.2 Rate Limiting**: Install `@nestjs/throttler`; apply to `/auth/login`, `/auth/register`, `/widget/chat`, `/api-keys`.
 - [ ] **15.3 Cloud Deployment Configs**: Set up Render/Azure hosting configs (Next task after Rate Limiting).
 - [ ] **8.2 End-to-End Widget Test**: Automated flow from widget chat to backend RAG response.
 - [ ] **8.3 Security Integration Tests**: Verify CORS restrictions and JWT safety failure states.
