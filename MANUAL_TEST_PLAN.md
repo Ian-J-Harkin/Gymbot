@@ -1,7 +1,19 @@
 # Manual Test Plan: Dashboard Navigation & Knowledge Base
 
-## Overview
-This document references the recent changes to the GymBot Dashboard, specifically the restructuring of the "AI Brain" / "Widget" tabs and the new "Quick Start Data" behavior in the "Knowledge Base" tab.
+> [!IMPORTANT]
+> **Which path are you testing?**
+> - **Full Application (Admin Dashboard)**: Start at **Step 0** and proceed through **Step 4**. (Requires full WordPress/Nest local stack).
+> - **React Integration Demo (Dockerized)**: Skip to **Step 5**. (Requires only the Dockerized Setup in Option B).
+
+## 0. Daily Start / Quick Health Check
+**Objective**: Ensure the local environment is healthy before starting manual testing.
+
+| Step | Action | Expected Result |
+|------|--------|-----------------|
+| 0.1 | Run React Component Unit Tests: `cd packages/fitbot-react && npm test` | All 5 tests should pass. |
+| 0.2 | (Optional) Start Docker Environment: `docker compose -f docker-compose.react-test.yml up --build` | All containers (postgres, api, react-demo) should start without errors. |
+
+---
 
 ## 1. Dashboard Navigation & Structure
 **Objective**: Verify the new tab structure and navigation.
@@ -94,11 +106,21 @@ This document references the recent changes to the GymBot Dashboard, specificall
     ```
 
 - **Option B: Dockerized Setup** (Recommended for clean environment)
-  - **Single Command**: Starts Postgres, API, and the React Demo.
-    ```bash
-    docker compose -f docker-compose.react-test.yml up --build
-    ```
-  - **Ports**: API (3000), Demo (5173), Postgres (5433).
+  1. **Clean Start**:
+     ```bash
+     docker compose -f docker-compose.react-test.yml down -v
+     ```
+  2. **Start Services**:
+     ```bash
+     docker compose -f docker-compose.react-test.yml up -d --build
+     ```
+  3. **Initialize Database** (Required first time):
+     ```bash
+     docker compose -f docker-compose.react-test.yml exec api npx prisma db push --accept-data-loss
+     docker compose -f docker-compose.react-test.yml exec api npx ts-node seed-test.ts
+     ```
+  - **Ports**: API (3005), Demo (5173), Postgres (5434).
+  - **Test API Key**: `demo-api-key-123`
 
 | Step | Action | Expected Result |
 |------|--------|-----------------|
@@ -130,3 +152,36 @@ This document references the recent changes to the GymBot Dashboard, specificall
 |------|--------|-----------------|
 | 6.3.1 | Close the chat window. | The window should minimize to the launcher bubble. |
 | 6.3.2 | Re-open the chat window. | The previous conversation history ("Hello, testing") should still be visible. |
+
+---
+
+## Appendix: Troubleshooting & Integration Notes
+
+This section documents key architectural decisions, edge cases, and hard-won lessons from testing the React Demo and AI integrations.
+
+### 1. Docker to Host Communication (Ollama)
+**How it works**: By default, applications running inside a Docker container cannot access services running on your local Windows PC (like a locally installed Ollama instance) via `localhost`, because in Docker, `localhost` means the container itself.
+**The Solution**: Docker Desktop for Windows provides the special DNS name `host.docker.internal`.
+- When the `fitbot-api` container tries to reach `http://host.docker.internal:11434`, Docker explicitly routes that request out of the container's isolated network bridge and back to your Windows host machine on port 11434, where Ollama is listening. 
+
+### 2. Parameter Passing: `docker exec` vs `docker compose exec`
+When passing inline environment variables to a running container, there is a critical distinction:
+- **`docker compose exec`**: Explicitly *drops* inline environment variables (like `-e AI_PROVIDER=ollama`) unless they are also predefined in the original `docker-compose.yml` file. This can silently cause scripts to fall back to hardcoded defaults (like OpenAI).
+- **`docker exec`**: Respects inline environment variables dynamically.
+- **Rule of Thumb**: When dynamically switching variables during local testing (like changing AI providers on the fly in `seed-test.ts`), always use standard `docker exec`.
+
+### 3. React Strict Mode & 3rd-Party Scripts
+When testing the widget inside a React Demo (`fitbot-react`), you may encounter the error: `SyntaxError: Identifier 'go' has already been declared`.
+- **Cause**: React Strict Mode intentionally mounts, unmounts, and re-mounts components in development to catch side effects. If the React component removes the `<script src="gymbot.min.js">` tag on unmount, the DOM node is deleted, but the JavaScript variables it declared remain in the browser's memory. When the script is injected a second time on the immediate re-mount, the browser hits a redeclaration conflict.
+- **Resolution**: The `FitBotWidget.tsx` component intentionally leaves the `<script>` tag in the `<head>` on unmount. It relies on a pre-existing element check to prevent duplicate injection. The actual UI `<div>` is still removed, ensuring visual cleanliness while preventing memory conflicts. This is the industry-standard approach for non-idempotent 3rd-party widget integrations.
+
+### 4. Prisma P2021 Errors on Fresh Builds
+If you encounter `PrismaClientInitializationError: P2021` (Table does not exist) when running the E2E tests or starting the API:
+- **Cause**: The PostgreSQL container successfully started and bound to the port, but the Prisma schema tables have not been generated inside it yet.
+- **Resolution**: You must explicitly push the schema before running dependent scripts:
+  `docker exec fitbot-api npx prisma db push --accept-data-loss`
+
+### 5. API Prefix Routing (404s)
+If the React Demo receives `404 Not Found` for endpoints like `/widget/config`:
+- **Cause**: NestJS applies global routing prefixes (`app.setGlobalPrefix('api');`).
+- **Resolution**: Ensure the `.env` or Docker `environment` variables explicitly append `/api` to the root URL (e.g., `VITE_FITBOT_API_URL=http://localhost:3005/api`).

@@ -2,18 +2,19 @@
 
 This document tracks the progress of the FitBot project implementation against the defined user stories.
 
-## � Priority Sprint: Pre-Production Quality Gate (Immediate Focus)
+## 🚨 Priority Sprint: Pre-Production Quality Gate (Immediate Focus)
 
-> **Goal**: Harden the system before containerization. Ensure the "application" works flawlessly before building the "box" (Docker).
+> **Goal**: Harden the system before containerization. Ensure the API is secure before deploying to the public internet.
 
+- [/] **9.2 Rate Limiting**: Install `@nestjs/throttler`; apply to `/auth/login`, `/auth/register`, `/widget/chat`, `/api-keys`.
+- [ ] **15.3 Cloud Deployment Configs**: Set up Render/Azure hosting configs (Next task after Rate Limiting).
 - [ ] **8.2 End-to-End Widget Test**: Automated flow from widget chat to backend RAG response.
 - [ ] **8.3 Security Integration Tests**: Verify CORS restrictions and JWT safety failure states.
-- [ ] **9.2 Rate Limiting**: Install `@nestjs/throttler`; apply to `/auth/login`, `/auth/register`, `/widget/chat`, `/api-keys`; per-API-key limits for AI usage.
-- [ ] **[BLOCKER] Database Connectivity Gate**: Fix `PrismaClientInitializationError (P1000)` in `fitbot-api`. Requires valid local Postgres credentials or switch to Neon.tech.
+- [x] **[BLOCKER] Database Connectivity Gate**: Fixed `PrismaClientInitializationError` via Docker compose.
 
 ---
 
-## �🟢 Epic 1: Project Setup & Database (Completed)
+## 🟢 Epic 1: Project Setup & Database (Completed)
 - [x] **1.1 Initialize NestJS Project**: Project creation, ConfigModule setup.
 - [x] **1.2 Integrate Prisma**: Prisma initialization, PostgreSQL connection.
 - [x] **1.3 Core Data Models**: User, Configuration, and ApiKey models defined in `schema.prisma`.
