@@ -6,7 +6,11 @@ import { configurationApi } from '../services/configurationApi';
 import { configurationSchema, ConfigurationFormData, GYM_COLOR_PRESETS } from '../schemas/configurationSchema';
 import { ChatbotPreview } from './ChatbotPreview';
 
-export const WidgetSettings: React.FC = () => {
+export interface WidgetSettingsProps {
+    onDirtyChange?: (isDirty: boolean) => void;
+}
+
+export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -18,7 +22,7 @@ export const WidgetSettings: React.FC = () => {
         handleSubmit,
         setValue,
         watch,
-        formState: { errors },
+        formState: { errors, isDirty },
         reset,
     } = useForm<ConfigurationFormData>({
         resolver: zodResolver(configurationSchema),
@@ -36,6 +40,13 @@ export const WidgetSettings: React.FC = () => {
     useEffect(() => {
         loadConfiguration();
     }, []);
+
+    // Sync dirty state to parent dashboard
+    useEffect(() => {
+        if (onDirtyChange) {
+            onDirtyChange(isDirty);
+        }
+    }, [isDirty, onDirtyChange]);
 
     const loadConfiguration = async () => {
         setIsLoading(true);
