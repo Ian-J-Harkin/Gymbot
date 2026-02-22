@@ -2,15 +2,16 @@
 
 This document tracks the progress of the FitBot project implementation against the defined user stories.
 
-## 🚨 Priority Sprint: Pre-Production Quality Gate (Immediate Focus)
+## 🚨 Priority Sprint: Core Development (Local Ecosystem)
 
-> **Goal**: Harden the system before containerization. Ensure the API is secure before deploying to the public internet.
+> **Goal**: Complete all outstanding system features and tests within the local Dockerized ecosystem before pushing to the cloud.
 
-- [x] **9.2 Rate Limiting**: Install `@nestjs/throttler`; apply to `/auth/login`, `/auth/register`, `/widget/chat`, `/api-keys`.
-- [ ] **15.3 Cloud Deployment Configs**: Set up Render/Azure hosting configs (Next task after Rate Limiting).
-- [ ] **8.2 End-to-End Widget Test**: Automated flow from widget chat to backend RAG response.
-- [ ] **8.3 Security Integration Tests**: Verify CORS restrictions and JWT safety failure states.
-- [x] **[BLOCKER] Database Connectivity Gate**: Fixed `PrismaClientInitializationError` via Docker compose.
+- [x] **8.2 End-to-End Widget Test**: Automated flow from widget chat to backend RAG response.
+- [x] **8.3 Security Integration Tests**: Verify CORS restrictions and JWT safety failure states.
+- [x] **9.1 Dashboard Analytics**: Basic charts for chat volume and common inquiries (Show Value).
+- [ ] **9.3 Admin UX Improvements**: "Unsaved Changes" warnings and better save feedback.
+- [ ] **11.1 WP Onboarding Architecture Review**: Redesign registration/setup flow between WordPress Admin and GymBot Admin (API key exchange, "Setup Wizard" UI).
+- [ ] **11.2 Multi-Platform Adapters**: Design wrappers for React, Next.js, and Angular to allow easy integration on non-WordPress sites.
 
 ---
 
@@ -94,26 +95,24 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] **8.5 Cloud-First Architecture Review**: Evaluate system portability (Docker, secrets, statelessness).
 - *(Note: 8.2 and 8.3 moved to Priority Sprint above)*
 
-## 🟡 Epic 9: UX Polish & Admin Features (Pending Epic 8)
-- [ ] **9.1 Dashboard Analytics**: Basic charts for chat volume and common inquiries (Show Value).
-- [ ] **9.3 Admin UX Improvements**: "Unsaved Changes" warnings and better save feedback.
+## 🟡 Epic 9: UX Polish & Admin Features (IN PROGRESS)
+- [x] **9.2 Rate Limiting**: Install `@nestjs/throttler`; apply to `/auth/login`, `/auth/register`, `/widget/chat`, `/api-keys`.
 - [ ] **9.4 Online Demo (Cloud-Ready)**: Deploy a "free demo" version using a HuggingFace/OpenRouter free model.
-- *(Note: 9.2 Rate Limiting moved to Priority Sprint above)*
+- *(Note: 9.1 and 9.3 moved to Priority Sprint above)*
 
 ## 🟡 Epic 10: CI/CD & Deployment (Pending Epic 9)
 - [ ] **10.1 CI/CD Pipeline Investigation**: Research GitHub Actions for automated deployment.
 - [ ] **10.2 Database Migration Automation**: Integrate Prisma migrations into the CI/CD flow.
 - [ ] **10.3 Staging Environment**: Setup a "free-tier" preview environment for pull requests.
 
-## 🟡 Epic 11: Ecosystem Integration & Pluggability
-- [ ] **11.1 WP Onboarding Architecture Review**: Redesign registration/setup flow between WordPress Admin and GymBot Admin (API key exchange, "Setup Wizard" UI).
-- [ ] **11.2 Multi-Platform Adapters**: Design wrappers for React, Next.js, and Angular to allow easy integration on non-WordPress sites.
+## 🟡 Epic 11: Ecosystem Integration & Pluggability (IN PROGRESS)
 - [ ] **11.3 Cross-Platform Delivery**: Finalize the "Universal JS" build that can be hosted on CDNs and dropped into any CMS (Wix, Squarespace, Shopify).
 - [x] **11.4 Universal React Component ("React Plugin Equivalent")**: Build and publish a distributable `@fitbot/react` component that mirrors the WordPress plugin experience for non-WP sites. This is the **core deliverable** validated by the React Demo Site in Epic 15.
     - [x] **11.4a Component Architecture**: Define the component API — `<FitBotWidget apiKey={...} apiUrl={...} theme={...} />` — wrapping the Universal Loader script.
     - [x] **11.4b npm Package**: Package configured with `tsup` for CJS/ESM/d.ts output.
     - [x] **11.4c Documentation**: README with install instructions, prop reference, and code sandbox example.
     - [/] **11.4d Theme/Style API**: (DEFERRED) Support for runtime theme overrides (parity sync). Exposes customisation props equivalent to the WP plugin settings screen.
+- *(Note: 11.1 and 11.2 moved to Priority Sprint above)*
 
 ## 🟡 Epic 12: Developer SOP & Modularization (Meta-Development)
 - [ ] **12.1 Project SOP Document**: Create a "Standard Operating Procedure" for going from idea to deployed app.
@@ -152,10 +151,10 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **14.21 Write Unit Tests for All Services**
 - [x] **14.25 Webhook Error Leakage**
 
-## 🔴 Epic 15: Production Readiness & Demo Ecosystem (NEW)
+## 🔴 Epic 15: Production Readiness & Demo Ecosystem (IN PROGRESS)
 
 > **Strategy**: Zero-Infrastructure. Deploy-Anywhere. Free-tier cloud (Render, Azure Static Web Apps, Neon) — no Docker or VPS required.
-> **Prerequisite**: Completion of Priority Sprint (8.2, 8.3, 9.2).
+> **Prerequisite**: Completion of Priority Sprint tasks.
 
 > [!IMPORTANT]
 > **External Demo Site Projects** — Both demo sites are *separate projects* outside this repo, exactly as the WordPress Demo Site is a standalone WP installation hosting the WP plugin:
@@ -166,17 +165,22 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **15.1 `@fitbot/react` Component (Task 11.4)**: Implement and package the Universal React component (see Epic 11.4). This is the primary deliverable of this phase.
 - [x] **15.1a `fitbot-react-demo` Site**: Created standalone Vite+React app in `demos/fitbot-react-demo` that consumes the local package.
 - [x] **15.2 Functional Parity Audit**: Verified `@fitbot/react` matches the WP plugin feature set (API key injection, RAG functionality verified). theme overrides deferred.
-- [ ] **15.3 Cloud Deployment Configs**:
-    - [ ] **15.3a Provider Configs**: `render.yaml` for the NestJS API; `staticwebapp.config.json` for the Admin panel on Azure.
-    - [ ] **15.3b Demo Site Projects**: *(External)* `fitbot-react-demo` repo deployed to Azure Static Web Apps; WP Demo Site live on WordPress.com. Both consume API on Render.
-    - [ ] **15.3c Database Migrations**: Use **Neon branching** to test schema changes safely before applying to demo DB. `prisma migrate deploy` runs on provider startup hook.
+- [x] **15.3 Cloud Deployment Configs** *(Configurations complete, awaiting final deployment)*:
+    - [x] **15.3a Provider Configs**: `render.yaml` for the NestJS API; `staticwebapp.config.json` for the Admin panel on Azure.
+    - [x] **15.3c Database Migrations**: Use **Neon branching** to test schema changes safely before applying to demo DB. `prisma migrate deploy` runs on provider startup hook.
         - [ ] Configure GitHub Actions to create a temporary Neon DB branch per PR, run `prisma migrate deploy` against it, then delete the branch after the PR merges.
-    - [ ] **15.3d Structured Logging**: Configure NestJS to output structured JSON to stdout (compatible with Render/Railway log aggregation).
-    - [ ] **15.3e Env Validation (Pre-flight)**: Implement `Joi` schema validation in `ConfigModule` — app fails loudly at boot if required secrets are missing.
-- [ ] **15.4 Deployment SOP**: Step-by-step guide to deploy admin, API, and both demo sites to free-tier cloud with zero server management.
+    - [x] **15.3d Structured Logging**: Configure NestJS to output structured JSON to stdout (compatible with Render/Railway log aggregation).
+    - [x] **15.3e Env Validation (Pre-flight)**: Implement `Joi` schema validation in `ConfigModule` — app fails loudly at boot if required secrets are missing.
+- [x] **15.4 Deployment SOP**: Step-by-step guide to deploy admin, API, and both demo sites to free-tier cloud with zero server management.
+- [ ] **15.7 Free Cloud LLM Support**: Integrate a free or near-free online LLM provider (e.g., Mistral API or Hugging Face) to ensure the cloud demo can operate without OpenAI costs.
+
+> ⏳ **The following tasks are strictly dependent on pushing code to GitHub and creating the actual cloud resources.**
+
+- [ ] **15.3b Demo Site Projects**: *(External)* `fitbot-react-demo` repo deployed to Azure Static Web Apps; WP Demo Site live on WordPress.com. Both consume API on Render.
 - [ ] **15.5 Live Smoke Test**: React demo on `*.azurestaticapps.net` (using `@fitbot/react`) successfully chats with API on Render. WP Demo Site confirmed working. Zero Docker involved.
 - [ ] **15.6 Connectivity Smoke Test**: Before every deployment, ping the `/api/health` endpoint from each demo site's origin to confirm cross-service connectivity. Catches URL typos and trailing-slash CORS mismatches that static hosts commonly produce.
 
 ## ❓ Future Queries & Clarifications
 - [ ] **Data Import Logic**: Do we need to test Sales/customer import logic — is this in the context of bulk testing more customers for Stripe integration?
 - [ ] **System Prompt Strategy**: Decide whether the system prompt should be centralized in `constants.ts` (for developer-driven consistency) or moved to the database via the `Configuration` model (to allow gyms to customize their bot's "personality" and instructions).
+- [ ] **Infrastructure as Code (IaC) Evolution**: While the current Azure Static Web Apps pipeline auto-generates GitHub Actions CI/CD after portal creation, we should eventually implement Terraform or Bicep scripts in an `/infrastructure` directory to allow 100% automated, reproducible deployments (e.g., spinning up multi-tenant white-label instances).

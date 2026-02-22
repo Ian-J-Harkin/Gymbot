@@ -18,5 +18,10 @@ export class ConfigurationsController {
     updateConfig(@CurrentUserId() userId: string, @Body() updateConfigDto: UpdateConfigurationDto) {
         return this.configurationsService.updateConfig(userId, updateConfigDto);
     }
+
+    @Get('analytics')
+    getAnalytics(@CurrentUserId() userId: string) {
+        return this.configurationsService.getAnalytics(userId);
+    }
 }
 

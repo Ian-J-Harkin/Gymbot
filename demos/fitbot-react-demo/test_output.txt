@@ -1,0 +1,33 @@
+
+Running 1 test using 1 worker
+
+  Γ£ÿ  1 [chromium] ΓÇ║ e2e\widget-chat.spec.ts:5:5 ΓÇ║ FitBot Widget End-to-End Flow ΓÇ║ Widget renders, opens, and processes an AI chat message (5.7s)
+
+
+  1) [chromium] ΓÇ║ e2e\widget-chat.spec.ts:5:5 ΓÇ║ FitBot Widget End-to-End Flow ΓÇ║ Widget renders, opens, and processes an AI chat message 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: locator('button.w-14.h-14')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for locator('button.w-14.h-14')[22m
+
+
+      14 |         // The FAB usually has a role="button" and contains the chat icon
+      15 |         const fabButton = page.locator('button.w-14.h-14'); // Targeting the circular FAB classes
+    > 16 |         await expect(fabButton).toBeVisible();
+         |                                 ^
+      17 |         await fabButton.click();
+      18 |
+      19 |         // 4. Verify the chat window opened
+        at C:\Github\Gymbot\Gymbot\demos\fitbot-react-demo\e2e\widget-chat.spec.ts:16:33
+
+    Error Context: test-results\widget-chat-FitBot-Widget--76650-rocesses-an-AI-chat-message-chromium\error-context.md
+
+  1 failed
+    [chromium] ΓÇ║ e2e\widget-chat.spec.ts:5:5 ΓÇ║ FitBot Widget End-to-End Flow ΓÇ║ Widget renders, opens, and processes an AI chat message 

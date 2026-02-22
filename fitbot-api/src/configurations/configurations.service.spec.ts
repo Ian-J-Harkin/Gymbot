@@ -146,4 +146,52 @@ describe('ConfigurationsService', () => {
       expect(upsertCall.update.openAiApiKey).toEqual('encrypted_sk-1234567890abcdef');
     });
   });
+
+  describe('getAnalytics', () => {
+    it('should return empty analytics if config not found', async () => {
+      prismaService.configuration.findUnique.mockResolvedValue(null);
+
+      const result = await service.getAnalytics('user1');
+
+      expect(result).toEqual({
+        totalInteractions: 0,
+        averageResponseTime: 0,
+        dailyVolume: [],
+      });
+    });
+
+    it('should calculate aggregations correctly for existing logs', async () => {
+      prismaService.configuration.findUnique.mockResolvedValue({ id: 'config-1' });
+
+      const mockDate1 = new Date('2026-02-21T10:00:00Z');
+      const mockDate2 = new Date('2026-02-21T11:00:00Z');
+      const mockDate3 = new Date('2026-02-22T09:00:00Z');
+
+      prismaService.chatLog = {
+        findMany: jest.fn().mockResolvedValue([
+          { createdAt: mockDate1, responseTimeMs: 1500 },
+          { createdAt: mockDate2, responseTimeMs: 2500 },
+          { createdAt: mockDate3, responseTimeMs: 1000 },
+        ]),
+      };
+
+      const result = await service.getAnalytics('user1');
+
+      expect(prismaService.chatLog.findMany).toHaveBeenCalledWith({
+        where: {
+          configurationId: 'config-1',
+          createdAt: { gte: expect.any(Date) }
+        },
+        select: { createdAt: true, responseTimeMs: true },
+        orderBy: { createdAt: 'asc' }
+      });
+
+      expect(result.totalInteractions).toBe(3);
+      expect(result.averageResponseTime).toBe(1667);
+
+      expect(result.dailyVolume).toHaveLength(2);
+      expect(result.dailyVolume).toContainEqual({ date: '2026-02-21', count: 2 });
+      expect(result.dailyVolume).toContainEqual({ date: '2026-02-22', count: 1 });
+    });
+  });
 });
