@@ -1,0 +1,7 @@
+CONTAINER ID   IMAGE                                COMMAND                  CREATED        STATUS                  PORTS                                         NAMES
+bd3adc2ee177   node:20-alpine                       "docker-entrypoint.s…"   31 hours ago   Up 31 hours             0.0.0.0:5173->5173/tcp, [::]:5173->5173/tcp   fitbot-react-demo
+ad42fd90d598   gymbot-api                           "docker-entrypoint.s…"   31 hours ago   Up 31 hours             0.0.0.0:3005->3000/tcp, [::]:3005->3000/tcp   fitbot-api
+0d4e1d888f55   postgres:15-alpine                   "docker-entrypoint.s…"   31 hours ago   Up 31 hours             0.0.0.0:5434->5432/tcp, [::]:5434->5432/tcp   fitbot-postgres
+71736d6c6b1c   dpage/pgadmin4                       "/entrypoint.sh"         11 days ago    Up 33 hours             0.0.0.0:5050->80/tcp, [::]:5050->80/tcp       fitbot-pgadmin
+8a2f8c428b35   mysql:8.0                            "docker-entrypoint.s…"   11 days ago    Up 33 hours             3306/tcp, 33060/tcp                           wp-db
+f2be10b323d3   ghcr.io/open-webui/open-webui:main   "bash start.sh"          3 months ago   Up 33 hours (healthy)   0.0.0.0:3000->8080/tcp, [::]:3000->8080/tcp   open-webui
