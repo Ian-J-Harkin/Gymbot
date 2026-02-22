@@ -17,13 +17,18 @@ import {
 import { knowledgeBaseApi, DocumentResponse } from '../services/knowledgeBaseApi';
 import { configurationApi } from '../services/configurationApi';
 
-export const KnowledgeBase: React.FC = () => {
+export interface KnowledgeBaseProps {
+    onDirtyChange?: (isDirty: boolean) => void;
+}
+
+export const KnowledgeBase: React.FC<KnowledgeBaseProps> = ({ onDirtyChange }) => {
     const [documents, setDocuments] = useState<DocumentResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isUploading, setIsUploading] = useState(false);
     const [isSavingQuickData, setIsSavingQuickData] = useState(false);
     const [isQuickStartOpen, setIsQuickStartOpen] = useState(true);
     const [quickStartData, setQuickStartData] = useState('');
+    const [originalQuickStartData, setOriginalQuickStartData] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +42,9 @@ export const KnowledgeBase: React.FC = () => {
             ]);
             setDocuments(docs);
             setIsQuickStartOpen(docs.length === 0);
-            setQuickStartData(config.faqText || '');
+            const initialText = config.faqText || '';
+            setQuickStartData(initialText);
+            setOriginalQuickStartData(initialText);
         } catch (err) {
             setError('Failed to load knowledge base data.');
             console.error(err);
@@ -49,6 +56,13 @@ export const KnowledgeBase: React.FC = () => {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // Sync dirty state to parent based on text changes
+    useEffect(() => {
+        if (onDirtyChange) {
+            onDirtyChange(quickStartData !== originalQuickStartData);
+        }
+    }, [quickStartData, originalQuickStartData, onDirtyChange]);
 
     const handleSaveQuickData = async () => {
         try {
@@ -69,6 +83,7 @@ export const KnowledgeBase: React.FC = () => {
                 widgetColor: currentConfig.widgetColor || '#2563EB'
             });
 
+            setOriginalQuickStartData(quickStartData); // Reset dirty tracking after successful save
             setSuccess('Quick Start Data saved successfully!');
             setTimeout(() => setSuccess(null), 3000);
         } catch (err: any) {

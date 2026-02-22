@@ -5,7 +5,11 @@ import { Save, Loader2, Brain, Info } from 'lucide-react';
 import { configurationApi } from '../services/configurationApi';
 import { configurationSchema, ConfigurationFormData, AI_PROVIDERS } from '../schemas/configurationSchema';
 
-export const AISettings: React.FC = () => {
+export interface AISettingsProps {
+    onDirtyChange?: (isDirty: boolean) => void;
+}
+
+export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -16,6 +20,7 @@ export const AISettings: React.FC = () => {
         handleSubmit,
         watch,
         reset,
+        formState: { isDirty },
     } = useForm<ConfigurationFormData>({
         resolver: zodResolver(configurationSchema),
         defaultValues: {
@@ -33,6 +38,13 @@ export const AISettings: React.FC = () => {
     useEffect(() => {
         loadConfiguration();
     }, []);
+
+    // Sync dirty state to parent dashboard
+    useEffect(() => {
+        if (onDirtyChange) {
+            onDirtyChange(isDirty);
+        }
+    }, [isDirty, onDirtyChange]);
 
     const loadConfiguration = async () => {
         setIsLoading(true);
