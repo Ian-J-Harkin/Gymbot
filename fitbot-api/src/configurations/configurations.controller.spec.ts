@@ -12,6 +12,7 @@ describe('ConfigurationsController', () => {
     service = {
       getConfig: jest.fn(),
       updateConfig: jest.fn(),
+      getAnalytics: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -68,5 +69,18 @@ describe('ConfigurationsController', () => {
 
     expect(result).toEqual(mockUpdatedConfig);
     expect(service.updateConfig).toHaveBeenCalledWith('user-1', updateDto);
+  });
+
+  it('should get analytics', async () => {
+    const mockAnalytics = {
+      totalInteractions: 10,
+      averageResponseTime: 1200,
+      dailyVolume: [{ date: '2026-02-21', count: 10 }]
+    };
+    (service.getAnalytics as jest.Mock).mockResolvedValue(mockAnalytics);
+
+    const result = await controller.getAnalytics('user-1');
+    expect(result).toEqual(mockAnalytics);
+    expect(service.getAnalytics).toHaveBeenCalledWith('user-1');
   });
 });

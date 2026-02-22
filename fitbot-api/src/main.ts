@@ -1,10 +1,22 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { rawBody: true });
+  const isProduction = process.env.NODE_ENV === 'production';
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    rawBody: true,
+    logger: isProduction ? ['error', 'warn', 'log'] : ['error', 'warn', 'log', 'debug', 'verbose'],
+  });
+
+  // Trust the reverse proxy (e.g., Render, Azure) so Rate Limiting uses the real client IP, not the load balancer IP.
+  app.set('trust proxy', 1);
+
+  if (isProduction) {
+    app.useLogger(console); // Render aggregates stdout into structured logs
+  }
   app.setGlobalPrefix('api');
 
   // Security headers

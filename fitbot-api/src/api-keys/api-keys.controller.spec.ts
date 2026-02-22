@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ApiKeysController } from './api-keys.controller';
 import { ApiKeysService } from './api-keys.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 describe('ApiKeysController', () => {
   let controller: ApiKeysController;
@@ -14,6 +15,7 @@ describe('ApiKeysController', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
+      imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }])],
       controllers: [ApiKeysController],
       providers: [{ provide: ApiKeysService, useValue: service }],
     })

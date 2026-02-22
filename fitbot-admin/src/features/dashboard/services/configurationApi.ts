@@ -11,4 +11,9 @@ export const configurationApi = {
     const response = await api.put('/configurations/me', data);
     return response.data;
   },
+
+  getAnalytics: async (): Promise<any> => {
+    const response = await api.get('/configurations/analytics');
+    return response.data;
+  },
 };

@@ -5,12 +5,12 @@ import {
     ExternalLink,
     Settings,
     Database,
-    CreditCard,
-    AlertTriangle
+    CreditCard
 } from 'lucide-react';
 import { useAuth } from '../../../features/auth/context/AuthContext';
 import { configurationApi } from '../services/configurationApi';
 import { knowledgeBaseApi } from '../services/knowledgeBaseApi';
+import { AnalyticsOverview } from './AnalyticsOverview';
 
 interface SystemStatus {
     aiConfigured: boolean;
@@ -29,7 +29,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ onNavigate }) => {
         documentsCount: 0,
         subscriptionActive: false,
     });
-    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const loadStatus = async () => {
@@ -46,8 +45,6 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ onNavigate }) => {
                 });
             } catch (err) {
                 console.error("Failed to load overview status", err);
-            } finally {
-                setIsLoading(false);
             }
         };
 
@@ -119,6 +116,13 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ onNavigate }) => {
                     actionText="Upgrade"
                 />
             </div>
+
+            {/* Analytics Overview Section */}
+            {status.aiConfigured && (
+                <div className="mt-8 mb-8">
+                    <AnalyticsOverview />
+                </div>
+            )}
 
             {/* Setup Checklist / Next Steps */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Save, Loader2, Code, Eye } from 'lucide-react';
+import { Save, Loader2, Eye } from 'lucide-react';
 import { configurationApi } from '../services/configurationApi';
 import { configurationSchema, ConfigurationFormData, GYM_COLOR_PRESETS } from '../schemas/configurationSchema';
 import { ChatbotPreview } from './ChatbotPreview';

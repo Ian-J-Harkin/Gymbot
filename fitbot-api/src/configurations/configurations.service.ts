@@ -126,5 +126,65 @@ export class ConfigurationsService {
             openRouterApiKey: this.maskKey(dto.openRouterApiKey || ''),
         };
     }
+
+    async getAnalytics(userId: string) {
+        const config = await this.prisma.configuration.findUnique({
+            where: { userId },
+            select: { id: true }
+        });
+
+        if (!config) {
+            return {
+                totalInteractions: 0,
+                averageResponseTime: 0,
+                dailyVolume: [],
+            };
+        }
+
+        // Get logs for the last 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+        const logs = await this.prisma.chatLog.findMany({
+            where: {
+                configurationId: config.id,
+                createdAt: {
+                    gte: thirtyDaysAgo,
+                },
+            },
+            select: {
+                createdAt: true,
+                responseTimeMs: true,
+            },
+            orderBy: {
+                createdAt: 'asc',
+            },
+        });
+
+        const totalInteractions = logs.length;
+        const averageResponseTime =
+            totalInteractions > 0
+                ? Math.round(logs.reduce((acc, log) => acc + log.responseTimeMs, 0) / totalInteractions)
+                : 0;
+
+        // Group by day for the chart
+        const dailyVolumeMap = new Map<string, number>();
+        logs.forEach(log => {
+            // YYYY-MM-DD string format
+            const dateStr = log.createdAt.toISOString().split('T')[0];
+            dailyVolumeMap.set(dateStr, (dailyVolumeMap.get(dateStr) || 0) + 1);
+        });
+
+        const dailyVolume = Array.from(dailyVolumeMap.entries()).map(([date, count]) => ({
+            date,
+            count
+        }));
+
+        return {
+            totalInteractions,
+            averageResponseTime,
+            dailyVolume
+        };
+    }
 }
 

@@ -9,11 +9,12 @@
         "preview": "vite preview"
     },
     "dependencies": {
+        "@fitbot/react": "file:../../packages/fitbot-react",
         "react": "^18.2.0",
-        "react-dom": "^18.2.0",
-        "@fitbot/react": "file:../../packages/fitbot-react"
+        "react-dom": "^18.2.0"
     },
     "devDependencies": {
+        "@playwright/test": "^1.58.2",
         "@types/react": "^18.2.66",
         "@types/react-dom": "^18.2.22",
         "@vitejs/plugin-react": "^4.2.1",
