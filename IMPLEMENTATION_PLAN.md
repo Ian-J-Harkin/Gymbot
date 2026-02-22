@@ -9,9 +9,9 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **8.2 End-to-End Widget Test**: Automated flow from widget chat to backend RAG response.
 - [x] **8.3 Security Integration Tests**: Verify CORS restrictions and JWT safety failure states.
 - [x] **9.1 Dashboard Analytics**: Basic charts for chat volume and common inquiries (Show Value).
-- [ ] **9.3 Admin UX Improvements**: "Unsaved Changes" warnings and better save feedback.
-- [ ] **11.1 WP Onboarding Architecture Review**: Redesign registration/setup flow between WordPress Admin and GymBot Admin (API key exchange, "Setup Wizard" UI).
-- [ ] **11.2 Multi-Platform Adapters**: Design wrappers for React, Next.js, and Angular to allow easy integration on non-WordPress sites.
+- [x] **9.3 Admin UX Improvements**: "Unsaved Changes" warnings and better save feedback.
+- [x] **11.1 WP Onboarding Architecture Review**: Redesign registration/setup flow between WordPress Admin and GymBot Admin (API key exchange, "Setup Wizard" UI).
+- [x] **11.2 Multi-Platform Adapters**: Design wrappers for React, Next.js, and Angular to allow easy integration on non-WordPress sites.
 
 ---
 
@@ -113,6 +113,23 @@ This document tracks the progress of the FitBot project implementation against t
     - [x] **11.4c Documentation**: README with install instructions, prop reference, and code sandbox example.
     - [/] **11.4d Theme/Style API**: (DEFERRED) Support for runtime theme overrides (parity sync). Exposes customisation props equivalent to the WP plugin settings screen.
 - *(Note: 11.1 and 11.2 moved to Priority Sprint above)*
+
+### Multi-Platform Adapters (Epic 11.2 Expansion)
+To allow gym owners and agencies to drop the FitBot widget into any tech stack, we need native wrappers for the most popular modern frameworks: Next.js and Angular. 
+
+#### 1. Next.js Adapter (`@fitbot/nextjs`)
+Next.js 13+ (App Router) defaults to Server Components. Since the widget interacts with the DOM, it must be a Client Component.
+*   **[NEW] `packages/fitbot-nextjs`**: Create a lightweight package that applies the `"use client";` directive and re-exports the `<FitBotWidget>` from `@fitbot/react`.
+*   This provides a zero-config experience for Next.js developers.
+
+#### 2. Angular Adapter (`@fitbot/angular`)
+*   **[NEW] `packages/fitbot-angular`**: Initialize a generic Angular library workspace using the Angular CLI.
+*   Implement a standalone `FitbotWidgetComponent` that accepts `@Input() apiKey: string` and `@Input() apiUrl?: string`.
+*   Use Angular's lifecycle hooks (`ngOnInit` or `ngAfterViewInit`) alongside `Renderer2` to safely inject the `gymbot.min.js` script into the DOM without violating Angular's strict DOM sanitization rules.
+
+## Verification Plan (11.2)
+1.  **Next.js Validation**: Spin up a minimal Next.js app in `demos/fitbot-nextjs-demo`, import `@fitbot/nextjs` into the `app/layout.tsx` (a Server Component), and verify the widget renders correctly without throwing hydration or Server Component errors.
+2.  **Angular Validation**: Spin up a minimal `demos/fitbot-angular-demo`, import the module/component, and verify the widget renders correctly.
 
 ## 🟡 Epic 12: Developer SOP & Modularization (Meta-Development)
 - [ ] **12.1 Project SOP Document**: Create a "Standard Operating Procedure" for going from idea to deployed app.
