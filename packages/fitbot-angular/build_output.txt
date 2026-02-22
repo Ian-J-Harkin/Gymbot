@@ -1,0 +1,8 @@
+
+> fitbot-angular@0.0.0 build
+> ng build
+
+Node.js version v25.0.0 detected.
+Odd numbered Node.js versions will not enter LTS status and should not be used for production. For more information, please see https://nodejs.org/en/about/previous-releases/.
+Node packages may not be installed. Try installing with 'npm install'.
+Error: Could not find the '@angular/build:ng-packagr' builder's node package.

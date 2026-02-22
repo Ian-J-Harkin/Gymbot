@@ -1,0 +1,35 @@
+{
+    "name": "@fitbot/nextjs",
+    "version": "1.0.0",
+    "description": "Next.js adapter for the FitBot AI Chat Widget",
+    "main": "dist/index.js",
+    "module": "dist/index.mjs",
+    "types": "dist/index.d.ts",
+    "scripts": {
+        "build": "node build.js",
+        "dev": "node build.js",
+        "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
+        "preview": "vite preview"
+    },
+    "keywords": [
+        "fitbot",
+        "nextjs",
+        "chatbot",
+        "ai",
+        "widget",
+        "react"
+    ],
+    "author": "FitBot AI Team",
+    "license": "ISC",
+    "peerDependencies": {
+        "react": "^18.2.0"
+    },
+    "dependencies": {
+        "@fitbot/react": "*"
+    },
+    "devDependencies": {
+        "@types/react": "^18.2.0",
+        "tsup": "^8.0.2",
+        "typescript": "^5.2.2"
+    }
+}
