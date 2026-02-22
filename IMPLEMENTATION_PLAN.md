@@ -189,7 +189,16 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
     - [x] **15.3d Structured Logging**: Configure NestJS to output structured JSON to stdout (compatible with Render/Railway log aggregation).
     - [x] **15.3e Env Validation (Pre-flight)**: Implement `Joi` schema validation in `ConfigModule` — app fails loudly at boot if required secrets are missing.
 - [x] **15.4 Deployment SOP**: Step-by-step guide to deploy admin, API, and both demo sites to free-tier cloud with zero server management.
-- [ ] **15.7 Free Cloud LLM Support**: Integrate a free or near-free online LLM provider (e.g., Mistral API or Hugging Face) to ensure the cloud demo can operate without OpenAI costs.
+- [/] **15.7 Free Cloud LLM Support**: Integrate a free online LLM provider (Hugging Face) to ensure the cloud demo can operate without OpenAI costs.
+    - **Backend Changes (`fitbot-api`)**:
+        - **Schema**: Add `huggingFaceApiKey` to `Configuration` model in `schema.prisma`.
+        - **Service**: Create `HuggingFaceProvider` implementing `AiProvider` using `@huggingface/inference` (or standard `fetch` against Hugging Face Serverless Inference API).
+        - **Constants**: Add `HUGGINGFACE` to `AI_PROVIDERS`, set `DEFAULT_HUGGINGFACE_MODEL` (e.g., `mistralai/Mistral-7B-Instruct-v0.2`).
+        - **Config Service**: Handle encryption/decryption of `huggingFaceApiKey`.
+    - **Frontend Changes (`fitbot-admin`)**:
+        - Update `AISettings.tsx` dropdown to include "Hugging Face".
+        - Add input field for Hugging Face API Key.
+    - **Verification**: Test the chat widget using the HuggingFace integration to confirm successful responses.
 
 > ⏳ **The following tasks are strictly dependent on pushing code to GitHub and creating the actual cloud resources.**
 

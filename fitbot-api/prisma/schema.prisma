@@ -15,40 +15,41 @@ datasource db {
 }
 
 model User {
-  id                     String         @id @default(cuid())
-  email                  String         @unique
-  password               String
-  gymName                String?
-  stripeCustomerId       String?        @unique
-  stripeSubscriptionId   String?        @unique
-  subscriptionStatus     String?        // "active", "canceled", "incomplete", etc.
-  subscriptionPriceId    String?
-  createdAt              DateTime       @default(now())
-  updatedAt              DateTime       @updatedAt
-  configuration          Configuration?
+  id                   String         @id @default(cuid())
+  email                String         @unique
+  password             String
+  gymName              String?
+  stripeCustomerId     String?        @unique
+  stripeSubscriptionId String?        @unique
+  subscriptionStatus   String? // "active", "canceled", "incomplete", etc.
+  subscriptionPriceId  String?
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  configuration        Configuration?
 }
 
 model Configuration {
-  id               String    @id @default(cuid())
-  faqText          String    @db.Text
-  widgetColor      String    @default("#2563EB")
-  openAiApiKey     String?
-  aiProvider       String    @default("openai") // "openai", "openrouter", "ollama"
-  openRouterApiKey String?
-  ollamaUrl        String?   @default("http://localhost:11434")
-  ollamaModel      String?   @default("llama3")
-  greetingMessage  String?   @default("Hi! I'm FitBot, your gym assistant. How can I help you today?")
-  
+  id                String  @id @default(cuid())
+  faqText           String  @db.Text
+  widgetColor       String  @default("#2563EB")
+  openAiApiKey      String?
+  aiProvider        String  @default("openai") // "openai", "openrouter", "ollama", "huggingface"
+  openRouterApiKey  String?
+  huggingFaceApiKey String?
+  ollamaUrl         String? @default("http://localhost:11434")
+  ollamaModel       String? @default("llama3")
+  greetingMessage   String? @default("Hi! I'm FitBot, your gym assistant. How can I help you today?")
+
   // Billing Instrumentation
-  requireSubscription Boolean   @default(false)
-  
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  userId           String    @unique
-  user             User      @relation(fields: [userId], references: [id])
-  apiKey           ApiKey?
-  logs             ChatLog[]
-  documents        Document[]
+  requireSubscription Boolean @default(false)
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id])
+  apiKey    ApiKey?
+  logs      ChatLog[]
+  documents Document[]
 }
 
 model ApiKey {
@@ -75,21 +76,21 @@ model ChatLog {
 }
 
 model Document {
-  id              String         @id @default(cuid())
+  id              String          @id @default(cuid())
   fileName        String
-  fileType        String         // "pdf", "docx", "txt"
-  content         String         @db.Text
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
+  fileType        String // "pdf", "docx", "txt"
+  content         String          @db.Text
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
   configurationId String
-  configuration   Configuration  @relation(fields: [configurationId], references: [id])
+  configuration   Configuration   @relation(fields: [configurationId], references: [id])
   chunks          DocumentChunk[]
 }
 
 model DocumentChunk {
-  id              String    @id @default(cuid())
-  content         String    @db.Text
-  tokenCount      Int?
-  documentId      String
-  document        Document  @relation(fields: [documentId], references: [id])
+  id         String   @id @default(cuid())
+  content    String   @db.Text
+  tokenCount Int?
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id])
 }

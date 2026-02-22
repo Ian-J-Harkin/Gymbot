@@ -10,6 +10,7 @@ import { AiProviderService } from './providers/ai-provider.service';
 import { OpenAiProvider } from './providers/openai.provider';
 import { OpenRouterProvider } from './providers/openrouter.provider';
 import { OllamaProvider } from './providers/ollama.provider';
+import { HuggingFaceProvider } from './providers/huggingface.provider';
 import { ExplanationHelper } from './explanation.helper';
 
 @Module({
@@ -20,6 +21,7 @@ import { ExplanationHelper } from './explanation.helper';
     OpenAiProvider,
     OpenRouterProvider,
     OllamaProvider,
+    HuggingFaceProvider,
     ExplanationHelper,
   ],
   controllers: [WidgetController],

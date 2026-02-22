@@ -11,7 +11,7 @@ export class UpdateConfigurationDto {
     widgetColor: string;
 
     @IsString()
-    @IsIn(['openai', 'openrouter', 'ollama'])
+    @IsIn(['openai', 'openrouter', 'ollama', 'huggingface'])
     aiProvider: string;
 
     @IsString()
@@ -21,6 +21,10 @@ export class UpdateConfigurationDto {
     @IsString()
     @IsOptional()
     openRouterApiKey?: string;
+
+    @IsString()
+    @IsOptional()
+    huggingFaceApiKey?: string;
 
     @IsString()
     @IsOptional()

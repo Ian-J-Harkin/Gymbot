@@ -9,10 +9,13 @@ export const AI_PROVIDERS = {
     OPENAI: 'openai',
     OPENROUTER: 'openrouter',
     OLLAMA: 'ollama',
+    HUGGINGFACE: 'huggingface',
 } as const;
 
 export const DEFAULT_OPENAI_MODEL = 'gpt-3.5-turbo';
 export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-3.5-turbo';
+export const DEFAULT_HUGGINGFACE_MODEL = 'mistralai/Mistral-7B-Instruct-v0.2';
+export const HUGGINGFACE_BASE_URL = 'https://api-inference.huggingface.co/v1/';
 export const DEFAULT_OLLAMA_MODEL = 'mistral:7b';
 export const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
 export const OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';

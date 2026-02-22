@@ -44,6 +44,7 @@ export class ConfigurationsService {
                 openAiApiKey: '',
                 aiProvider: AI_PROVIDERS.OPENAI,
                 openRouterApiKey: '',
+                huggingFaceApiKey: '',
                 ollamaUrl: DEFAULT_OLLAMA_URL,
                 ollamaModel: DEFAULT_OLLAMA_MODEL,
             };
@@ -70,10 +71,21 @@ export class ConfigurationsService {
             decryptedOpenRouterKey = '';
         }
 
+        let decryptedHuggingFaceKey = '';
+        try {
+            if (config.huggingFaceApiKey) {
+                decryptedHuggingFaceKey = this.encryptionService.decrypt(config.huggingFaceApiKey);
+            }
+        } catch (err) {
+            this.logger.warn(`Failed to decrypt HuggingFace key for user ${userId}: ${err.message}`);
+            decryptedHuggingFaceKey = '';
+        }
+
         return {
             ...config,
             openAiApiKey: this.maskKey(decryptedOpenAiKey),
             openRouterApiKey: this.maskKey(decryptedOpenRouterKey),
+            huggingFaceApiKey: this.maskKey(decryptedHuggingFaceKey),
         };
     }
 
@@ -81,6 +93,7 @@ export class ConfigurationsService {
         // If user submitted a masked value, preserve the existing encrypted key
         let encryptedOpenAiKey: string | null = null;
         let encryptedOpenRouterKey: string | null = null;
+        let encryptedHuggingFaceKey: string | null = null;
 
         if (dto.openAiApiKey && !this.isMaskedValue(dto.openAiApiKey)) {
             // New key submitted — encrypt it
@@ -104,12 +117,23 @@ export class ConfigurationsService {
             encryptedOpenRouterKey = existing?.openRouterApiKey || null;
         }
 
+        if (dto.huggingFaceApiKey && !this.isMaskedValue(dto.huggingFaceApiKey)) {
+            encryptedHuggingFaceKey = this.encryptionService.encrypt(dto.huggingFaceApiKey);
+        } else if (dto.huggingFaceApiKey && this.isMaskedValue(dto.huggingFaceApiKey)) {
+            const existing = await this.prisma.configuration.findUnique({
+                where: { userId },
+                select: { huggingFaceApiKey: true },
+            });
+            encryptedHuggingFaceKey = existing?.huggingFaceApiKey || null;
+        }
+
         const data = {
             faqText: dto.faqText || '',
             widgetColor: dto.widgetColor,
             aiProvider: dto.aiProvider,
             openAiApiKey: encryptedOpenAiKey,
             openRouterApiKey: encryptedOpenRouterKey,
+            huggingFaceApiKey: encryptedHuggingFaceKey,
             ollamaUrl: dto.ollamaUrl || DEFAULT_OLLAMA_URL,
             ollamaModel: dto.ollamaModel || DEFAULT_OLLAMA_MODEL,
         };
@@ -124,6 +148,7 @@ export class ConfigurationsService {
             ...config,
             openAiApiKey: this.maskKey(dto.openAiApiKey || ''),
             openRouterApiKey: this.maskKey(dto.openRouterApiKey || ''),
+            huggingFaceApiKey: this.maskKey(dto.huggingFaceApiKey || ''),
         };
     }
 

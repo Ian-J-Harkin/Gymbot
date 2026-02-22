@@ -27,6 +27,7 @@ export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
             aiProvider: 'openai',
             openaiApiKey: '',
             openRouterApiKey: '',
+            huggingFaceApiKey: '',
             ollamaUrl: 'http://localhost:11434',
             ollamaModel: 'llama3',
             faqData: '', // Legacy field still required by API
@@ -56,6 +57,7 @@ export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
                 aiProvider: config.aiProvider || 'openai',
                 openaiApiKey: config.openAiApiKey || '',
                 openRouterApiKey: config.openRouterApiKey || '',
+                huggingFaceApiKey: config.huggingFaceApiKey || '',
                 ollamaUrl: config.ollamaUrl || 'http://localhost:11434',
                 ollamaModel: config.ollamaModel || 'llama3',
             });
@@ -145,6 +147,14 @@ export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
                         <div className="animate-in fade-in slide-in-from-top-2">
                             <label className="block text-sm font-medium text-gray-700 mb-2">OpenRouter API Key</label>
                             <input {...register('openRouterApiKey')} type="password" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary-500 focus:border-primary-500" placeholder="sk-or-..." />
+                        </div>
+                    )}
+
+                    {selectedProvider === 'huggingface' && (
+                        <div className="animate-in fade-in slide-in-from-top-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Hugging Face API Token</label>
+                            <input {...register('huggingFaceApiKey')} type="password" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary-500 focus:border-primary-500" placeholder="hf_..." />
+                            <p className="text-xs text-gray-500 mt-2">Get your free API token from <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer" className="text-primary-600 hover:underline">Hugging Face Settings</a>.</p>
                         </div>
                     )}
 

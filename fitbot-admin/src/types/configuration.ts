@@ -1,4 +1,4 @@
-export type AiProvider = 'openai' | 'openrouter' | 'ollama';
+export type AiProvider = 'openai' | 'openrouter' | 'ollama' | 'huggingface';
 
 export interface ChatbotConfiguration {
   id: string;
@@ -8,6 +8,7 @@ export interface ChatbotConfiguration {
   aiProvider: AiProvider;
   openAiApiKey: string;
   openRouterApiKey: string;
+  huggingFaceApiKey: string;
   ollamaUrl: string;
   ollamaModel: string;
   createdAt: string;
@@ -20,6 +21,7 @@ export interface ConfigurationRequest {
   aiProvider: AiProvider;
   openAiApiKey?: string;
   openRouterApiKey?: string;
+  huggingFaceApiKey?: string;
   ollamaUrl?: string;
   ollamaModel?: string;
 }
@@ -31,6 +33,7 @@ export interface ConfigurationResponse {
   aiProvider: AiProvider;
   openAiApiKey: string;
   openRouterApiKey: string;
+  huggingFaceApiKey: string;
   ollamaUrl: string;
   ollamaModel: string;
   createdAt?: string;
