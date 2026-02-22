@@ -101,9 +101,49 @@ This document tracks the progress of the FitBot project implementation against t
 - *(Note: 9.1 and 9.3 moved to Priority Sprint above)*
 
 ## 🟡 Epic 10: CI/CD & Deployment (Pending Epic 9)
-- [ ] **10.1 CI/CD Pipeline Investigation**: Research GitHub Actions for automated deployment.
-- [ ] **10.2 Database Migration Automation**: Integrate Prisma migrations into the CI/CD flow.
-- [ ] **10.3 Staging Environment**: Setup a "free-tier" preview environment for pull requests.
+
+### 10.1 CI/CD Pipeline Investigation
+To ensure GymBot's monorepo architecture scales efficiently, we need a robust CI/CD pipeline. We will use **GitHub Actions** to automate our testing and deployment processes. The investigation and implementation strategy is as follows:
+
+#### Technical Implementation Strategy
+
+1.  **Monorepo Workflow Architecture (`.github/workflows/`)**:
+    *   **CI Pipeline (`ci.yml`)**: Triggered on `push` and `pull_request` to the `main` branch.
+        *   **Job 1: Lint & Format**: Run ESLint and Prettier across all workspaces to enforce code quality.
+        *   **Job 2: Unit Tests**: Execute Jest suites for `fitbot-api`, `fitbot-react`, `fitbot-admin`, and adapters.
+        *   **Job 3: E2E Tests (Playwright)**: Spin up the required services (API, Postgres, Demo App) using Docker Compose within the GitHub Actions runner, execute Playwright tests, and upload artifacts (traces/videos) on failure.
+    *   **CD Pipeline (`cd.yml`)**: Triggered on `push` to `main` (after CI succeeds) or on release tags.
+        *   **Job 1: Build Packages**: Compile `@fitbot/react`, `@fitbot/angular`, and `@fitbot/nextjs` using `tsup` and custom build scripts. (Packages remain private/internal for now).
+        *   **Job 2: Deploy Backend (fitbot-api)**: Deploy the NestJS application directly to **Render** using a `render.yaml` blueprint or API hooks.
+        *   **Job 3: Deploy Frontends (fitbot-admin & demos)**: Build the React admin dashboard and demo sites, deploying static assets to **Vercel**.
+
+2.  **Tooling & Caching Strategy**:
+    *   Use `actions/cache` to aggressively cache `node_modules`, Next.js build cache, and Prisma engine binaries to drastically reduce workflow execution time.
+    *   Utilize standard GitHub Actions runners (Ubuntu) as they provide pre-installed Node.js and Docker environments.
+
+### 10.2 Database Migration Automation
+Integrating database schema changes safely into the deployment flow.
+
+#### Technical Implementation Strategy
+1.  **CI Validation**: The CI pipeline will run `npx prisma migrate dev` against a disposable Postgres container to generate the initial schema and ensure migrations are valid.
+2.  **CD Deployment**: During the CD pipeline deployment phase, run `npx prisma migrate deploy` against the production staging database before the new API image is rolled out to ensure schema compatibility.
+
+### 10.3 Staging Environment
+Creating a zero-risk environment for reviewing changes before production.
+
+#### Technical Implementation Strategy
+1.  **Preview Deployments**: Leverage Vercel/Netlify's built-in preview environments for the `fitbot-admin` and demo deployments on every Pull Request.
+2.  **Ephemeral Backend**: (Optional Phase 2) Investigate spinning up ephemeral backend databases and API instances per PR using Railway or Render's preview environment features. If cost-prohibitive, route all PR previews to a shared, isolated staging database.
+
+### 10.4 Public Package Distribution (Future)
+Publishing the universal adapters to npm.
+
+#### Technical Implementation Strategy
+1.  **NPM Automation**: Later down the road, set up GitHub Actions with `Changesets` to automate semver bumping and publishing `@fitbot/*` packages to the public NPM registry.
+
+## Verification Plan (Epic 10)
+1.  **CI Validation**: Create a test PR that intentionally breaks a unit test or formatting rule and verify that GitHub Actions correctly blocks merging.
+2.  **CD Validation**: Merge a passing PR and monitor the GitHub Actions UI to trace the successful build and deployment of the backend API and frontend dashboards to their respective staging URLs.
 
 ## 🟡 Epic 11: Ecosystem Integration & Pluggability (IN PROGRESS)
 - [ ] **11.3 Cross-Platform Delivery**: Finalize the "Universal JS" build that can be hosted on CDNs and dropped into any CMS (Wix, Squarespace, Shopify).
