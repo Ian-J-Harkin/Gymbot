@@ -16,6 +16,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [previewColor, setPreviewColor] = useState('#2563EB');
+    const [apiKey, setApiKey] = useState('YOUR_GYM_ID');
 
     const {
         register,
@@ -52,6 +53,9 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
         setIsLoading(true);
         try {
             const config = await configurationApi.getConfiguration();
+            if (config.apiKey?.key) {
+                setApiKey(config.apiKey.key);
+            }
             reset({
                 primaryColor: config.widgetColor || '#2563EB',
                 // Preserve other fields
@@ -126,11 +130,11 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                         <p className="text-sm text-gray-500 mb-4">Copy and paste this code into your website's &lt;body&gt; tag.</p>
                         <div className="bg-gray-900 rounded-xl p-4 relative group">
                             <code className="text-xs text-gray-300 font-mono break-all block">
-                                {`<script src="${window.location.origin}/widget/loader.js" data-gym-id="YOUR_GYM_ID"></script>`}
+                                {`<script src="${window.location.origin}/widget/loader.js" data-gym-id="${apiKey}"></script>`}
                             </code>
                             <button
                                 type="button"
-                                onClick={() => navigator.clipboard.writeText(`<script src="${window.location.origin}/widget/loader.js" data-gym-id="YOUR_GYM_ID"></script>`)}
+                                onClick={() => navigator.clipboard.writeText(`<script src="${window.location.origin}/widget/loader.js" data-gym-id="${apiKey}"></script>`)}
                                 className="absolute top-2 right-2 p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                             >
                                 Copy
