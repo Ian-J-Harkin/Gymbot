@@ -10,10 +10,15 @@ export class RecaptchaService {
         this.secretKey = this.configService.get<string>('GOOGLE_RECAPTCHA_SECRET_KEY');
     }
 
-    async verify(token: string): Promise<boolean> {
+    async verify(token?: string): Promise<boolean> {
         if (!this.secretKey) {
             this.logger.warn('GOOGLE_RECAPTCHA_SECRET_KEY is not defined. Skipping verification.');
             return true; // Bypass in dev if not configured
+        }
+
+        if (!token) {
+            this.logger.warn('reCAPTCHA token is required when GOOGLE_RECAPTCHA_SECRET_KEY is configured.');
+            return false;
         }
 
         try {
