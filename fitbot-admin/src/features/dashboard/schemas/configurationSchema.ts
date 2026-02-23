@@ -15,20 +15,28 @@ export const configurationSchema = z.object({
   huggingFaceApiKey: z.string().optional(),
   ollamaUrl: z.string().optional(),
   ollamaModel: z.string().optional(),
-}).refine((data) => {
+}).superRefine((data, ctx) => {
   if (data.aiProvider === 'openai' && (!data.openaiApiKey || data.openaiApiKey.length === 0)) {
-    return false;
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'OpenAI API key is required when using OpenAI',
+      path: ['openaiApiKey'],
+    });
   }
   if (data.aiProvider === 'openrouter' && (!data.openRouterApiKey || data.openRouterApiKey.length === 0)) {
-    return false;
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'OpenRouter API key is required when using OpenRouter',
+      path: ['openRouterApiKey'],
+    });
   }
   if (data.aiProvider === 'huggingface' && (!data.huggingFaceApiKey || data.huggingFaceApiKey.length === 0)) {
-    return false;
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Hugging Face Token is required when using Hugging Face',
+      path: ['huggingFaceApiKey'],
+    });
   }
-  return true;
-}, {
-  message: 'API key is required for the selected provider',
-  path: ['openaiApiKey'],
 });
 
 export type ConfigurationFormData = z.infer<typeof configurationSchema>;
