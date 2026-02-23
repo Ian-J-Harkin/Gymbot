@@ -14,7 +14,7 @@ export const AI_PROVIDERS = {
 
 export const DEFAULT_OPENAI_MODEL = 'gpt-3.5-turbo';
 export const DEFAULT_OPENROUTER_MODEL = 'openai/gpt-3.5-turbo';
-export const DEFAULT_HUGGINGFACE_MODEL = 'mistralai/Mistral-7B-Instruct-v0.2';
+export const DEFAULT_HUGGINGFACE_MODEL = 'mistralai/Mistral-Nemo-Instruct-2407';
 export const HUGGINGFACE_BASE_URL = 'https://router.huggingface.co/hf-inference/v1/';
 export const DEFAULT_OLLAMA_MODEL = 'mistral:7b';
 export const DEFAULT_OLLAMA_URL = 'http://localhost:11434';
