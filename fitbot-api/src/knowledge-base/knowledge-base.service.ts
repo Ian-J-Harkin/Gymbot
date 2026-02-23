@@ -15,12 +15,20 @@ export class KnowledgeBaseService {
     constructor(private prisma: PrismaService) { }
 
     async processFile(userId: string, file: Express.Multer.File): Promise<any> {
-        const config = await this.prisma.configuration.findUnique({
+        let config = await this.prisma.configuration.findUnique({
             where: { userId },
         });
 
         if (!config) {
-            throw new NotFoundException('User configuration not found');
+            this.logger.log(`No configuration found for user ${userId}. Creating default configuration.`);
+            config = await this.prisma.configuration.create({
+                data: {
+                    userId,
+                    widgetColor: '#2563EB',
+                    aiProvider: 'openai',
+                    faqText: '',
+                },
+            });
         }
 
         let content = '';
