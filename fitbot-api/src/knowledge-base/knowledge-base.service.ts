@@ -27,6 +27,11 @@ export class KnowledgeBaseService {
                     widgetColor: '#2563EB',
                     aiProvider: 'openai',
                     faqText: '',
+                    apiKey: {
+                        create: {
+                            key: `fb_${Math.random().toString(36).substr(2, 9)}_${Date.now()}`,
+                        }
+                    }
                 },
             });
         }
