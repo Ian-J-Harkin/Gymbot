@@ -31,7 +31,7 @@ This report evaluates the security posture of the FitBot system and identifies v
 *   **XSS**: An attacker (or a malicious AI response) could inject `<script>` tags or `onerror` handlers into the chat bubble.
 
 ### Mitigations
-*   [ ] **Sanitization**: Integrate `dompurify` in the widget to sanitize HTML before rendering.
+*   [x] **Sanitization**: Integrated `DOMPurify` and `snarkdown` in the widget to sanitize and render Markdown safely.
 *   [x] **Input Validation**: Added `MaxMessageLengthRule` to prevent massive payload injection attempts.
 
 ---
@@ -46,7 +46,7 @@ This report evaluates the security posture of the FitBot system and identifies v
 *   **CORS Over-permissiveness**: Currently, `app.enableCors()` allows any domain to call the API.
 
 ### Mitigations
-*   [ ] **Restrict CORS**: Update `main.ts` to only allow specific origins (or a whitelist of gym domains).
+*   [x] **Restrict CORS**: Updated `main.ts` to only allow whitelisted dashboard and widget origins.
 
 ---
 
@@ -64,7 +64,18 @@ This report evaluates the security posture of the FitBot system and identifies v
 
 ---
 
+## 5. Planned Web-First Security Review
+*   **Scope**: Full end-to-end audit of the Preact widget, API authentication flow, and data sanitization.
+*   **Focus**: 
+    *   Validation of `DOMPurify` implementation in edge cases.
+    *   Verification of CORS enforcement across different gym subdomains.
+    *   Audit of SSE (Server-Sent Events) stream for potential data leakage.
+    *   CSRF protection review for the Admin Dashboard.
+    *   **Secret Integrity**: Verification that no sensitive keys exist in source control and environmental secrets are purely injected.
+
+---
+
 ## 🛡️ Immediate Fixes Required
-1.  **Restrict CORS** in `fitbot-api/src/main.ts`.
-2.  **Sanitize Markdown** output in `fitbot-widget/src/components/ChatWidget.tsx`.
-3.  **Harden JWT Config** to ensure it fails if no secret is provided.
+1.  **Restrict CORS** in `fitbot-api/src/main.ts` (Done).
+2.  **Harden JWT Config** to ensure it fails if no secret is provided (Done).
+3.  **Implement Rate Limiting** to protect AI quotas (Phase 6).

@@ -1,0 +1,24 @@
+
+> fitbot-api@0.0.1 test:e2e
+> jest --config ./test/jest-e2e.json
+
+PASS test/app.e2e-spec.ts (6.455 s)
+  Security & Integration (e2e)
+    CORS Restrictions
+      Γ£ô should allow requests from permitted origin (132 ms)
+      Γ£ô should block requests from unauthorized origin via mismatch (65 ms)
+    API Key Guard
+      Γ£ô should block access without X-API-Key header (70 ms)
+      Γ£ô should block access with invalid API key (76 ms)
+      Γ£ô should permit access with valid seeded demo API key (70 ms)
+    Rate Limiting (Throttler)
+      Γ£ô should enforce limits by returning 429 after bursting config endpoint (353 ms)
+
+Test Suites: 1 passed, 1 total
+Tests:       6 passed, 6 total
+Snapshots:   0 total
+Time:        6.651 s, estimated 17 s
+Ran all test suites.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.

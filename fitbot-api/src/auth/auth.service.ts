@@ -3,25 +3,28 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LoginDto } from './dto/login.dto';
+import { User } from '@prisma/client';
+import { AuthenticatedUser } from '../common/interfaces/auth.interfaces';
+import { RecaptchaService } from './recaptcha.service';
 
 @Injectable()
 export class AuthService {
     constructor(
         private usersService: UsersService,
         private jwtService: JwtService,
+        private recaptchaService: RecaptchaService,
     ) { }
 
-    async validateUser(email: string, pass: string): Promise<any> {
+    async validateUser(email: string, pass: string): Promise<AuthenticatedUser | null> {
         const user = await this.usersService.findOne(email);
         if (user && (await bcrypt.compare(pass, user.password))) {
             const { password, ...result } = user;
-            return result;
+            return result as AuthenticatedUser;
         }
         return null;
     }
 
-    async login(user: any) {
+    async login(user: AuthenticatedUser) {
         const payload = { email: user.email, sub: user.id };
         return {
             access_token: this.jwtService.sign(payload),
@@ -29,17 +32,24 @@ export class AuthService {
                 id: user.id,
                 email: user.email,
                 gymName: user.gymName,
-                createdAt: user.createdAt,
+                createdAt: (user as any).createdAt, // User might have createdAt which is not in AuthenticatedUser
+                subscriptionStatus: user.subscriptionStatus,
             }
         };
     }
 
     async register(createUserDto: CreateUserDto) {
+        // Verify reCAPTCHA
+        const isHuman = await this.recaptchaService.verify(createUserDto.recaptchaToken);
+        if (!isHuman) {
+            throw new UnauthorizedException('reCAPTCHA verification failed');
+        }
+
         const existingUser = await this.usersService.findOne(createUserDto.email);
         if (existingUser) {
             throw new ConflictException('User already exists');
         }
         const user = await this.usersService.create(createUserDto);
-        return this.login(user);
+        return this.login(user as AuthenticatedUser);
     }
 }

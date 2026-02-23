@@ -3,16 +3,15 @@ import { IsString, IsNotEmpty, IsHexColor, IsOptional, IsIn } from 'class-valida
 
 export class UpdateConfigurationDto {
     @IsString()
-    @IsNotEmpty()
-    faqText: string;
+    @IsOptional()
+    faqText?: string;
 
     @IsString()
-    @IsNotEmpty()
     @IsHexColor()
     widgetColor: string;
 
     @IsString()
-    @IsIn(['openai', 'openrouter', 'ollama'])
+    @IsIn(['openai', 'openrouter', 'ollama', 'huggingface'])
     aiProvider: string;
 
     @IsString()
@@ -22,6 +21,10 @@ export class UpdateConfigurationDto {
     @IsString()
     @IsOptional()
     openRouterApiKey?: string;
+
+    @IsString()
+    @IsOptional()
+    huggingFaceApiKey?: string;
 
     @IsString()
     @IsOptional()

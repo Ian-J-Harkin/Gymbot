@@ -1,4 +1,47 @@
-fitbot-admin/node_modules/
-fitbot-admin/.env.example
-fitbot-api/node_modules/
+# Dependencies
 node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Binaries
+*.exe
+
+# Logs
+*.log
+npm-debug.log*
+
+# Debug / utility scripts (should not be in production)
+db-check.js
+fix-db.js
+check-key.ts
+check-subscriptions.ts
+check-configs.ts
+check-content.ts
+check-db.ts
+check-detail.ts
+check-docs.ts
+list-keys.ts
+test-pdf.js
+
+# Prisma generated client (regenerated on install)
+fitbot-api/generated/
+
+# WordPress (local dev only)
+wp-content/
