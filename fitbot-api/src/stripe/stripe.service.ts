@@ -13,22 +13,14 @@ export class StripeService {
         private configService: ConfigService,
         private prisma: PrismaService,
     ) {
-<<<<<<< HEAD
-        const apiKey = this.configService.get<string>('STRIPE_SECRET_KEY');
-        if (apiKey) {
-            this.stripe = new Stripe(apiKey, {
-                apiVersion: '2026-01-28.clover',
-            });
-        } else {
-            this.logger.warn('STRIPE_SECRET_KEY not set. Billing features will be disabled or mocked.');
-        }
-=======
         const stripeKey = this.configService.get<string>('STRIPE_SECRET_KEY');
         if (!stripeKey) {
-            this.logger.warn('STRIPE_SECRET_KEY is not defined. Stripe integration will be disabled.');
+            this.logger.warn('STRIPE_SECRET_KEY is not defined. Stripe integration will be disabled (mocked for dev).');
             this.isEnabled = false;
         } else {
-            this.stripe = new Stripe(stripeKey);
+            this.stripe = new Stripe(stripeKey, {
+                apiVersion: '2026-01-28.clover' as any,
+            });
             this.isEnabled = true;
         }
     }
@@ -41,7 +33,6 @@ export class StripeService {
             throw new ServiceUnavailableException('Stripe integration is not configured. Set STRIPE_SECRET_KEY to enable.');
         }
         return this.stripe;
->>>>>>> feat/kb-uploads-and-security
     }
 
     async isSubscriptionActive(userId: string): Promise<boolean> {
@@ -59,8 +50,7 @@ export class StripeService {
     }
 
     async createCheckoutSession(userId: string, email: string) {
-<<<<<<< HEAD
-        if (!this.stripe) {
+        if (!this.isEnabled) {
             this.logger.log('Mocking checkout session creation (No Stripe Key)');
             const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL') || 'http://localhost:3001/dashboard';
             // Strip any query params from returnUrl for the base, then append mock param
@@ -68,13 +58,9 @@ export class StripeService {
             return { url: `${baseUrl}?session_id=mock_session_123&mock_success=true` };
         }
 
-        const priceId = this.configService.get<string>('STRIPE_PRICE_ID');
-        const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL');
-=======
         const stripe = this.getStripeClient();
         const priceId = this.configService.get<string>('STRIPE_PRICE_ID')!;
         const returnUrl = this.configService.get<string>('STRIPE_RETURN_URL')!;
->>>>>>> feat/kb-uploads-and-security
 
         try {
             const session = await stripe.checkout.sessions.create({
@@ -124,17 +110,13 @@ export class StripeService {
     }
 
     async handleWebhook(signature: string, payload: Buffer) {
-<<<<<<< HEAD
-        if (!this.stripe) {
+        if (!this.isEnabled) {
             this.logger.warn('Received webhook but Stripe is not configured.');
             return;
         }
 
-        const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET') || '';
-=======
         const stripe = this.getStripeClient();
-        const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET')!;
->>>>>>> feat/kb-uploads-and-security
+        const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET') || '';
         let event: Stripe.Event;
 
         try {

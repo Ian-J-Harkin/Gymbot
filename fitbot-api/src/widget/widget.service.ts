@@ -131,26 +131,8 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
         let errorOccurred = false;
 
         try {
-<<<<<<< HEAD
-            let stream: AsyncIterable<any> | any;
-
-            switch (provider) {
-                case 'openai':
-                    stream = await this.chatWithOpenAI(configuration, messages);
-                    break;
-                case 'openrouter':
-                    stream = await this.chatWithOpenRouter(configuration, messages);
-                    break;
-                case 'ollama':
-                    stream = await this.chatWithOllama(configuration, messages);
-                    break;
-                default:
-                    throw new InternalServerErrorException(`Unknown AI provider: ${provider}`);
-            }
-=======
             const providerStrategy = this.aiProviderService.getProvider(providerName);
             const stream = providerStrategy.generateResponse(configuration, messages);
->>>>>>> feat/kb-uploads-and-security
 
             for await (const chunk of stream) {
                 fullResponse += chunk;
@@ -212,103 +194,5 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
             throw error;
         }
     }
-<<<<<<< HEAD
 
-    private async chatWithOpenAI(configuration: any, messages: any[]) {
-        const apiKey = this.encryptionService.decrypt(configuration.openAiApiKey);
-        const openai = new OpenAI({ apiKey });
-
-        const stream = await openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
-            messages: messages as any,
-            stream: true,
-        });
-
-        return stream;
-    }
-
-    private async chatWithOpenRouter(configuration: any, messages: any[]) {
-        const apiKey = this.encryptionService.decrypt(configuration.openRouterApiKey);
-        const openai = new OpenAI({
-            apiKey,
-            baseURL: 'https://openrouter.ai/api/v1',
-            defaultHeaders: {
-                'HTTP-Referer': 'https://fitbot.app',
-                'X-Title': 'FitBot',
-            },
-        });
-
-        const stream = await openai.chat.completions.create({
-            model: 'openai/gpt-3.5-turbo',
-            messages: messages as any,
-            stream: true,
-        });
-
-        return stream;
-    }
-
-    private async *chatWithOllama(configuration: any, messages: any[]) {
-        const ollamaUrl = configuration.ollamaUrl || 'http://localhost:11434';
-        const model = configuration.ollamaModel || 'llama3';
-
-        // Ensure URL doesn't end with slash
-        const baseUrl = ollamaUrl.replace(/\/$/, '');
-
-        const response = await fetch(`${baseUrl}/api/chat`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                model,
-                messages,
-                stream: true, // Enable streaming
-            }),
-        });
-
-        if (!response.ok) {
-            throw new Error(`Ollama request failed: ${response.statusText}`);
-        }
-
-        if (!response.body) {
-            throw new Error('Ollama response has no body');
-        }
-
-        // Handle the stream
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        try {
-            while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-
-                const chunk = decoder.decode(value, { stream: true });
-                buffer += chunk;
-                const lines = buffer.split('\n');
-
-                // Keep the last partial line in the buffer
-                buffer = lines.pop() || '';
-
-                for (const line of lines) {
-                    if (!line.trim()) continue;
-                    try {
-                        const json = JSON.parse(line);
-                        if (json.message?.content) {
-                            yield {
-                                choices: [{
-                                    delta: { content: json.message.content }
-                                }]
-                            };
-                        }
-                    } catch (e) {
-                        console.warn('Failed to parse Ollama chunk:', e);
-                    }
-                }
-            }
-        } finally {
-            reader.releaseLock();
-        }
-    }
-=======
->>>>>>> feat/kb-uploads-and-security
 }

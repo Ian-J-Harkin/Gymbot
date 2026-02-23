@@ -49,7 +49,6 @@ export class WidgetController {
             }
         } catch (error) {
             console.error('Error in chat stream:', error);
-<<<<<<< HEAD
             let errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
             if (errorMessage.includes('Invalid encrypted string')) {
@@ -57,9 +56,6 @@ export class WidgetController {
             }
 
             res.write(`data: ${JSON.stringify({ content: `I'm sorry, I encountered an error: ${errorMessage}` })}\n\n`);
-=======
-            res.write(`data: ${JSON.stringify({ content: "I'm sorry, I encountered an error." })}\n\n`);
->>>>>>> feat/kb-uploads-and-security
         }
 
         res.write('data: [DONE]\n\n');
