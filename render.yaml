@@ -2,6 +2,7 @@ services:
   - type: web
     name: gymbot-api
     env: node
+    rootDir: fitbot-api
     region: ohio
     plan: free
     buildCommand: npm install && npx prisma generate && npm run build
