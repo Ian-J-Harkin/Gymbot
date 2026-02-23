@@ -12,13 +12,13 @@ export const configurationApi = {
     return response.data;
   },
 
-<<<<<<< HEAD
   generateApiKey: async (): Promise<{ apiKey: string }> => {
     const response = await api.post('/api-keys');
-=======
+    return response.data;
+  },
+
   getAnalytics: async (): Promise<any> => {
     const response = await api.get('/configurations/analytics');
->>>>>>> feat/kb-uploads-and-security
     return response.data;
   },
 };
