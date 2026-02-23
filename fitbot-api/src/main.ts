@@ -25,7 +25,12 @@ async function bootstrap() {
   // CORS — read allowed origins from env, fall back to dev defaults
   const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
-    : ['http://localhost:5173'];
+    : [
+      'http://localhost:5173',
+      'http://localhost:3001',
+      'https://gymbot-admin.vercel.app',
+      'https://gymbot-react-demo.vercel.app'
+    ];
 
   app.enableCors({
     origin: allowedOrigins,
@@ -34,7 +39,6 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(new ValidationPipe());
-  app.enableCors();
   await app.listen(process.env.PORT ?? 3002);
 }
 bootstrap();
