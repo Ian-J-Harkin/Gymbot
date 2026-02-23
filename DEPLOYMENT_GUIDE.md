@@ -20,39 +20,38 @@ Neon is a serverless PostgreSQL database that sleeps when inactive, making it id
 
 Render hosts the NestJS API. The infrastructure is defined as code in the `render.yaml` file located in the root directory.
 
-1.  **Connect Repo**: Log into [Render.com](https://render.com), click **New > Blueprint**, and connect your GitHub repository.
-2.  **Automatic Configuration**: Render will read `render.yaml` and configure the Node environment, build commands, and start commands automatically.
-3.  **Environment Variables**: Render will prompt you to provide the required secrets. Joi validation ensures the app will not boot if these are missing:
+1.  **Create Account & Link GitHub**: Sign up at [Render.com](https://render.com) (using your GitHub account is the easiest and recommended method).
+2.  **Grant Repository Access**: During signup or when creating your first service, Render will ask for permission to view your GitHub repositories. You can limit this access specifically to the `Gymbot` repository if you prefer.
+3.  **Deploy Blueprint**: Once logged in, click **New > Blueprint** in the Render dashboard and select your `Gymbot` repository.
+4.  **Automatic Configuration**: Render will automatically detect the `render.yaml` file in the root of the repo. It will set up the Node environment, build commands, and start commands without you having to click anything manually.
+5.  **Environment Variables**: Render will ask you to fill in the missing environment variables before it can deploy. Grab these from your `.env.cloud` file:
     *   `DATABASE_URL`: (From Neon)
     *   `DATABASE_URL_UNPOOLED`: (From Neon)
     *   `JWT_SECRET`: (Random 32+ character string)
     *   `ENCRYPTION_KEY`: (Exactly 32 characters)
     *   `IV_SECRET`: (Exactly 16 characters)
-4.  **Deploy**: Click deploy. Render will connect to Neon, run the migrations, and provide a live URL (e.g., `https://gymbot-api.onrender.com`).
+6.  **Deploy**: Click deploy. Render will connect to Neon, run the migrations, and provide a live URL (e.g., `https://gymbot-api.onrender.com`).
+7.  **Webhook Setup (For CD)**: Once deployed, go to the service's "Settings" page in Render, scroll down to "Deploy Hook", copy the URL, and add it as a GitHub Repository Secret named `RENDER_DEPLOY_HOOK` so GitHub Actions can trigger future updates automatically.
 
 ---
 
-## 3. Frontend Dashboard: Azure Static Web Apps
+## 3. Frontend Dashboard & Demos: Vercel
 
-Azure Static Web Apps (SWA) provides fast, globally distributed hosting for the React Admin Dashboard (`fitbot-admin`).
+Vercel provides fast, globally distributed hosting for the React Admin Dashboard (`fitbot-admin`) and demo sites, fully integrated natively with Next.js and Vite.
 
-1.  **Create Static Web App**: In the [Azure Portal](https://portal.azure.com), search for "Static Web Apps" and create a new one.
-2.  **Source**: Select GitHub, choose your repository and the `main` branch.
-3.  **Build Details**:
-    *   **Build Presets**: React
-    *   **App Location**: `/packages/fitbot-admin` (or `/demos/fitbot-react-demo`)
-    *   **Api Location**: Keep blank (we are using Render for the API).
-    *   **Output Location**: `dist`
-4.  **Routing**: The repository includes `staticwebapp.config.json` which tells Azure how to handle React Router fallback navigation natively.
-5.  **Environment Variables**: Once the app is created, go to **Settings > Configuration** in the Azure portal and add:
+1.  **Create Vercel Project**: Log into Vercel and import your GitHub repository.
+2.  **Configuration**: You will need to set up two separate Vercel projects pointing to the same repository:
+    *   **FitBot Admin Dashboard**: Set the Root Directory to `fitbot-admin`. Vercel will automatically detect Vite.
+    *   **React Demo Site**: Set the Root Directory to `demos/fitbot-react-demo`.
+3.  **Environment Variables**: In each Vercel project's settings, add:
     *   `VITE_FITBOT_API_URL`: Your deployed Render URL (e.g., `https://gymbot-api.onrender.com/api`).
     *   *Note: Ensure you include the `/api` suffix as configured in the NestJS global prefix.*
-
----
+4.  **Automated Deployments**: With GitHub Actions configured (`.github/workflows/cd.yml`), Vercel deployments will occur automatically via the `amondnet/vercel-action` whenever code is pushed to `main`.
 
 ## Appendix: Legacy Alternatives
 
-*   **Netlify (Frontend)**: Previously used for frontends. Replaced by Azure SWA for better enterprise scaling.
+*   **Azure Static Web Apps (Frontend)**: Previously used for frontends. Replaced by Vercel for better React/Next.js ecosystem support.
+*   **Netlify (Frontend)**: Optional alternative to Vercel.
 *   **Railway (Backend)**: Previously used for the API. Replaced by Render due to native `render.yaml` Infrastructure-as-Code support.
 *   **Supabase (Database)**: An alternative to Neon; follows the exact same connection string logic.
 
@@ -60,9 +59,9 @@ Azure Static Web Apps (SWA) provides fast, globally distributed hosting for the 
 
 ## Future Enhancements: Full Infrastructure as Code (IaC)
 
-While the current deployment strategy relies on a one-time setup via the Azure Portal (which then automatically generates the GitHub Actions CI/CD pipeline), future iterations of GymBot may require fully reproducible environments (e.g., spinning up separate white-labeled instances for different clients).
+While the current deployment strategy relies on GitHub Actions (`cd.yml`) executing Vercel CLI deployments and Render webhooks, future iterations of GymBot may require fully reproducible environments (e.g., spinning up separate white-labeled instances for different clients).
 
-When that scaling need arises, the architecture will evolve to use **Terraform** or Azure **Bicep**. This will involve:
+When that scaling need arises, the architecture will evolve to use **Terraform**. This will involve:
 1. Creating an `/infrastructure` directory in the root repository.
-2. Writing declarative `.tf` or `.bicep` scripts to automatically provision the Azure Static Web Apps and resource groups without touching the Azure Portal.
-3. Managing the OAuth handshake and deployment tokens via automated GitHub Secrets injection.
+2. Writing declarative `.tf` scripts to automatically provision the Vercel projects and Render services.
+3. Managing the deployment tokens natively via Terraform state.

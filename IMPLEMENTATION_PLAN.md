@@ -210,7 +210,7 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
 
 ## 🔴 Epic 15: Production Readiness & Demo Ecosystem (IN PROGRESS)
 
-> **Strategy**: Zero-Infrastructure. Deploy-Anywhere. Free-tier cloud (Render, Azure Static Web Apps, Neon) — no Docker or VPS required.
+> **Strategy**: Zero-Infrastructure. Deploy-Anywhere. Free-tier cloud (Render, Vercel, Neon) — no Docker or VPS required.
 > **Prerequisite**: Completion of Priority Sprint tasks.
 
 > [!IMPORTANT]
@@ -223,7 +223,7 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
 - [x] **15.1a `fitbot-react-demo` Site**: Created standalone Vite+React app in `demos/fitbot-react-demo` that consumes the local package.
 - [x] **15.2 Functional Parity Audit**: Verified `@fitbot/react` matches the WP plugin feature set (API key injection, RAG functionality verified). theme overrides deferred.
 - [x] **15.3 Cloud Deployment Configs** *(Configurations complete, awaiting final deployment)*:
-    - [x] **15.3a Provider Configs**: `render.yaml` for the NestJS API; `staticwebapp.config.json` for the Admin panel on Azure.
+    - [x] **15.3a Provider Configs**: `render.yaml` for the NestJS API; Continuous Deployment via GitHub Actions to Vercel for Admin/Demos.
     - [x] **15.3c Database Migrations**: Use **Neon branching** to test schema changes safely before applying to demo DB. `prisma migrate deploy` runs on provider startup hook.
         - [ ] Configure GitHub Actions to create a temporary Neon DB branch per PR, run `prisma migrate deploy` against it, then delete the branch after the PR merges.
     - [x] **15.3d Structured Logging**: Configure NestJS to output structured JSON to stdout (compatible with Render/Railway log aggregation).
@@ -242,11 +242,11 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
 
 > ⏳ **The following tasks are strictly dependent on pushing code to GitHub and creating the actual cloud resources.**
 
-- [ ] **15.3b Demo Site Projects**: *(External)* `fitbot-react-demo` repo deployed to Azure Static Web Apps; WP Demo Site live on WordPress.com. Both consume API on Render.
-- [ ] **15.5 Live Smoke Test**: React demo on `*.azurestaticapps.net` (using `@fitbot/react`) successfully chats with API on Render. WP Demo Site confirmed working. Zero Docker involved.
+- [ ] **15.3b Demo Site Projects**: *(External)* `fitbot-react-demo` repo deployed to Vercel; WP Demo Site live on WordPress.com. Both consume API on Render.
+- [ ] **15.5 Live Smoke Test**: React demo on `*.vercel.app` (using `@fitbot/react`) successfully chats with API on Render. WP Demo Site confirmed working. Zero Docker involved.
 - [ ] **15.6 Connectivity Smoke Test**: Before every deployment, ping the `/api/health` endpoint from each demo site's origin to confirm cross-service connectivity. Catches URL typos and trailing-slash CORS mismatches that static hosts commonly produce.
 
 ## ❓ Future Queries & Clarifications
 - [ ] **Data Import Logic**: Do we need to test Sales/customer import logic — is this in the context of bulk testing more customers for Stripe integration?
 - [ ] **System Prompt Strategy**: Decide whether the system prompt should be centralized in `constants.ts` (for developer-driven consistency) or moved to the database via the `Configuration` model (to allow gyms to customize their bot's "personality" and instructions).
-- [ ] **Infrastructure as Code (IaC) Evolution**: While the current Azure Static Web Apps pipeline auto-generates GitHub Actions CI/CD after portal creation, we should eventually implement Terraform or Bicep scripts in an `/infrastructure` directory to allow 100% automated, reproducible deployments (e.g., spinning up multi-tenant white-label instances).
+- [ ] **Infrastructure as Code (IaC) Evolution**: While the current deployment creates GitHub Actions automatically or uses Vercel's deep native integrations, we should eventually implement Terraform scripts in an `/infrastructure` directory to allow 100% automated, reproducible deployments.
