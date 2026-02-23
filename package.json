@@ -3,7 +3,7 @@
     "version": "1.0.0",
     "description": "Root script to run FitBot full stack",
     "scripts": {
-        "dev": "npx concurrently --kill-others-on-fail -n \"API,ADMIN\" -c \"blue,magenta\" \"npm run start:dev --prefix fitbot-api\" \"npm run dev --prefix fitbot-admin\"",
+        "dev": "npx concurrently --kill-others-on-fail -n \"API,ADMIN,READY\" -c \"blue,magenta,green\" \"npm run start:dev --prefix fitbot-api\" \"npm run dev --prefix fitbot-admin\" \"npx wait-on http://localhost:3000 http://localhost:3001 && echo. && echo '---------------------------------------' && echo '🚀 GYMBOT IS READY!' && echo 'API: http://localhost:3000' && echo 'ADMIN: http://localhost:3001' && echo '---------------------------------------'\"",
         "install:all": "npm install && npm install --prefix fitbot-api && npm install --prefix fitbot-admin",
         "test:api": "npm run test --prefix fitbot-api"
     },

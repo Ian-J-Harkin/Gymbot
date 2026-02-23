@@ -8,7 +8,8 @@ This document tracks the implementation progress of the GymBot Explanation Layer
 - **Phase 2: Structured Explanation** - ✅ API Implemented | ✅ Frontend Widget Implemented
 - **Phase 3: Rule-Based Validation (Backend)** - ✅ Backend Implemented | ✅ Tested
 - **Phase 4: Retrieved Context (Mini-RAG)** - ✅ Implemented | ✅ Tech Demo Ready
-- **Phase 5: Admin UI & Exploration** - ✅ Implemented | ✅ Ready for Review
+- **Phase 5: Admin UI & Exploration** - ✅ Implemented | ✅ Database Integrated
+- **Phase 6: Advanced Knowledge Base** - ✅ File Ingestion (PDF/Docx) | ✅ DB Chunking
 - **Phase 7: Frontend Widget Build** - ✅ Preact Implementation | ✅ SSE Streaming | ✅ Explanation UI
 
 ## Implementation Details

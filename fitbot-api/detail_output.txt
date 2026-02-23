@@ -1,0 +1,3 @@
+Hex representation of content:
+0a0a0a0a
+Direct content: "\n\n\n\n"

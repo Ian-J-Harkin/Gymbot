@@ -7,11 +7,12 @@ export const configurationSchema = z.object({
     .regex(/^#[0-9A-F]{6}$/i, 'Please enter a valid hex color (e.g., #FF5733)'),
   faqData: z
     .string()
-    .min(1, 'FAQ data is required')
-    .min(50, 'FAQ data must be at least 50 characters to provide useful information'),
-  aiProvider: z.enum(['openai', 'openrouter', 'ollama']),
+    .optional()
+    .or(z.string().min(0)),
+  aiProvider: z.enum(['openai', 'openrouter', 'ollama', 'huggingface']),
   openaiApiKey: z.string().optional(),
   openRouterApiKey: z.string().optional(),
+  huggingFaceApiKey: z.string().optional(),
   ollamaUrl: z.string().optional(),
   ollamaModel: z.string().optional(),
 }).refine((data) => {
@@ -19,6 +20,9 @@ export const configurationSchema = z.object({
     return false;
   }
   if (data.aiProvider === 'openrouter' && (!data.openRouterApiKey || data.openRouterApiKey.length === 0)) {
+    return false;
+  }
+  if (data.aiProvider === 'huggingface' && (!data.huggingFaceApiKey || data.huggingFaceApiKey.length === 0)) {
     return false;
   }
   return true;
@@ -57,5 +61,11 @@ export const AI_PROVIDERS = [
     name: 'Ollama',
     description: 'Run models locally with Ollama (free, no API key needed)',
     icon: '🦙',
+  },
+  {
+    id: 'huggingface' as const,
+    name: 'Hugging Face',
+    description: 'Free serverless inference models via Hugging Face',
+    icon: '🤗',
   },
 ];

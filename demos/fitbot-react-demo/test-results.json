@@ -1,0 +1,150 @@
+{
+  "config": {
+    "configFile": "C:\\Github\\Gymbot\\Gymbot\\demos\\fitbot-react-demo\\playwright.config.ts",
+    "rootDir": "C:/Github/Gymbot/Gymbot/demos/fitbot-react-demo/e2e",
+    "forbidOnly": false,
+    "fullyParallel": true,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "C:/Github/Gymbot/Gymbot/demos/fitbot-react-demo/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "chromium",
+        "name": "chromium",
+        "testDir": "C:/Github/Gymbot/Gymbot/demos/fitbot-react-demo/e2e",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 30000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "json"
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "runAgents": "none",
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.58.2",
+    "workers": 11,
+    "webServer": {
+      "command": "npm run dev",
+      "url": "http://localhost:5173",
+      "reuseExistingServer": true
+    }
+  },
+  "suites": [
+    {
+      "title": "widget-chat.spec.ts",
+      "file": "widget-chat.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "FitBot Widget End-to-End Flow",
+          "file": "widget-chat.spec.ts",
+          "line": 3,
+          "column": 6,
+          "specs": [
+            {
+              "title": "Widget renders, opens, and processes an AI chat message",
+              "ok": false,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 30000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "chromium",
+                  "projectName": "chromium",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "failed",
+                      "duration": 7647,
+                      "error": {
+                        "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.fitbot-message.assistant .fitbot-bubble').nth(1)\nExpected pattern: \u001b[32m/pm|am|hours|open/i\u001b[39m\nReceived string:  \u001b[31m\"I'm sorry, I encountered an error.\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.fitbot-message.assistant .fitbot-bubble').nth(1)\u001b[22m\n\u001b[2m    3 ├ù locator resolved to <div class=\"fitbot-bubble\"></div>\u001b[22m\n\u001b[2m      - unexpected value \"\"\u001b[22m\n\u001b[2m    6 ├ù locator resolved to <div class=\"fitbot-bubble\">I'm sorry, I encountered an error.</div>\u001b[22m\n\u001b[2m      - unexpected value \"I'm sorry, I encountered an error.\"\u001b[22m\n",
+                        "stack": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.fitbot-message.assistant .fitbot-bubble').nth(1)\nExpected pattern: \u001b[32m/pm|am|hours|open/i\u001b[39m\nReceived string:  \u001b[31m\"I'm sorry, I encountered an error.\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.fitbot-message.assistant .fitbot-bubble').nth(1)\u001b[22m\n\u001b[2m    3 ├ù locator resolved to <div class=\"fitbot-bubble\"></div>\u001b[22m\n\u001b[2m      - unexpected value \"\"\u001b[22m\n\u001b[2m    6 ├ù locator resolved to <div class=\"fitbot-bubble\">I'm sorry, I encountered an error.</div>\u001b[22m\n\u001b[2m      - unexpected value \"I'm sorry, I encountered an error.\"\u001b[22m\n\n    at C:\\Github\\Gymbot\\Gymbot\\demos\\fitbot-react-demo\\e2e\\widget-chat.spec.ts:53:34",
+                        "location": {
+                          "file": "C:\\Github\\Gymbot\\Gymbot\\demos\\fitbot-react-demo\\e2e\\widget-chat.spec.ts",
+                          "column": 34,
+                          "line": 53
+                        },
+                        "snippet": "\u001b[0m \u001b[90m 51 |\u001b[39m         \u001b[90m// 10. Verify the response contains relevant text (e.g., \"6am\", \"hours\", etc.)\u001b[39m\n \u001b[90m 52 |\u001b[39m         \u001b[90m// We use a broader regex instead of exact text since LLM output varies slightly\u001b[39m\n\u001b[31m\u001b[1m>\u001b[22m\u001b[39m\u001b[90m 53 |\u001b[39m         \u001b[36mawait\u001b[39m expect(aiResponse)\u001b[33m.\u001b[39mtoContainText(\u001b[35m/pm|am|hours|open/i\u001b[39m)\u001b[33m;\u001b[39m\n \u001b[90m    |\u001b[39m                                  \u001b[31m\u001b[1m^\u001b[22m\u001b[39m\n \u001b[90m 54 |\u001b[39m     })\u001b[33m;\u001b[39m\n \u001b[90m 55 |\u001b[39m\n \u001b[90m 56 |\u001b[39m })\u001b[33m;\u001b[39m\u001b[0m"
+                      },
+                      "errors": [
+                        {
+                          "location": {
+                            "file": "C:\\Github\\Gymbot\\Gymbot\\demos\\fitbot-react-demo\\e2e\\widget-chat.spec.ts",
+                            "column": 34,
+                            "line": 53
+                          },
+                          "message": "Error: \u001b[2mexpect(\u001b[22m\u001b[31mlocator\u001b[39m\u001b[2m).\u001b[22mtoContainText\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m)\u001b[22m failed\n\nLocator: locator('.fitbot-message.assistant .fitbot-bubble').nth(1)\nExpected pattern: \u001b[32m/pm|am|hours|open/i\u001b[39m\nReceived string:  \u001b[31m\"I'm sorry, I encountered an error.\"\u001b[39m\nTimeout: 5000ms\n\nCall log:\n\u001b[2m  - Expect \"toContainText\" with timeout 5000ms\u001b[22m\n\u001b[2m  - waiting for locator('.fitbot-message.assistant .fitbot-bubble').nth(1)\u001b[22m\n\u001b[2m    3 ├ù locator resolved to <div class=\"fitbot-bubble\"></div>\u001b[22m\n\u001b[2m      - unexpected value \"\"\u001b[22m\n\u001b[2m    6 ├ù locator resolved to <div class=\"fitbot-bubble\">I'm sorry, I encountered an error.</div>\u001b[22m\n\u001b[2m      - unexpected value \"I'm sorry, I encountered an error.\"\u001b[22m\n\n\n  51 |         // 10. Verify the response contains relevant text (e.g., \"6am\", \"hours\", etc.)\n  52 |         // We use a broader regex instead of exact text since LLM output varies slightly\n> 53 |         await expect(aiResponse).toContainText(/pm|am|hours|open/i);\n     |                                  ^\n  54 |     });\n  55 |\n  56 | });\n    at C:\\Github\\Gymbot\\Gymbot\\demos\\fitbot-react-demo\\e2e\\widget-chat.spec.ts:53:34"
+                        }
+                      ],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-02-21T19:53:24.700Z",
+                      "annotations": [],
+                      "attachments": [
+                        {
+                          "name": "error-context",
+                          "contentType": "text/markdown",
+                          "path": "C:\\Github\\Gymbot\\Gymbot\\demos\\fitbot-react-demo\\test-results\\widget-chat-FitBot-Widget--76650-rocesses-an-AI-chat-message-chromium\\error-context.md"
+                        }
+                      ],
+                      "errorLocation": {
+                        "file": "C:\\Github\\Gymbot\\Gymbot\\demos\\fitbot-react-demo\\e2e\\widget-chat.spec.ts",
+                        "column": 34,
+                        "line": 53
+                      }
+                    }
+                  ],
+                  "status": "unexpected"
+                }
+              ],
+              "id": "4340a82a94341d4d0614-c5187092f395e0e87c92",
+              "file": "widget-chat.spec.ts",
+              "line": 5,
+              "column": 5
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-02-21T19:53:22.908Z",
+    "duration": 9897.733,
+    "expected": 0,
+    "skipped": 0,
+    "unexpected": 1,
+    "flaky": 0
+  }
+}

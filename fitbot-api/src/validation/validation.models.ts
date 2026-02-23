@@ -1,5 +1,7 @@
+import { Configuration } from '@prisma/client';
+
 export interface ValidationContext {
-    configuration: any;
+    configuration: Configuration;
     userMessage: string;
 }
 

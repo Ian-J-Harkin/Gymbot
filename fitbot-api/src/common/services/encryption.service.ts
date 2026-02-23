@@ -7,14 +7,15 @@ import { ConfigService } from '@nestjs/config';
 export class EncryptionService {
     private readonly algorithm = 'aes-256-gcm';
     private readonly key: Buffer;
-    private readonly ivSecret: Buffer;
 
     constructor(private configService: ConfigService) {
-        const key = this.configService.get<string>('ENCRYPTION_KEY') || '12345678901234567890123456789012'; // 32 characters
-        const iv = this.configService.get<string>('IV_SECRET') || '1234567890123456'; // 16 characters
+        const key = this.configService.get<string>('ENCRYPTION_KEY');
+
+        if (!key || key.length !== 32) {
+            throw new Error('ENCRYPTION_KEY must be a 32-character string');
+        }
 
         this.key = Buffer.from(key);
-        this.ivSecret = Buffer.from(iv);
     }
 
     encrypt(text: string): string {

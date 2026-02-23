@@ -1,26 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { WidgetService } from './widget.service';
-import { EncryptionService } from '../common/services/encryption.service';
-import OpenAI from 'openai';
 import { ChatLogsService } from '../chat-logs/chat-logs.service';
 import { ValidationService } from '../validation/validation.service';
 import { RagService } from '../rag/rag.service';
-
-jest.mock('openai');
+import { PrismaService } from '../prisma/prisma.service';
+import { AiProviderService } from './providers/ai-provider.service';
+import { ExplanationHelper } from './explanation.helper';
+import { AiProvider } from './providers/ai-provider.interface';
 
 describe('WidgetService', () => {
   let service: WidgetService;
-  let encryptionService: Partial<EncryptionService>;
   let chatLogsService: Partial<ChatLogsService>;
   let validationService: Partial<ValidationService>;
   let ragService: Partial<RagService>;
+  let prismaService: Partial<PrismaService>;
+  let aiProviderService: Partial<AiProviderService>;
+  let explanationHelper: Partial<ExplanationHelper>;
 
   beforeEach(async () => {
-    encryptionService = {
-      encrypt: jest.fn((text) => `encrypted_${text}`),
-      decrypt: jest.fn((text) => text.replace('encrypted_', '')),
-    };
-
     chatLogsService = {
       createLog: jest.fn().mockResolvedValue({} as any),
     };
@@ -34,16 +31,34 @@ describe('WidgetService', () => {
 
     ragService = {
       chunkText: jest.fn().mockReturnValue([]),
-      search: jest.fn().mockReturnValue([]),
+      search: jest.fn().mockImplementation((q, chunks) => chunks.slice(0, 2)),
+    };
+
+    prismaService = {
+      documentChunk: {
+        findMany: jest.fn().mockResolvedValue([]),
+      } as any,
+    };
+
+    aiProviderService = {
+      getProvider: jest.fn().mockReturnValue({
+        generateResponse: jest.fn(),
+      }),
+    };
+
+    explanationHelper = {
+      build: jest.fn().mockReturnValue({} as any),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         WidgetService,
-        { provide: EncryptionService, useValue: encryptionService },
         { provide: ChatLogsService, useValue: chatLogsService },
         { provide: ValidationService, useValue: validationService },
         { provide: RagService, useValue: ragService },
+        { provide: PrismaService, useValue: prismaService },
+        { provide: AiProviderService, useValue: aiProviderService },
+        { provide: ExplanationHelper, useValue: explanationHelper },
       ],
     }).compile();
 
@@ -60,7 +75,7 @@ describe('WidgetService', () => {
         widgetColor: '#ff0000',
         openAiApiKey: 'encrypted_secret',
         faqText: 'some faq',
-      };
+      } as any;
       const result = service.getPublicConfig(config);
       expect(result.widgetColor).toEqual('#ff0000');
       expect(result).not.toHaveProperty('openAiApiKey');
@@ -69,22 +84,22 @@ describe('WidgetService', () => {
   });
 
   describe('processChat', () => {
-    it('should call OpenAI for openai provider and log interaction', async () => {
+    it('should delegate to the correct AI provider and log interaction', async () => {
       const mockStream = (async function* () {
-        yield { choices: [{ delta: { content: 'chunk1' } }] };
-        yield { choices: [{ delta: { content: 'chunk2' } }] };
+        yield 'chunk1';
+        yield 'chunk2';
       })();
-      const mockCreate = jest.fn().mockResolvedValue(mockStream);
-      (OpenAI as unknown as jest.Mock).mockImplementation(() => ({
-        chat: { completions: { create: mockCreate } },
-      }));
+
+      const mockProvider: AiProvider = {
+        generateResponse: jest.fn().mockReturnValue(mockStream),
+      };
+      (aiProviderService.getProvider as jest.Mock).mockReturnValue(mockProvider);
 
       const config = {
         id: 'config-1',
         aiProvider: 'openai',
-        openAiApiKey: 'encrypted_sk-test',
         faqText: 'FAQ text',
-      };
+      } as any;
 
       const iterator = service.processChat(config, 'Hello', []);
       let result = '';
@@ -98,77 +113,16 @@ describe('WidgetService', () => {
         }
       }
 
-      expect(encryptionService.decrypt).toHaveBeenCalledWith('encrypted_sk-test');
+      expect(aiProviderService.getProvider).toHaveBeenCalledWith('openai');
+      expect(mockProvider.generateResponse).toHaveBeenCalled();
       expect(result).toBe('chunk1chunk2');
-      expect(explanation).toBeDefined();
-      expect(explanation.provider).toBe('openai');
+      expect(explanationHelper.build).toHaveBeenCalled();
       expect(chatLogsService.createLog).toHaveBeenCalledWith(expect.objectContaining({
         provider: 'openai',
         aiResponse: 'chunk1chunk2',
       }));
     });
 
-    it('should call OpenRouter for openrouter provider', async () => {
-      const mockStream = (async function* () {
-        yield { choices: [{ delta: { content: 'chunk' } }] };
-      })();
-      const mockCreate = jest.fn().mockResolvedValue(mockStream);
-      (OpenAI as unknown as jest.Mock).mockImplementation(() => ({
-        chat: { completions: { create: mockCreate } },
-      }));
-
-      const config = {
-        id: 'config-2',
-        aiProvider: 'openrouter',
-        openRouterApiKey: 'encrypted_sk-or-test',
-        faqText: 'FAQ text',
-      };
-
-      const iterator = service.processChat(config, 'Hello', []);
-      for await (const chunk of iterator) {
-        // consume stream
-      }
-
-      expect(encryptionService.decrypt).toHaveBeenCalledWith('encrypted_sk-or-test');
-      expect(chatLogsService.createLog).toHaveBeenCalledWith(expect.objectContaining({
-        provider: 'openrouter',
-      }));
-    });
-
-    it('should call Ollama for ollama provider', async () => {
-      const mockResponse = {
-        ok: true,
-        json: jest.fn().mockResolvedValue({
-          message: { content: 'Hello from Ollama' },
-        }),
-      };
-      global.fetch = jest.fn().mockResolvedValue(mockResponse);
-
-      const config = {
-        id: 'config-3',
-        aiProvider: 'ollama',
-        ollamaUrl: 'http://localhost:11434',
-        ollamaModel: 'llama3',
-        faqText: 'FAQ text',
-      };
-
-      const iterator = service.processChat(config, 'Hello', []);
-      let result = '';
-      for await (const chunk of iterator) {
-        if (typeof chunk === 'string') {
-          result += chunk;
-        }
-      }
-
-      expect(global.fetch).toHaveBeenCalledWith(
-        'http://localhost:11434/api/chat',
-        expect.any(Object),
-      );
-      expect(result).toBe('Hello from Ollama');
-      expect(chatLogsService.createLog).toHaveBeenCalledWith(expect.objectContaining({
-        provider: 'ollama',
-      }));
-    });
     it('should block chat if validation fails with blocking error', async () => {
       validationService.validate = jest.fn().mockResolvedValue({
         results: [{ passed: false, ruleId: 'rule-1', severity: 'block', message: 'Blocked' }],
@@ -180,7 +134,7 @@ describe('WidgetService', () => {
         id: 'config-4',
         aiProvider: 'openai',
         faqText: 'FAQ',
-      };
+      } as any;
 
       const iterator = service.processChat(config, 'Bad message', []);
       let result = '';
@@ -192,6 +146,7 @@ describe('WidgetService', () => {
 
       expect(validationService.validate).toHaveBeenCalled();
       expect(result).toBe('Blocked');
+      expect(aiProviderService.getProvider).not.toHaveBeenCalled();
       expect(chatLogsService.createLog).toHaveBeenCalledWith(expect.objectContaining({
         aiResponse: 'Blocked',
         validationFlags: ['rule-1'],
