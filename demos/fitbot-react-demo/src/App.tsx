@@ -3,7 +3,7 @@ import { FitBotWidget } from '@fitbot/react'
 
 function App() {
     const [apiKey, setApiKey] = useState('');
-    const API_URL = import.meta.env.VITE_FITBOT_API_URL || 'https://gymbot-production.up.railway.app';
+    const API_URL = import.meta.env.VITE_FITBOT_API_URL || 'https://gymbot-api.onrender.com';
 
     return (
         <div className="container" style={{ padding: '2rem', fontFamily: 'sans-serif', maxWidth: '800px', margin: '0 auto' }}>
