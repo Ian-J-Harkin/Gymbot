@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Save, Loader2, Brain, Info } from 'lucide-react';
+import { Save, Loader2, Brain, Info, AlertTriangle, ExternalLink } from 'lucide-react';
 import { configurationApi } from '../services/configurationApi';
 import { configurationSchema, ConfigurationFormData, AI_PROVIDERS } from '../schemas/configurationSchema';
+
+const FREE_OPENROUTER_MODELS = [
+    { id: 'meta-llama/llama-3.2-3b-instruct:free', name: 'Llama 3.2 3B (Free)', description: 'Fast & lightweight, great for simple Q&A' },
+    { id: 'meta-llama/llama-3.1-8b-instruct:free', name: 'Llama 3.1 8B (Free)', description: 'Balanced performance for most use cases' },
+    { id: 'mistralai/mistral-7b-instruct:free', name: 'Mistral 7B (Free)', description: 'Strong reasoning, ideal for gym FAQs' },
+    {
+        id: 'google/gemma-3-4b-it:free', name: 'Gemma 3 4B (Free)', description: "Google's compact open model"
+    },
+    { id: 'qwen/qwen-2.5-7b-instruct:free', name: 'Qwen 2.5 7B (Free)', description: 'Excellent instruction-following' },
+];
 
 export interface AISettingsProps {
     onDirtyChange?: (isDirty: boolean) => void;
@@ -144,17 +154,62 @@ export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
                     )}
 
                     {selectedProvider === 'openrouter' && (
-                        <div className="animate-in fade-in slide-in-from-top-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">OpenRouter API Key</label>
-                            <input {...register('openRouterApiKey')} type="password" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary-500 focus:border-primary-500" placeholder="sk-or-..." />
+                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">OpenRouter API Key</label>
+                                <input {...register('openRouterApiKey')} type="password" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary-500 focus:border-primary-500" placeholder="sk-or-..." />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Get a free key at{' '}
+                                    <a href="https://openrouter.ai/keys" target="_blank" rel="noreferrer" className="text-primary-600 hover:underline inline-flex items-center gap-1">
+                                        openrouter.ai/keys <ExternalLink className="h-3 w-3" />
+                                    </a>
+                                </p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Model</label>
+                                <input
+                                    {...register('ollamaModel')}
+                                    type="text"
+                                    className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary-500 focus:border-primary-500 font-mono text-sm"
+                                    placeholder="e.g. meta-llama/llama-3.2-3b-instruct:free"
+                                />
+                                <p className="text-xs text-gray-500 mt-1 mb-3">Pick a free model below or enter any model ID from <a href="https://openrouter.ai/models" target="_blank" rel="noreferrer" className="text-primary-600 hover:underline">openrouter.ai/models</a>.</p>
+                                <div className="grid grid-cols-1 gap-2">
+                                    {FREE_OPENROUTER_MODELS.map((model) => (
+                                        <button
+                                            key={model.id}
+                                            type="button"
+                                            onClick={() => {
+                                                const input = document.querySelector('input[name="ollamaModel"]') as HTMLInputElement;
+                                                if (input) { input.value = model.id; input.dispatchEvent(new Event('input', { bubbles: true })); }
+                                            }}
+                                            className="flex items-center justify-between text-left px-3 py-2 rounded-lg border border-gray-200 hover:border-primary-400 hover:bg-primary-50 transition-colors group"
+                                        >
+                                            <div>
+                                                <p className="text-sm font-medium text-gray-900 group-hover:text-primary-700">{model.name}</p>
+                                                <p className="text-xs text-gray-500">{model.description}</p>
+                                            </div>
+                                            <span className="text-xs text-gray-400 font-mono ml-4 shrink-0 group-hover:text-primary-500">{model.id.split('/')[1]}</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     )}
 
                     {selectedProvider === 'huggingface' && (
-                        <div className="animate-in fade-in slide-in-from-top-2">
-                            <label className="block text-sm font-medium text-gray-700 mb-2">Hugging Face API Token</label>
-                            <input {...register('huggingFaceApiKey')} type="password" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary-500 focus:border-primary-500" placeholder="hf_..." />
-                            <p className="text-xs text-gray-500 mt-2">Get your free API token from <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer" className="text-primary-600 hover:underline">Hugging Face Settings</a>.</p>
+                        <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                            <div className="flex gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                <AlertTriangle className="h-5 w-5 text-amber-500 shrink-0 mt-0.5" />
+                                <p className="text-sm text-amber-800">
+                                    <strong>Note:</strong> Hugging Face has deprecated their free Serverless API. We recommend switching to <strong>OpenRouter</strong> which offers free models with no credit card required.
+                                </p>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">Hugging Face API Token</label>
+                                <input {...register('huggingFaceApiKey')} type="password" className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-primary-500 focus:border-primary-500" placeholder="hf_..." />
+                                <p className="text-xs text-gray-500 mt-2">Get your API token from <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noreferrer" className="text-primary-600 hover:underline">Hugging Face Settings</a>.</p>
+                            </div>
                         </div>
                     )}
 
