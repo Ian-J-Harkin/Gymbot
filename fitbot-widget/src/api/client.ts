@@ -1,12 +1,5 @@
 import type { WidgetConfig } from '../types';
 
-<<<<<<< HEAD
-const API_BASE_URL = 'http://localhost:3002/api';
-console.log('FitBot Widget API URL:', API_BASE_URL);
-
-
-=======
->>>>>>> feat/kb-uploads-and-security
 export class ApiClient {
     private apiKey: string;
     private baseUrl: string;

@@ -6,7 +6,7 @@ describe('ApiClient Unit Tests', () => {
 
     beforeEach(() => {
         vi.resetAllMocks();
-        client = new ApiClient('test-key');
+        client = new ApiClient('test-key', 'http://localhost:3000/api');
         global.fetch = vi.fn();
     });
 
