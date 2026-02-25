@@ -124,7 +124,7 @@ export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
                         AI Provider
                     </h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                        {AI_PROVIDERS.map((provider) => (
+                        {AI_PROVIDERS.filter(p => p.id !== 'ollama' || import.meta.env.DEV).map((provider) => (
                             <label
                                 key={provider.id}
                                 className={`flex flex-col items-center justify-center p-4 border rounded-xl cursor-pointer transition-all aspect-video ${selectedProvider === provider.id
