@@ -13,7 +13,7 @@ export function WidgetLoader() {
         <FitBotWidget
             apiKey={API_KEY}
             apiUrl={API_URL}
-            scriptUrl={`${API_URL}/gymbot.min.js`}
+            scriptUrl="/gymbot.min.js"
         />
     );
 }
