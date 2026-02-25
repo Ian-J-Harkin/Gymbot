@@ -1,0 +1,10 @@
+var R=require("../../chunks/ssr/[turbopack]_runtime.js")("server/app/_global-error/page.js")
+R.c("server/chunks/ssr/85d57_9aba6810._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__112c92ce._.js")
+R.c("server/chunks/ssr/85d57_next_dist_54a015f1._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__ce100a2a._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__29d1791c._.js")
+R.c("server/chunks/ssr/[root-of-the-server]__d0cb04b2._.js")
+R.c("server/chunks/ssr/7775f_fitbot-react-demo__next-internal_server_app__global-error_page_actions_632a2dc7.js")
+R.m(23179)
+module.exports=R.m(23179).exports
