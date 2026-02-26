@@ -146,6 +146,38 @@ class FitBot_Widget
                         submitBtn.style.pointerEvents = 'auto';
                     }
                 });
+                // Listen for JSON pastes to auto-fill all three fields
+                input.addEventListener('paste', function(e) {
+                    try {
+                        let pasteData = (e.clipboardData || window.clipboardData).getData('text');
+                        let parsed = JSON.parse(pasteData);
+                        
+                        if (parsed && parsed.apiKey && parsed.apiUrl && parsed.scriptUrl) {
+                            e.preventDefault(); // Stop normal paste
+                            
+                            document.getElementById('fitbot_api_key').value = parsed.apiKey;
+                            document.getElementById('fitbot_api_url').value = parsed.apiUrl;
+                            document.getElementById('fitbot_script_url').value = parsed.scriptUrl;
+                            
+                            // Flash success style to indicate auto-fill worked
+                            input.style.backgroundColor = '#f0fdf4';
+                            document.getElementById('fitbot_api_url').style.backgroundColor = '#f0fdf4';
+                            document.getElementById('fitbot_script_url').style.backgroundColor = '#f0fdf4';
+                            
+                            setTimeout(() => {
+                                input.style.backgroundColor = '#fff';
+                                document.getElementById('fitbot_api_url').style.backgroundColor = '#fff';
+                                document.getElementById('fitbot_script_url').style.backgroundColor = '#fff';
+                            }, 1000);
+                            
+                            error.style.display = 'none';
+                            submitBtn.style.opacity = '1';
+                            submitBtn.style.pointerEvents = 'auto';
+                        }
+                    } catch (err) {
+                        // Not JSON, just let the normal paste happen
+                    }
+                });
             });
         </script>
         <?php

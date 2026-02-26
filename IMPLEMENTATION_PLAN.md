@@ -317,6 +317,7 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
 - [x] **15.6 Connectivity Smoke Test**: Before every deployment, ping the `/api/health` endpoint from each demo site's origin to confirm cross-service connectivity. Catches URL typos and trailing-slash CORS mismatches that static hosts commonly produce.
 
 ## ❓ Future Queries & Clarifications
+- [ ] **WordPress Plugin UX**: Can we make the FitBot settings more prominent in the WP Admin menu (e.g., using `add_menu_page()` instead of `add_options_page()`) so it appears as a top-level icon rather than hidden inside the Settings dropdown?
 - [ ] **Data Import Logic**: Do we need to test Sales/customer import logic — is this in the context of bulk testing more customers for Stripe integration?
 - [ ] **System Prompt Strategy**: Decide whether the system prompt should be centralized in `constants.ts` (for developer-driven consistency) or moved to the database via the `Configuration` model (to allow gyms to customize their bot's "personality" and instructions).
 - [ ] **Infrastructure as Code (IaC) Evolution**: While the current deployment creates GitHub Actions automatically or uses Vercel's deep native integrations, we should eventually implement Terraform scripts in an `/infrastructure` directory to allow 100% automated, reproducible deployments.

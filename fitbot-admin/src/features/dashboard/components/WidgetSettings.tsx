@@ -183,6 +183,26 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                                     </li>
                                     <li>Click <strong>Save & Connect</strong>. The bot will instantly appear on your live site!</li>
                                 </ol>
+
+                                <div className="mt-6 pt-5 border-t border-gray-200">
+                                    <h4 className="text-sm font-bold text-gray-900 mb-2">Fast Setup (Recommended)</h4>
+                                    <p className="text-xs text-gray-500 mb-3">Copy this combined configuration block and paste it directly into the <strong>API Key</strong> field in WordPress. It will automatically fill out all three fields for you!</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const settings = {
+                                                apiKey: apiKey,
+                                                apiUrl: 'https://gymbot-api.onrender.com/api',
+                                                scriptUrl: 'https://fitbot-demo.vercel.app/gymbot.min.js'
+                                            };
+                                            navigator.clipboard.writeText(JSON.stringify(settings, null, 2));
+                                            alert('Settings copied! Paste them into the API Key field in WordPress.');
+                                        }}
+                                        className="w-full sm:w-auto px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 transition-colors"
+                                    >
+                                        Copy All Settings Block
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>
