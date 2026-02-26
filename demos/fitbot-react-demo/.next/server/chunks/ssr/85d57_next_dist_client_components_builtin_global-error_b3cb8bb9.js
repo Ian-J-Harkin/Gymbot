@@ -1,3 +1,0 @@
-module.exports=[29457,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(76400);a.n(d("[project]/Gymbot/Gymbot/demos/fitbot-react-demo/node_modules/next/dist/client/components/builtin/global-error.js <module evaluation>"))},16316,(a,b,c)=>{let{createClientModuleProxy:d}=a.r(76400);a.n(d("[project]/Gymbot/Gymbot/demos/fitbot-react-demo/node_modules/next/dist/client/components/builtin/global-error.js"))},44896,a=>{"use strict";a.i(29457);var b=a.i(16316);a.n(b)}];
-
-//# sourceMappingURL=85d57_next_dist_client_components_builtin_global-error_b3cb8bb9.js.map

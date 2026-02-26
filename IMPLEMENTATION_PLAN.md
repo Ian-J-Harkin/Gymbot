@@ -294,7 +294,7 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
 > [!IMPORTANT]
 > **External Demo Site Projects** — Both demo sites are *separate projects* outside this repo, exactly as the WordPress Demo Site is a standalone WP installation hosting the WP plugin:
 > - **`fitbot-react-demo`**: A standalone React website (separate repo/project) that installs and demonstrates `@fitbot/react`. Validates that Task 11.4 works in the real world.
-> - **WordPress Demo Site**: A hosted WordPress installation with the FitBot WP plugin installed. Validates the full plugin experience.
+> - **WordPress Demo Site**: A hosted WordPress installation with the FitBot WP plugin installed. Validates the full plugin experience. **Decision**: We will build this using a **Custom Simple Theme (PHP + Tailwind)** to perfectly mirror the React demo site without page builder bloat.
 > These projects are the *consumers* of this repo's outputs, not part of the codebase itself.
 
 - [x] **15.1 `@fitbot/react` Component (Task 11.4)**: Implement and package the Universal React component (see Epic 11.4). This is the primary deliverable of this phase.
@@ -320,8 +320,8 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
 
 > ⏳ **The following tasks are strictly dependent on pushing code to GitHub and creating the actual cloud resources.**
 
-- [ ] **15.3b Demo Site Projects**: *(External)* `fitbot-react-demo` repo deployed to Vercel; WP Demo Site live on WordPress.com. Both consume API on Render.
-- [ ] **15.5 Live Smoke Test**: React demo on `*.vercel.app` (using `@fitbot/react`) successfully chats with API on Render. WP Demo Site confirmed working. Zero Docker involved.
+- [/] **15.3b Demo Site Projects**: *(External)* `fitbot-react-demo` repo deployed to Vercel; WP Demo Site live on WordPress.com. Both consume API on Render.
+- [/] **15.5 Live Smoke Test**: React demo on `*.vercel.app` (using `@fitbot/react`) successfully chats with API on Render. WP Demo Site confirmed working. Zero Docker involved.
 - [ ] **15.6 Connectivity Smoke Test**: Before every deployment, ping the `/api/health` endpoint from each demo site's origin to confirm cross-service connectivity. Catches URL typos and trailing-slash CORS mismatches that static hosts commonly produce.
 
 ## ❓ Future Queries & Clarifications
