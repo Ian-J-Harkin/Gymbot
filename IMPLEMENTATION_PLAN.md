@@ -7,6 +7,7 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] **Option A (Epic 6): Knowledge Base File Uploads** - Allow uploading PDF/DOCX files instead of just pasting text.
 - [ ] **Option B (Story 8.1): Admin UX Polish** - Implement "Unsaved Changes" warning and better visual save feedback.
 - [ ] **Option C (Story 7.5): Email Integration** - Create workflow to email API Key & Instructions to a web developer.
+- [ ] **Deferred**: Move AI system instructions to the database and expose them in the Admin UI for customization.
 =======
 ## 🚨 Priority Sprint: Core Development (Local Ecosystem)
 
