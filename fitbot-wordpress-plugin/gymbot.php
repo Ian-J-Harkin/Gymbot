@@ -32,13 +32,17 @@ class FitBot_Widget
 
     public function settings_init()
     {
-        // Register the setting allowing WordPress to handle saving it automatically
+        // Register the settings allowing WordPress to handle saving it automatically
         register_setting('fitbot_settings', 'fitbot_api_key');
+        register_setting('fitbot_settings', 'fitbot_api_url');
+        register_setting('fitbot_settings', 'fitbot_script_url');
     }
 
     public function settings_page()
     {
         $api_key = get_option('fitbot_api_key');
+        $api_url = get_option('fitbot_api_url', 'http://localhost:3000/api');
+        $script_url = get_option('fitbot_script_url', 'http://localhost:5173/gymbot.min.js');
         $is_connected = !empty($api_key);
 ?>
         <style>
@@ -96,8 +100,23 @@ class FitBot_Widget
                 <div class="fitbot-step">
                     <h3><span>2</span> Connect your Site</h3>
                     <p>Paste your API key below and save to link this WordPress site to your AI brain.</p>
-                    <input type="text" name="fitbot_api_key" id="fitbot_api_key" value="<?php echo esc_attr($api_key); ?>" class="fitbot-input" placeholder="Paste your API key here..." autocomplete="off">
-                    <div id="fitbot_error" class="fitbot-error-msg">Please enter a valid API key.</div>
+                    <div style="margin-bottom: 16px;">
+                        <label for="fitbot_api_key" style="display:block; font-weight:600; margin-bottom:4px;">API Key</label>
+                        <input type="text" name="fitbot_api_key" id="fitbot_api_key" value="<?php echo esc_attr($api_key); ?>" class="fitbot-input" placeholder="Paste your API key here..." autocomplete="off">
+                        <div id="fitbot_error" class="fitbot-error-msg">Please enter a valid API key.</div>
+                    </div>
+                    
+                    <div style="margin-bottom: 16px;">
+                        <label for="fitbot_api_url" style="display:block; font-weight:600; margin-bottom:4px;">Backend API URL</label>
+                        <input type="url" name="fitbot_api_url" id="fitbot_api_url" value="<?php echo esc_url($api_url); ?>" class="fitbot-input" placeholder="e.g., https://gymbot-api.onrender.com/api">
+                        <p style="font-size:13px; color:#6b7280; margin-top:4px;">Point to your local or live backend server.</p>
+                    </div>
+
+                    <div>
+                        <label for="fitbot_script_url" style="display:block; font-weight:600; margin-bottom:4px;">Frontend Script URL</label>
+                        <input type="url" name="fitbot_script_url" id="fitbot_script_url" value="<?php echo esc_url($script_url); ?>" class="fitbot-input" placeholder="e.g., https://your-demo-app.vercel.app/gymbot.min.js">
+                        <p style="font-size:13px; color:#6b7280; margin-top:4px;">Point to your local or live Vercel deployment hosting <code>gymbot.min.js</code>.</p>
+                    </div>
                 </div>
 
                 <div style="text-align: right; padding-top: 16px;">
@@ -139,19 +158,24 @@ class FitBot_Widget
             return;
         }
 
-        // In a production environment, this would point to a CDN.
-        // Check for development mode constant (defined in wp-config.php or plugin header)
-        if (defined('FITBOT_DEV_MODE') && FITBOT_DEV_MODE) {
-            $script_url = '/widget-dist/gymbot.min.js?v=' . time();
-        }
-        else {
-            $script_url = 'https://cdn.fitbot.ai/gymbot.min.js';
-        }
+        // Use configured URLs, falling back to local defaults if empty
+        $api_url = get_option('fitbot_api_url');
+        if (empty($api_url))
+            $api_url = 'http://localhost:3000/api';
+
+        $script_url = get_option('fitbot_script_url');
+        if (empty($script_url))
+            $script_url = 'http://localhost:5173/gymbot.min.js';
+
+        // Add version busting to script URL to avoid aggressive caching
+        $cache_buster = defined('FITBOT_DEV_MODE') && FITBOT_DEV_MODE ? time() : '1.1.0';
+        $final_script_url = add_query_arg('v', $cache_buster, $script_url);
 
 ?>
         <script 
-            src="<?php echo esc_url($script_url); ?>" 
+            src="<?php echo esc_url($final_script_url); ?>" 
             data-api-key="<?php echo esc_attr($api_key); ?>" 
+            data-api-url="<?php echo esc_url($api_url); ?>"
             async>
         </script>
         <?php

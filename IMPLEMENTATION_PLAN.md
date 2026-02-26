@@ -4,10 +4,11 @@ This document tracks the progress of the FitBot project implementation against t
 
 <<<<<<< HEAD
 ## 📌 Next Steps / Parking Lot (To Do)
-- [ ] **Option A (Epic 6): Knowledge Base File Uploads** - Allow uploading PDF/DOCX files instead of just pasting text.
-- [ ] **Option B (Story 8.1): Admin UX Polish** - Implement "Unsaved Changes" warning and better visual save feedback.
+- [x] **Option A (Epic 6): Knowledge Base File Uploads** - Allow uploading PDF/DOCX files instead of just pasting text.
+- [x] **Option B (Story 8.1): Admin UX Polish** - Implement "Unsaved Changes" warning and better visual save feedback.
 - [ ] **Option C (Story 7.5): Email Integration** - Create workflow to email API Key & Instructions to a web developer.
 - [ ] **Deferred**: Move AI system instructions to the database and expose them in the Admin UI for customization.
+- [ ] **Maintenance**: Resolve git conflicts by merging/rebasing `main` into the `feat/kb-uploads-and-security` branch to keep it up to date.
 =======
 ## 🚨 Priority Sprint: Core Development (Local Ecosystem)
 
@@ -100,18 +101,18 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **Components & UI**: Basic structures for Login, Register, and Dashboard exist.
 - [x] **Integration**: Connect frontend forms to the backend API (Code Updated).
 
-## ⚪ Epic 6: Advanced Knowledge Base (Planned)
+## 🟢 Epic 6: Advanced Knowledge Base (Completed)
 ### Story 6.1: File Upload Support (Text/Markdown)
-- [ ] Backend: Create `UploadsModule` or extend `ConfigurationsModule`.
-- [ ] Backend: Implement `POST /configurations/knowledge/upload` for `.txt` and `.md`.
-- [ ] Frontend: Add file picker to **Knowledge Base** tab.
-- [ ] Logic: Append file content to `faqText` context.
+- [x] Backend: Create `UploadsModule` or extend `ConfigurationsModule`.
+- [x] Backend: Implement `POST /configurations/knowledge/upload` for `.txt` and `.md`.
+- [x] Frontend: Add file picker to **Knowledge Base** tab.
+- [x] Logic: Append file content to `faqText` context.
 
 ### Story 6.2: Rich Document Processing (PDF/Word)
-- [ ] Research & Select parsing libraries (e.g., `pdf-parse`, `mammoth`).
-- [ ] Backend: Extend upload endpoint to handle `.pdf` and `.docx`.
-- [ ] Backend: Extract text content from binary formats.
-- [ ] Frontend: Display uploaded file list and status.
+- [x] Research & Select parsing libraries (e.g., `pdf-parse`, `mammoth`).
+- [x] Backend: Extend upload endpoint to handle `.pdf` and `.docx`.
+- [x] Backend: Extract text content from binary formats.
+- [x] Frontend: Display uploaded file list and status.
 
 ### Story 6.3: Vector Search (RAG)
 - [ ] *Detailed planning needed for vector database integration when context size exceeds token limits.*
@@ -156,9 +157,9 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **E2E Testing**: Set up Playwright/Cypress for full end-to-end testing of the Widget -> API flow.
 - [x] **CI/CD Integration**: Run tests automatically on build.
 
-### Story 8.1: Admin UX Polish (Added based on feedback)
-- [ ] **Unsaved Changes Indicator**: Show a warning if user tries to navigate away with unsaved changes.
-- [ ] **Save Feedback**: Change "Save" button to "Saved!" (green) temporarily on success.
+### Story 8.1: Admin UX Polish (Completed via 9.3)
+- [x] **Unsaved Changes Indicator**: Show a warning if user tries to navigate away with unsaved changes.
+- [x] **Save Feedback**: Change "Save" button to "Saved!" (green) temporarily on success.
 ## 🟡 Epic 6: Knowledge Base & Security Hardening (Partially Complete)
 - [x] **6.1 Advanced Document Support**: Support for .pdf and .docx file uploads; automatic chunking and indexing.
 - [ ] **6.2 Security Hardening** *(reopened — see Epic 14)*: CORS is still hardcoded to `localhost` origins in `main.ts`; no `helmet` middleware; file-type validation relies on user-supplied extension not MIME type.
@@ -307,22 +308,13 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
     - [x] **15.3d Structured Logging**: Configure NestJS to output structured JSON to stdout (compatible with Render/Railway log aggregation).
     - [x] **15.3e Env Validation (Pre-flight)**: Implement `Joi` schema validation in `ConfigModule` — app fails loudly at boot if required secrets are missing.
 - [x] **15.4 Deployment SOP**: Step-by-step guide to deploy admin, API, and both demo sites to free-tier cloud with zero server management.
-- [/] **15.7 Free Cloud LLM Support**: Integrate a free online LLM provider (Hugging Face) to ensure the cloud demo can operate without OpenAI costs.
-    - **Backend Changes (`fitbot-api`)**:
-        - **Schema**: Add `huggingFaceApiKey` to `Configuration` model in `schema.prisma`.
-        - **Service**: Create `HuggingFaceProvider` implementing `AiProvider` using `@huggingface/inference` (or standard `fetch` against Hugging Face Serverless Inference API).
-        - **Constants**: Add `HUGGINGFACE` to `AI_PROVIDERS`, set `DEFAULT_HUGGINGFACE_MODEL` (e.g., `mistralai/Mistral-7B-Instruct-v0.2`).
-        - **Config Service**: Handle encryption/decryption of `huggingFaceApiKey`.
-    - **Frontend Changes (`fitbot-admin`)**:
-        - Update `AISettings.tsx` dropdown to include "Hugging Face".
-        - Add input field for Hugging Face API Key.
-    - **Verification**: Test the chat widget using the HuggingFace integration to confirm successful responses.
+- [x] **15.7 Free Cloud LLM Support**: Integrate a free online LLM provider (OpenRouter) to ensure the cloud demo can operate without OpenAI costs. (Implemented via `OpenRouterProvider`).
 
 > ⏳ **The following tasks are strictly dependent on pushing code to GitHub and creating the actual cloud resources.**
 
 - [/] **15.3b Demo Site Projects**: *(External)* `fitbot-react-demo` repo deployed to Vercel; WP Demo Site live on WordPress.com. Both consume API on Render.
 - [/] **15.5 Live Smoke Test**: React demo on `*.vercel.app` (using `@fitbot/react`) successfully chats with API on Render. WP Demo Site confirmed working. Zero Docker involved.
-- [ ] **15.6 Connectivity Smoke Test**: Before every deployment, ping the `/api/health` endpoint from each demo site's origin to confirm cross-service connectivity. Catches URL typos and trailing-slash CORS mismatches that static hosts commonly produce.
+- [x] **15.6 Connectivity Smoke Test**: Before every deployment, ping the `/api/health` endpoint from each demo site's origin to confirm cross-service connectivity. Catches URL typos and trailing-slash CORS mismatches that static hosts commonly produce.
 
 ## ❓ Future Queries & Clarifications
 - [ ] **Data Import Logic**: Do we need to test Sales/customer import logic — is this in the context of bulk testing more customers for Stripe integration?
