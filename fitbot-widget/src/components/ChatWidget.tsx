@@ -237,8 +237,13 @@ export function ChatWidget({ apiKey, apiUrl }: ChatWidgetProps) {
           border-radius: 20px;
           padding: 8px 16px;
           font-size: 14px;
+          color: #111827;
+          background-color: #ffffff;
           outline: none;
           transition: border-color 0.2s;
+        }
+        .fitbot-input::placeholder {
+          color: #6b7280;
         }
         .fitbot-input:focus {
           border-color: ${primaryColor};
