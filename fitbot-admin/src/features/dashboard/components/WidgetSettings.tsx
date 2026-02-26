@@ -17,6 +17,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
     const [success, setSuccess] = useState<string | null>(null);
     const [previewColor, setPreviewColor] = useState('#2563EB');
     const [apiKey, setApiKey] = useState('YOUR_GYM_ID');
+    const [integrationType, setIntegrationType] = useState<'wordpress' | 'html'>('html');
 
     const {
         register,
@@ -126,20 +127,64 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                     </div>
 
                     <div>
-                        <h3 className="text-lg font-bold text-gray-900 mb-1">Widget Embed Code</h3>
-                        <p className="text-sm text-gray-500 mb-4">Copy and paste this code into your website's &lt;body&gt; tag.</p>
-                        <div className="bg-gray-900 rounded-xl p-4 relative group">
-                            <code className="text-xs text-gray-300 font-mono break-all block">
-                                {`<script src="${window.location.origin}/widget/loader.js" data-gym-id="${apiKey}"></script>`}
-                            </code>
+                        <h3 className="text-lg font-bold text-gray-900 mb-1">Installation Instructions</h3>
+                        <p className="text-sm text-gray-500 mb-4">Choose your platform to get the correct setup details.</p>
+
+                        <div className="flex space-x-2 mb-4 bg-gray-100 p-1 rounded-lg w-fit">
                             <button
                                 type="button"
-                                onClick={() => navigator.clipboard.writeText(`<script src="${window.location.origin}/widget/loader.js" data-gym-id="${apiKey}"></script>`)}
-                                className="absolute top-2 right-2 p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => setIntegrationType('html')}
+                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${integrationType === 'html' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                             >
-                                Copy
+                                React / Any Website
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIntegrationType('wordpress')}
+                                className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${integrationType === 'wordpress' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                            >
+                                WordPress
                             </button>
                         </div>
+
+                        {integrationType === 'html' ? (
+                            <div className="bg-gray-900 rounded-xl p-4 relative group">
+                                <code className="text-xs text-gray-300 font-mono break-all block whitespace-pre-wrap">
+                                    {`<script \n  src="https://fitbot-demo.vercel.app/gymbot.min.js" \n  data-api-key="${apiKey}" \n  data-api-url="https://gymbot-api.onrender.com/api" \n  async>\n</script>`}
+                                </code>
+                                <button
+                                    type="button"
+                                    onClick={() => navigator.clipboard.writeText(`<script src="https://fitbot-demo.vercel.app/gymbot.min.js" data-api-key="${apiKey}" data-api-url="https://gymbot-api.onrender.com/api" async></script>`)}
+                                    className="absolute top-2 right-2 p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                                >
+                                    Copy
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+                                <ol className="list-decimal pl-4 space-y-3 text-sm text-gray-700">
+                                    <li>Install the <strong>FitBot</strong> plugin in your WordPress Admin dashboard.</li>
+                                    <li>Navigate to the <strong>FitBot Setup</strong> tab.</li>
+                                    <li>Paste the following configurations into the settings screen:
+                                        <div className="mt-3 space-y-3 bg-white p-4 border border-gray-100 rounded-lg shadow-sm">
+                                            <div>
+                                                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">1. API Key</div>
+                                                <code className="bg-gray-100 px-2 py-1 rounded text-gray-900 font-mono text-xs select-all">{apiKey}</code>
+                                            </div>
+                                            <div>
+                                                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">2. Backend API URL</div>
+                                                <code className="bg-gray-100 px-2 py-1 rounded text-gray-900 font-mono text-xs select-all">https://gymbot-api.onrender.com/api</code>
+                                            </div>
+                                            <div>
+                                                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">3. Frontend Script URL</div>
+                                                <code className="bg-gray-100 px-2 py-1 rounded text-gray-900 font-mono text-xs select-all">https://fitbot-demo.vercel.app/gymbot.min.js</code>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>Click <strong>Save & Connect</strong>. The bot will instantly appear on your live site!</li>
+                                </ol>
+                            </div>
+                        )}
                     </div>
 
                     <div className="pt-4 border-t border-gray-100">
