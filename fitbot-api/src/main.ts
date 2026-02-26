@@ -30,7 +30,8 @@ async function bootstrap() {
       'http://localhost:5173',
       'http://localhost:3001',
       'https://gymbot-admin.vercel.app',
-      'https://gymbot-react-demo.vercel.app'
+      'https://gymbot-react-demo.vercel.app',
+      'https://jabberdocky.com'
     ];
 
   app.enableCors({

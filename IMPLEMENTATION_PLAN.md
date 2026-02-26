@@ -8,6 +8,7 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **Option B (Story 8.1): Admin UX Polish** - Implement "Unsaved Changes" warning and better visual save feedback.
 - [ ] **Option C (Story 7.5): Email Integration** - Create workflow to email API Key & Instructions to a web developer.
 - [ ] **Deferred**: Move AI system instructions to the database and expose them in the Admin UI for customization.
+- [ ] **Deferred**: Create a "Allowed Domains" whitelist in the Configuration database model to dynamically serve CORS headers instead of hardcoding domains in `main.ts` environment variables.
 - [ ] **Maintenance**: Resolve git conflicts by merging/rebasing `main` into the `feat/kb-uploads-and-security` branch to keep it up to date.
 =======
 ## 🚨 Priority Sprint: Core Development (Local Ecosystem)

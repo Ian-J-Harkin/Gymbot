@@ -94,7 +94,7 @@ class FitBot_Widget
                 <div class="fitbot-step">
                     <h3><span>1</span> Get your API Key</h3>
                     <p>Open your GymBot SaaS Portal. Navigate to the "Widget" tab or "API Keys" section to copy your unique installation key.</p>
-                    <a href="#" target="_blank" class="fitbot-btn fitbot-btn-secondary" onclick="alert('In a real environment, this would link to your GymBot SaaS dashboard.'); return false;">Open Admin Portal &rarr;</a>
+                    <a href="https://gymbot-admin.vercel.app" target="_blank" class="fitbot-btn fitbot-btn-secondary">Open Admin Portal &rarr;</a>
                 </div>
 
                 <div class="fitbot-step">

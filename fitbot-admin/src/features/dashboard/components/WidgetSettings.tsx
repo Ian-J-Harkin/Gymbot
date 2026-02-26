@@ -150,11 +150,11 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                         {integrationType === 'html' ? (
                             <div className="bg-gray-900 rounded-xl p-4 relative group">
                                 <code className="text-xs text-gray-300 font-mono break-all block whitespace-pre-wrap">
-                                    {`<script \n  src="https://fitbot-demo.vercel.app/gymbot.min.js" \n  data-api-key="${apiKey}" \n  data-api-url="https://gymbot-api.onrender.com/api" \n  async>\n</script>`}
+                                    {`<script \n  src="https://gymbot-demo.vercel.app/gymbot.min.js" \n  data-api-key="${apiKey}" \n  data-api-url="https://gymbot-api.onrender.com/api" \n  async>\n</script>`}
                                 </code>
                                 <button
                                     type="button"
-                                    onClick={() => navigator.clipboard.writeText(`<script src="https://fitbot-demo.vercel.app/gymbot.min.js" data-api-key="${apiKey}" data-api-url="https://gymbot-api.onrender.com/api" async></script>`)}
+                                    onClick={() => navigator.clipboard.writeText(`<script src="https://gymbot-demo.vercel.app/gymbot.min.js" data-api-key="${apiKey}" data-api-url="https://gymbot-api.onrender.com/api" async></script>`)}
                                     className="absolute top-2 right-2 p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                     Copy
@@ -177,7 +177,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                                             </div>
                                             <div>
                                                 <div className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1">3. Frontend Script URL</div>
-                                                <code className="bg-gray-100 px-2 py-1 rounded text-gray-900 font-mono text-xs select-all">https://fitbot-demo.vercel.app/gymbot.min.js</code>
+                                                <code className="bg-gray-100 px-2 py-1 rounded text-gray-900 font-mono text-xs select-all">https://gymbot-demo.vercel.app/gymbot.min.js</code>
                                             </div>
                                         </div>
                                     </li>
@@ -193,7 +193,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                                             const settings = {
                                                 apiKey: apiKey,
                                                 apiUrl: 'https://gymbot-api.onrender.com/api',
-                                                scriptUrl: 'https://fitbot-demo.vercel.app/gymbot.min.js'
+                                                scriptUrl: 'https://gymbot-demo.vercel.app/gymbot.min.js'
                                             };
                                             navigator.clipboard.writeText(JSON.stringify(settings, null, 2));
                                             alert('Settings copied! Paste them into the API Key field in WordPress.');
