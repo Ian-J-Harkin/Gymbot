@@ -134,15 +134,15 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] Show progress bar % complete.
 
 ### Story 7.2: WordPress Plugin "One-Click" Connect (Client Side)
-- [ ] Implement a "Connect to Gymbot" button in WP Admin using OAuth or simple Key exchange.
+- [x] Implement a "Connect to Gymbot" button in WP Admin using OAuth or simple Key exchange.
     - *Alternative (MVP)*: Improved Key Input with "Verify Connection" button.
-- [ ] Add status indicator: 🟢 Connected / 🔴 Disconnected.
-- [ ] Display basic bot stats in WP Admin (e.g., "Bot is active", "Last chat: 2m ago").
+- [x] Add status indicator: 🟢 Connected / 🔴 Disconnected.
+- [x] Display basic bot stats in WP Admin (e.g., "Bot is active", "Last chat: 2m ago").
 
 ### Story 7.3: Connection Verification (End-to-End Test)
-- [ ] **Backend**: Add `HEAD /api/widget/health` endpoint that validates API Key.
-- [ ] **Frontend (WP)**: In plugin settings, AJAX call to check key validity before saving.
-- [ ] **Frontend (Widget)**: Display a friendly "Setup Needed" screen if key is invalid (Already implemented in Widget UI).
+- [x] **Backend**: Add `HEAD /api/widget/health` endpoint that validates API Key.
+- [x] **Frontend (WP)**: In plugin settings, AJAX call to check key validity before saving.
+- [x] **Frontend (Widget)**: Display a friendly "Setup Needed" screen if key is invalid (Already implemented in Widget UI).
 
 ### Story 7.4: Developer Experience (Local Dev)
 - [ ] Improve local dev setup to require fewer manual steps (e.g., auto-inject test keys or mock mode).
@@ -163,7 +163,7 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **Save Feedback**: Change "Save" button to "Saved!" (green) temporarily on success.
 ## 🟡 Epic 6: Knowledge Base & Security Hardening (Partially Complete)
 - [x] **6.1 Advanced Document Support**: Support for .pdf and .docx file uploads; automatic chunking and indexing.
-- [ ] **6.2 Security Hardening** *(reopened — see Epic 14)*: CORS is still hardcoded to `localhost` origins in `main.ts`; no `helmet` middleware; file-type validation relies on user-supplied extension not MIME type.
+- [x] **6.2 Security Hardening** *(completed in Epic 14)*: CORS is now environment-driven; added `helmet` middleware; file-type validation uses MIME type.
 - [x] **6.3 Source Attribution**: API and Widget now support metadata tracking for cited documents.
 - [x] **6.4 Quick Start Data**: "System Prompt" fallback UI with "Binary Choice" logic (disabled when docs exist).
 - [ ] **6.5 Vector Search Evaluation**: Investigate `pgvector` in PostgreSQL (Neon) for semantic search vs. current basic keyword logic.
@@ -177,7 +177,7 @@ This document tracks the progress of the FitBot project implementation against t
 
 ## 🟡 Epic 9: UX Polish & Admin Features (IN PROGRESS)
 - [x] **9.2 Rate Limiting**: Install `@nestjs/throttler`; apply to `/auth/login`, `/auth/register`, `/widget/chat`, `/api-keys`.
-- [ ] **9.4 Online Demo (Cloud-Ready)**: Deploy a "free demo" version using a HuggingFace/OpenRouter free model.
+- [x] **9.4 Online Demo (Cloud-Ready)**: Deployed a "free demo" version (`gymbot-react-demo.vercel.app`) using OpenRouter free models via Render API.
 - *(Note: 9.1 and 9.3 moved to Priority Sprint above)*
 
 ## 🟡 Epic 10: CI/CD & Deployment (Pending Epic 9)
@@ -226,7 +226,7 @@ Publishing the universal adapters to npm.
 2.  **CD Validation**: Merge a passing PR and monitor the GitHub Actions UI to trace the successful build and deployment of the backend API and frontend dashboards to their respective staging URLs.
 
 ## 🟡 Epic 11: Ecosystem Integration & Pluggability (IN PROGRESS)
-- [ ] **11.3 Cross-Platform Delivery**: Finalize the "Universal JS" build that can be hosted on CDNs and dropped into any CMS (Wix, Squarespace, Shopify).
+- [x] **11.3 Cross-Platform Delivery**: Finalized the raw HTML `<script>` embed code in the Admin Dashboard that can be dropped into any CMS (Wix, Squarespace, Shopify).
 - [x] **11.4 Universal React Component ("React Plugin Equivalent")**: Build and publish a distributable `@fitbot/react` component that mirrors the WordPress plugin experience for non-WP sites. This is the **core deliverable** validated by the React Demo Site in Epic 15.
     - [x] **11.4a Component Architecture**: Define the component API — `<FitBotWidget apiKey={...} apiUrl={...} theme={...} />` — wrapping the Universal Loader script.
     - [x] **11.4b npm Package**: Package configured with `tsup` for CJS/ESM/d.ts output.
@@ -313,12 +313,13 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
 
 > ⏳ **The following tasks are strictly dependent on pushing code to GitHub and creating the actual cloud resources.**
 
-- [/] **15.3b Demo Site Projects**: *(External)* `fitbot-react-demo` repo deployed to Vercel; WP Demo Site live on WordPress.com. Both consume API on Render.
-- [/] **15.5 Live Smoke Test**: React demo on `*.vercel.app` (using `@fitbot/react`) successfully chats with API on Render. WP Demo Site confirmed working. Zero Docker involved.
+- [x] **15.3b Demo Site Projects**: *(External)* React Demo live on Vercel; WP Demo Site securely connected on live host. Both consume API on Render.
+- [x] **15.5 Live Smoke Test**: React demo and WP Demo Site confirmed chatting successfully with the live API on Render. Zero Docker involved.
 - [x] **15.6 Connectivity Smoke Test**: Before every deployment, ping the `/api/health` endpoint from each demo site's origin to confirm cross-service connectivity. Catches URL typos and trailing-slash CORS mismatches that static hosts commonly produce.
 
 ## ❓ Future Queries & Clarifications
 - [ ] **WordPress Plugin UX**: Can we make the FitBot settings more prominent in the WP Admin menu (e.g., using `add_menu_page()` instead of `add_options_page()`) so it appears as a top-level icon rather than hidden inside the Settings dropdown?
+- [ ] **Widget Customization**: Add configuration options to the Admin Dashboard (and reflect them in the WP plugin/React widget) to allow gym owners to customize the chatbot's title (e.g., "Gym Name Assistant") and UI styling (colors, font) to better match their underlying website.
 - [ ] **Data Import Logic**: Do we need to test Sales/customer import logic — is this in the context of bulk testing more customers for Stripe integration?
 - [ ] **System Prompt Strategy**: Decide whether the system prompt should be centralized in `constants.ts` (for developer-driven consistency) or moved to the database via the `Configuration` model (to allow gyms to customize their bot's "personality" and instructions).
 - [ ] **Infrastructure as Code (IaC) Evolution**: While the current deployment creates GitHub Actions automatically or uses Vercel's deep native integrations, we should eventually implement Terraform scripts in an `/infrastructure` directory to allow 100% automated, reproducible deployments.
