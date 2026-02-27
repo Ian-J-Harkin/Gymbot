@@ -32,10 +32,19 @@ class FitBot_Widget
 
     public function settings_init()
     {
-        // Register the settings allowing WordPress to handle saving it automatically
-        register_setting('fitbot_settings', 'fitbot_api_key');
-        register_setting('fitbot_settings', 'fitbot_api_url');
-        register_setting('fitbot_settings', 'fitbot_script_url');
+        // Register the settings allowing WordPress to handle saving it automatically with sanitization
+        register_setting('fitbot_settings', 'fitbot_api_key', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_text_field'
+        ));
+        register_setting('fitbot_settings', 'fitbot_api_url', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_url'
+        ));
+        register_setting('fitbot_settings', 'fitbot_script_url', array(
+            'type' => 'string',
+            'sanitize_callback' => 'sanitize_url'
+        ));
     }
 
     public function settings_page()

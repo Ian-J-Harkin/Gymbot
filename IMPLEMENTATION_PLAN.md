@@ -22,6 +22,21 @@ This document tracks the progress of the FitBot project implementation against t
 - [x] **11.1 WP Onboarding Architecture Review**: Redesign registration/setup flow between WordPress Admin and GymBot Admin (API key exchange, "Setup Wizard" UI).
 - [x] **11.2 Multi-Platform Adapters**: Design wrappers for React, Next.js, and Angular to allow easy integration on non-WordPress sites.
 
+## 🚨 Priority Sprint 2: Post-MVP Architecture & Security Hardening
+> **Goal**: Address critical architectural flaws and security vulnerabilities identified in expert review before scaling production traffic.
+
+**Immediate Priorities:**
+- [ ] **Vector Search Scalability (Story 6.3)**: Implement `pgvector` in PostgreSQL for semantic retrieval of PDF/DOCX uploads. Replaces raw text appending to prevent LLM token limit exhaustion as the Knowledge Base grows.
+- [ ] **Database-Driven CORS**: Move "Allowed Domains" from environment variables to the `Configuration` database model to securely manage multi-tenant cross-origin requests.
+- [ ] **WordPress Input Sanitization**: Update `register_setting` in the WordPress plugin (`gymbot.php`) to use `sanitize_text_field` and `sanitize_url` callbacks, preventing XSS/script injection via the WP Admin area.
+- [ ] **Universal Core Package**: Consolidate redundant widget logic spanning React, Next.js, and vanilla HTML into a single shared `@fitbot/core` package to eliminate behavioral drift.
+
+**Post-MVP (Deferred & Scaling):**
+- [ ] **Shared Types/DTOs**: Extract Prisma-generated types into a shared package to ensure strict type parity between the React Admin frontend and NestJS backend.
+- [ ] **API Key Rotation Strategy**: Enhance `EncryptionService` to support AES-256-GCM key rotation, preventing catastrophic exposure if the primary `ENCRYPTION_KEY` is compromised.
+- [ ] **Robust SSE Handling**: Enhance the client-side Widget SSE streaming logic to gracefully handle connection drops and reconnects (especially given custom header limitations with native `EventSource`).
+- [ ] **Zero-Downtime Migrations**: Define a safe, zero-downtime database migration strategy for production CI/CD (e.g., expand-and-contract pattern) to handle Prisma schema drift.
+
 ---
 >>>>>>> feat/kb-uploads-and-security
 
