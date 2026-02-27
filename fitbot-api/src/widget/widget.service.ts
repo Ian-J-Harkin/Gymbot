@@ -33,6 +33,7 @@ export class WidgetService {
     getPublicConfig(configuration: Configuration) {
         return {
             widgetColor: configuration.widgetColor,
+            widgetTitle: configuration.widgetTitle || 'FitBot Assistant',
             greetingMessage: configuration.greetingMessage || 'How can I help you?',
         };
     }
@@ -89,7 +90,10 @@ export class WidgetService {
             ? `Retrieved ${relevantChunks.length} relevant sections`
             : "No specific match found (using general context)";
 
-        const systemPrompt = `You are a helpful assistant for a gym. Use the following EXCERPT from the gym's FAQ to answer user questions:
+        const baseInstructions = configuration.systemInstructions || "You are a helpful assistant for a gym.";
+        const systemPrompt = `${baseInstructions}
+
+Use the following EXCERPT from the gym's Knowledge Base to answer user questions:
 ---
 ${contextContent}
 ---

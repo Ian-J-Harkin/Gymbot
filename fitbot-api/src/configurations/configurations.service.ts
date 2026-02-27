@@ -41,6 +41,8 @@ export class ConfigurationsService {
             return {
                 userId,
                 widgetColor: DEFAULT_WIDGET_COLOR,
+                widgetTitle: 'FitBot Assistant',
+                systemInstructions: '',
                 faqText: '',
                 openAiApiKey: '',
                 aiProvider: AI_PROVIDERS.OPENAI,
@@ -131,6 +133,8 @@ export class ConfigurationsService {
         const data = {
             faqText: dto.faqText || '',
             widgetColor: dto.widgetColor,
+            widgetTitle: dto.widgetTitle || 'FitBot Assistant',
+            systemInstructions: dto.systemInstructions || '',
             aiProvider: dto.aiProvider,
             openAiApiKey: encryptedOpenAiKey,
             openRouterApiKey: encryptedOpenRouterKey,

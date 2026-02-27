@@ -11,6 +11,14 @@ export class UpdateConfigurationDto {
     widgetColor: string;
 
     @IsString()
+    @IsOptional()
+    widgetTitle?: string;
+
+    @IsString()
+    @IsOptional()
+    systemInstructions?: string;
+
+    @IsString()
     @IsIn(['openai', 'openrouter', 'ollama', 'huggingface'])
     aiProvider: string;
 
