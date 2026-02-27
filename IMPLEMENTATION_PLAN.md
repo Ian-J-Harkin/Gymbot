@@ -168,6 +168,15 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] Allow sending API Key + Plugin Link + Setup Guide to a specified email address (e.g., to the gym's web developer).
 - [ ] **Goal**: seamless handoff between Gym Owner (Gymbot Admin) and Web Admin.
 
+### Story 7.6 (Phase 8): Auto-Theme Matching (Frontend Telemetry)
+- [ ] **Proposed Strategy (Option 2: The "Spy" Approach)**
+  To make branding effortless, the widget will automatically detect the host website's primary theme color and report it back to the Admin Dashboard as a suggestion.
+- [ ] **Widget Telemetry (`fitbot-widget`)**: Add a lightweight `useEffect` to `ChatWidget`. On initial load, calculate the host website's computed background color or primary brand color (e.g., checking `document.body` background, or searching for specific CSS variables like `--primary-color`). Silently `POST` this extracted color HEX code back to a new telemetry endpoint on the `fitbot-api`.
+- [ ] **Backend Storage (`fitbot-api`)**: Add a `suggestedThemeColor` (String) field to the `Configuration` Prisma model. Create a lightweight `POST /widget/telemetry` endpoint that accepts the color from the widget and updates the `suggestedThemeColor` for that specific API Key's configuration.
+- [ ] **Admin UI Suggestion (`fitbot-admin`)**: In `WidgetSettings.tsx`, fetch the `suggestedThemeColor` alongside the user's active `widgetColor`. If a suggested color exists and differs from the active color, display a small UI bubble: *"We detected [Color Block] on your live website. Click to apply."*
+> [!NOTE]
+> **Deferred Enhancement (Backend Scraper)**: We considered "Option 1", where the Admin Dashboard asks for the Gym's URL and a Node.js scraper fetches the colors *before* the script is ever installed. This was deferred in favor of the frontend telemetry approach due to its exact accuracy with computed DOM styles vs. static scraping limitations.
+
 ## 🟣 Epic 8: Testing & Quality Assurance (Added based on feedback)
 - [x] **Widget Unit Tests**: Add Vitest to `fitbot-widget` to test `ApiClient` logic and component rendering.
 - [x] **E2E Testing**: Set up Playwright/Cypress for full end-to-end testing of the Widget -> API flow.

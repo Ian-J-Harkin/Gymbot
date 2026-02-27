@@ -36,6 +36,36 @@ export function ChatWidget({ apiKey, apiUrl }: ChatWidgetProps) {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  useEffect(() => {
+    // Only run telemetry once after config is loaded
+    if (!config || !clientRef.current) return;
+
+    const detectColor = setTimeout(() => {
+      try {
+        const bodyStyle = window.getComputedStyle(document.body);
+        const bgColor = bodyStyle.backgroundColor;
+
+        // Basic check to ensure it's not completely transparent
+        if (bgColor && bgColor !== 'rgba(0, 0, 0, 0)' && bgColor !== 'transparent') {
+          clientRef.current?.sendTelemetry({ suggestedThemeColor: bgColor });
+        } else {
+          // fallback attempt: check header if exists
+          const header = document.querySelector('header');
+          if (header) {
+            const headerBg = window.getComputedStyle(header).backgroundColor;
+            if (headerBg && headerBg !== 'rgba(0, 0, 0, 0)' && headerBg !== 'transparent') {
+              clientRef.current?.sendTelemetry({ suggestedThemeColor: headerBg });
+            }
+          }
+        }
+      } catch (e) {
+        console.warn("FitBot: Could not detect host website theme", e);
+      }
+    }, 2000);
+
+    return () => clearTimeout(detectColor);
+  }, [config]);
+
   const handleSend = async () => {
     if (!inputValue.trim() || !clientRef.current || isTyping) return;
 

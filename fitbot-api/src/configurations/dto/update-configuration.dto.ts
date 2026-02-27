@@ -19,6 +19,10 @@ export class UpdateConfigurationDto {
     systemInstructions?: string;
 
     @IsString()
+    @IsOptional()
+    suggestedThemeColor?: string;
+
+    @IsString()
     @IsIn(['openai', 'openrouter', 'ollama', 'huggingface'])
     aiProvider: string;
 

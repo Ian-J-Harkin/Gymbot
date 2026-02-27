@@ -82,4 +82,19 @@ export class ApiClient {
             }
         }
     }
+
+    async sendTelemetry(data: { suggestedThemeColor: string }): Promise<void> {
+        try {
+            await fetch(`${this.baseUrl}/widget/telemetry`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-Key': this.apiKey,
+                },
+                body: JSON.stringify(data),
+            });
+        } catch (e) {
+            console.error('Failed to send telemetry data:', e);
+        }
+    }
 }

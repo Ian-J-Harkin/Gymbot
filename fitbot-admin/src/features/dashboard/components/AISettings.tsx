@@ -90,6 +90,7 @@ export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
                 // Ensure we pass widgetColor so back-end doesn't wipe it, though useForm default does this usually
                 widgetColor: data.primaryColor,
                 faqText: data.faqData || '',
+                suggestedThemeColor: data.suggestedThemeColor || undefined,
             });
             setSuccess('AI Brain updated successfully!');
             setTimeout(() => setSuccess(null), 3000);

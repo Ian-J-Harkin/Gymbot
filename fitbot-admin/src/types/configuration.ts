@@ -13,6 +13,7 @@ export interface ChatbotConfiguration {
   ollamaModel: string;
   widgetTitle?: string;
   systemInstructions?: string;
+  suggestedThemeColor?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -28,6 +29,7 @@ export interface ConfigurationRequest {
   ollamaModel?: string;
   widgetTitle?: string;
   systemInstructions?: string;
+  suggestedThemeColor?: string;
 }
 
 export interface ConfigurationResponse {
@@ -42,6 +44,7 @@ export interface ConfigurationResponse {
   ollamaModel: string;
   widgetTitle?: string;
   systemInstructions?: string;
+  suggestedThemeColor?: string;
   createdAt?: string;
   updatedAt?: string;
   apiKey?: {

@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Body, UseGuards, Request, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { WidgetService } from './widget.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { WidgetHistoryItem } from './providers/ai-provider.interface';
 import { ApiKeyAuthGuard } from '../common/guards/api-key-auth.guard';
 import { ApiKeyThrottlerGuard } from '../common/guards/api-key-throttler.guard';
@@ -22,7 +23,7 @@ class ChatMessageDto {
 @Controller('widget')
 @UseGuards(ApiKeyAuthGuard)
 export class WidgetController {
-    constructor(private readonly widgetService: WidgetService) { }
+    constructor(private readonly widgetService: WidgetService, private readonly prisma: PrismaService) { }
 
     @Get('config')
     getConfig(@Request() req: ApiKeyRequest) {
@@ -60,5 +61,24 @@ export class WidgetController {
 
         res.write('data: [DONE]\n\n');
         res.end();
+    }
+
+    @Post('telemetry')
+    async telemetry(@Request() req: ApiKeyRequest, @Body('suggestedThemeColor') color: string) {
+        if (!color || typeof color !== 'string') {
+            return { success: false };
+        }
+
+        // Simple check to ensure it looks like a hex color or rgb string to prevent abuse
+        if (color.length > 30) {
+            return { success: false };
+        }
+
+        await this.prisma.configuration.update({
+            where: { id: req.configuration.id },
+            data: { suggestedThemeColor: color }
+        });
+
+        return { success: true };
     }
 }

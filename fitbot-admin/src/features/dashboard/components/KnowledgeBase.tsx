@@ -80,7 +80,8 @@ export const KnowledgeBase: React.FC<KnowledgeBaseProps> = ({ onDirtyChange }) =
                 faqText: quickStartData,
                 // Ensure required fields are present if updateConfiguration type demands them
                 aiProvider: currentConfig.aiProvider || 'openai',
-                widgetColor: currentConfig.widgetColor || '#2563EB'
+                widgetColor: currentConfig.widgetColor || '#2563EB',
+                suggestedThemeColor: currentConfig.suggestedThemeColor || undefined,
             });
 
             setOriginalQuickStartData(quickStartData); // Reset dirty tracking after successful save

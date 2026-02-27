@@ -11,6 +11,7 @@ export const configurationSchema = z.object({
     .or(z.string().min(0)),
   widgetTitle: z.string().optional().default('FitBot Assistant'),
   systemInstructions: z.string().optional(),
+  suggestedThemeColor: z.string().optional().nullable(),
   aiProvider: z.enum(['openai', 'openrouter', 'ollama', 'huggingface']),
   openaiApiKey: z.string().optional(),
   openRouterApiKey: z.string().optional(),

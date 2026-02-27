@@ -37,6 +37,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
 
     const primaryColor = watch('primaryColor');
     const widgetTitle = watch('widgetTitle');
+    const suggestedThemeColor = watch('suggestedThemeColor');
 
     useEffect(() => {
         if (primaryColor) setPreviewColor(primaryColor);
@@ -67,6 +68,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
             reset({
                 primaryColor: config.widgetColor || '#2563EB',
                 widgetTitle: config.widgetTitle || 'FitBot Assistant',
+                suggestedThemeColor: config.suggestedThemeColor || undefined,
                 // Preserve other fields
                 aiProvider: config.aiProvider || 'openai',
                 faqData: config.faqText || '',
@@ -91,6 +93,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                 ...data, // Send all data including hidden fields to avoid overwriting with null
                 widgetColor: data.primaryColor,
                 faqText: data.faqData || '',
+                suggestedThemeColor: data.suggestedThemeColor || undefined,
             });
             setSuccess('Widget settings saved!');
             setTimeout(() => setSuccess(null), 3000);
@@ -134,8 +137,27 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                                 />
                             ))}
                         </div>
-                        {errors.primaryColor && <p className="text-sm text-red-600">{errors.primaryColor.message}</p>}
                     </div>
+                    {errors.primaryColor && <p className="text-sm text-red-600">{errors.primaryColor.message}</p>}
+
+                    {suggestedThemeColor && suggestedThemeColor.toLowerCase() !== primaryColor?.toLowerCase() && (
+                        <div className="mt-4 p-4 bg-blue-50 border border-blue-100 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-sm">
+                            <div className="flex items-center space-x-3 mb-3 sm:mb-0">
+                                <div className="w-8 h-8 rounded-full border border-gray-200 shadow-sm" style={{ backgroundColor: suggestedThemeColor }}></div>
+                                <div>
+                                    <p className="text-sm font-semibold text-blue-900">Detected Website Theme</p>
+                                    <p className="text-xs text-blue-700">We noticed {suggestedThemeColor} is a primary color on your live website.</p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => handleColorPresetClick(suggestedThemeColor)}
+                                className="whitespace-nowrap px-3 py-1.5 bg-white border border-blue-200 text-blue-700 text-xs font-bold rounded-md hover:bg-blue-50 transition-colors shadow-sm"
+                            >
+                                Apply Color
+                            </button>
+                        </div>
+                    )}
 
                     <div>
                         <h3 className="text-lg font-bold text-gray-900 mb-1">Installation Instructions</h3>
