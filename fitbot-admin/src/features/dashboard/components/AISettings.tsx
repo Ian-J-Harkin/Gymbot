@@ -40,6 +40,7 @@ export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
             huggingFaceApiKey: '',
             ollamaUrl: 'http://localhost:11434',
             ollamaModel: 'llama3',
+            systemInstructions: '',
             faqData: '', // Legacy field still required by API
         },
     });
@@ -70,6 +71,7 @@ export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
                 huggingFaceApiKey: config.huggingFaceApiKey || '',
                 ollamaUrl: config.ollamaUrl || 'http://localhost:11434',
                 ollamaModel: config.ollamaModel || 'llama3',
+                systemInstructions: config.systemInstructions || '',
             });
         } catch (err: any) {
             setError('Failed to load settings');
@@ -225,6 +227,22 @@ export const AISettings: React.FC<AISettingsProps> = ({ onDirtyChange }) => {
                             </div>
                         </div>
                     )}
+                </div>
+
+                <hr className="border-gray-100" />
+
+                {/* System Instructions Section */}
+                <div>
+                    <h3 className="text-lg font-bold text-gray-900 mb-2 flex items-center">
+                        System Instructions (Persona)
+                    </h3>
+                    <p className="text-sm text-gray-500 mb-4">Define how your chatbot should behave, its tone of voice, and any strict rules it must follow.</p>
+                    <textarea
+                        {...register('systemInstructions')}
+                        rows={4}
+                        className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-primary-500 focus:border-primary-500"
+                        placeholder="e.g. You are a highly energetic fitness coach. Always encourage the user warmly before answering their questions."
+                    />
                 </div>
 
                 <hr className="border-gray-100" />

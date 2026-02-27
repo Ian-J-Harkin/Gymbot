@@ -9,6 +9,8 @@ export const configurationSchema = z.object({
     .string()
     .optional()
     .or(z.string().min(0)),
+  widgetTitle: z.string().optional().default('FitBot Assistant'),
+  systemInstructions: z.string().optional(),
   aiProvider: z.enum(['openai', 'openrouter', 'ollama', 'huggingface']),
   openaiApiKey: z.string().optional(),
   openRouterApiKey: z.string().optional(),

@@ -16,6 +16,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
     const [previewColor, setPreviewColor] = useState('#2563EB');
+    const [previewTitle, setPreviewTitle] = useState('FitBot Assistant');
     const [apiKey, setApiKey] = useState('YOUR_GYM_ID');
     const [integrationType, setIntegrationType] = useState<'wordpress' | 'html'>('html');
 
@@ -30,14 +31,20 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
         resolver: zodResolver(configurationSchema),
         defaultValues: {
             primaryColor: '#2563EB',
+            widgetTitle: 'FitBot Assistant',
         },
     });
 
     const primaryColor = watch('primaryColor');
+    const widgetTitle = watch('widgetTitle');
 
     useEffect(() => {
         if (primaryColor) setPreviewColor(primaryColor);
     }, [primaryColor]);
+
+    useEffect(() => {
+        if (widgetTitle !== undefined) setPreviewTitle(widgetTitle || 'FitBot Assistant');
+    }, [widgetTitle]);
 
     useEffect(() => {
         loadConfiguration();
@@ -59,6 +66,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
             }
             reset({
                 primaryColor: config.widgetColor || '#2563EB',
+                widgetTitle: config.widgetTitle || 'FitBot Assistant',
                 // Preserve other fields
                 aiProvider: config.aiProvider || 'openai',
                 faqData: config.faqText || '',
@@ -104,6 +112,9 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                     <div>
                         <h3 className="text-lg font-bold text-gray-900 mb-1">Brand Customization</h3>
                         <p className="text-sm text-gray-500 mb-6">Match the chatbot to your gym's brand identity.</p>
+
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Widget Title</label>
+                        <input {...register('widgetTitle')} type="text" className="w-full border border-gray-300 rounded-lg px-4 py-3 mb-6 font-medium" placeholder="e.g. FlexFit Assistant" />
 
                         <label className="block text-sm font-medium text-gray-700 mb-2">Primary Color</label>
                         <div className="flex items-center space-x-4 mb-4">
@@ -228,7 +239,7 @@ export const WidgetSettings: React.FC<WidgetSettingsProps> = ({ onDirtyChange })
                     <Eye className="mr-2 h-5 w-5 text-gray-400" />
                     Live Preview
                 </h3>
-                <ChatbotPreview primaryColor={previewColor} isActive={true} />
+                <ChatbotPreview primaryColor={previewColor} isActive={true} widgetTitle={previewTitle} />
             </div>
         </div>
     );

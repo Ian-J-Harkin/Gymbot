@@ -11,6 +11,8 @@ export interface ChatbotConfiguration {
   huggingFaceApiKey: string;
   ollamaUrl: string;
   ollamaModel: string;
+  widgetTitle?: string;
+  systemInstructions?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -24,6 +26,8 @@ export interface ConfigurationRequest {
   huggingFaceApiKey?: string;
   ollamaUrl?: string;
   ollamaModel?: string;
+  widgetTitle?: string;
+  systemInstructions?: string;
 }
 
 export interface ConfigurationResponse {
@@ -36,6 +40,8 @@ export interface ConfigurationResponse {
   huggingFaceApiKey: string;
   ollamaUrl: string;
   ollamaModel: string;
+  widgetTitle?: string;
+  systemInstructions?: string;
   createdAt?: string;
   updatedAt?: string;
   apiKey?: {

@@ -4,11 +4,13 @@ import { MessageCircle, X, Send } from 'lucide-react';
 interface ChatbotPreviewProps {
   primaryColor: string;
   isActive: boolean;
+  widgetTitle?: string;
 }
 
 export const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({
   primaryColor,
   isActive,
+  widgetTitle = 'FitBot Assistant',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages] = useState([
@@ -83,7 +85,7 @@ export const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({
                 >
                   <div className="flex items-center space-x-2">
                     <MessageCircle className="h-5 w-5" />
-                    <span className="font-medium">FitBot Assistant</span>
+                    <span className="font-medium">{widgetTitle}</span>
                   </div>
                   <button
                     onClick={() => setIsOpen(false)}
@@ -98,16 +100,14 @@ export const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${
-                        message.sender === 'user' ? 'justify-end' : 'justify-start'
-                      }`}
+                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'
+                        }`}
                     >
                       <div
-                        className={`max-w-xs px-3 py-2 rounded-lg text-sm ${
-                          message.sender === 'user'
+                        className={`max-w-xs px-3 py-2 rounded-lg text-sm ${message.sender === 'user'
                             ? 'text-white'
                             : 'bg-gray-100 text-gray-800'
-                        }`}
+                          }`}
                         style={{
                           backgroundColor:
                             message.sender === 'user' ? primaryColor : undefined,

@@ -405,7 +405,7 @@ export function ChatWidget({ apiKey, apiUrl }: ChatWidgetProps) {
         <div className="fitbot-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <MessageCircle size={20} />
-            <span style={{ fontWeight: 600 }}>FitBot Assistant</span>
+            <span style={{ fontWeight: 600 }}>{config?.widgetTitle || 'FitBot Assistant'}</span>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button
