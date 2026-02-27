@@ -12,7 +12,7 @@ export const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({
   isActive,
   widgetTitle = 'FitBot Assistant',
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
   const [messages] = useState([
     {
       id: 1,
@@ -61,11 +61,11 @@ export const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({
         {/* Mock Website Content */}
         <div className="p-6 bg-white rounded-b-lg min-h-[300px] relative">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">
-              Welcome to Your Gym
+            <h2 className="text-2xl font-bold text-gray-400 mb-2">
+              Mock Website Layout
             </h2>
-            <p className="text-gray-600">
-              Transform your fitness journey with us
+            <p className="text-gray-400">
+              This is a preview of how the widget looks embedded on a page.
             </p>
           </div>
 
@@ -105,8 +105,8 @@ export const ChatbotPreview: React.FC<ChatbotPreviewProps> = ({
                     >
                       <div
                         className={`max-w-xs px-3 py-2 rounded-lg text-sm ${message.sender === 'user'
-                            ? 'text-white'
-                            : 'bg-gray-100 text-gray-800'
+                          ? 'text-white'
+                          : 'bg-gray-100 text-gray-800'
                           }`}
                         style={{
                           backgroundColor:
