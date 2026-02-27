@@ -41,8 +41,7 @@ model Configuration {
   ollamaModel       String? @default("llama3")
   greetingMessage   String? @default("Hi! I'm FitBot, your gym assistant. How can I help you today?")
   systemInstructions String? @db.Text
-
-  // Billing Instrumentation
+  suggestedThemeColor String?  // Billing Instrumentation
   requireSubscription Boolean @default(false)
 
   createdAt DateTime   @default(now())
