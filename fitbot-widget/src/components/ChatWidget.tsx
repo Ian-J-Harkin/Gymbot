@@ -164,7 +164,7 @@ export function ChatWidget({ apiKey, apiUrl }: ChatWidgetProps) {
           cursor: pointer;
           box-shadow: 0 4px 12px rgba(0,0,0,0.15);
           transition: transform 0.2s ease;
-          border: none;
+          border: 1px solid rgba(255, 255, 255, 0.2);
         }
         .fitbot-launcher:hover {
           transform: scale(1.05);
@@ -180,6 +180,7 @@ export function ChatWidget({ apiKey, apiUrl }: ChatWidgetProps) {
           background-color: white;
           border-radius: 16px;
           box-shadow: 0 5px 40px rgba(0,0,0,0.16);
+          border: 1px solid rgba(160, 160, 160, 0.3);
           display: ${isOpen ? 'flex' : 'none'};
           flex-direction: column;
           overflow: hidden;
