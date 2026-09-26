@@ -11,7 +11,9 @@ export class ExplanationHelper {
         relevantChunks: any[],
         allChunksCount: number,
         responseTimeMs: number,
-        validationResults?: ValidationResult[]
+        validationResults?: ValidationResult[],
+        routeDecision?: string,
+        routeConfidence?: number
     ): ExplanationMetadata {
         const uniqueSources = new Map(relevantChunks.map(c => [c.fileName, {
             id: c.id,
@@ -30,7 +32,9 @@ export class ExplanationHelper {
             responseTimeMs,
             timestamp: new Date().toISOString(),
             validationResults,
-            sources: Array.from(uniqueSources.values())
+            sources: Array.from(uniqueSources.values()),
+            routeDecision,
+            routeConfidence
         };
     }
 }

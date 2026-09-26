@@ -19,6 +19,8 @@ import { AiProviderService } from './providers/ai-provider.service';
 import { ExplanationHelper } from './explanation.helper';
 import { WidgetHistoryItem } from './providers/ai-provider.interface';
 
+import { SemanticRouterService } from '../semantic-router/semantic-router.service';
+
 @Injectable()
 export class WidgetService {
     constructor(
@@ -28,6 +30,7 @@ export class WidgetService {
         private prisma: PrismaService,
         private aiProviderService: AiProviderService,
         private explanationHelper: ExplanationHelper,
+        private semanticRouter: SemanticRouterService,
     ) { }
 
     getPublicConfig(configuration: Configuration) {
@@ -54,6 +57,9 @@ export class WidgetService {
         }
 
         // --- Mini-RAG: Context Retrieval ---
+        // Semantic Routing (Classify the query)
+        const { route, confidence } = await this.semanticRouter.routeQuery(message);
+
         const faqChunks = this.ragService.chunkText(configuration.faqText);
 
         // Fetch document chunks from the database with document info
@@ -153,7 +159,9 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
                 relevantChunks,
                 allChunks.length,
                 responseTimeMs,
-                inputValidation.results
+                inputValidation.results,
+                route,
+                confidence
             );
 
             yield { explanation };

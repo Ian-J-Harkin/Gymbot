@@ -16,4 +16,6 @@ export interface ExplanationMetadata {
     timestamp: string;
     validationResults?: ValidationResult[];  // Flags or results from validation service
     sources?: Source[];         // Document snippets retrieved
+    routeDecision?: string;     // 'rag_synthesis' | 'standard_search'
+    routeConfidence?: number;   // 0.0 – 1.0
 }

@@ -12,9 +12,10 @@ import { OpenRouterProvider } from './providers/openrouter.provider';
 import { OllamaProvider } from './providers/ollama.provider';
 import { HuggingFaceProvider } from './providers/huggingface.provider';
 import { ExplanationHelper } from './explanation.helper';
+import { SemanticRouterModule } from '../semantic-router/semantic-router.module';
 
 @Module({
-  imports: [CommonModule, ChatLogsModule, ValidationModule, RagModule, PrismaModule],
+  imports: [CommonModule, ChatLogsModule, ValidationModule, RagModule, PrismaModule, SemanticRouterModule],
   providers: [
     WidgetService,
     AiProviderService,
