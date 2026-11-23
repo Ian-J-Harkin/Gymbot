@@ -125,10 +125,12 @@ describe('StripeService', () => {
             disabledService = module.get<StripeService>(StripeService);
         });
 
-        it('should throw ServiceUnavailableException from createCheckoutSession', async () => {
+        it('should return a mocked checkout URL from createCheckoutSession', async () => {
             await expect(
                 disabledService.createCheckoutSession('user-1', 'test@test.com'),
-            ).rejects.toThrow('Stripe integration is not configured');
+            ).resolves.toEqual({
+                url: 'some-value?session_id=mock_session_123&mock_success=true',
+            });
         });
 
         it('should still allow isSubscriptionActive (DB-only method)', async () => {

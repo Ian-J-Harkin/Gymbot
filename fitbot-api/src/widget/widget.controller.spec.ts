@@ -4,6 +4,7 @@ import { WidgetController } from './widget.controller';
 import { WidgetService } from './widget.service';
 import { ApiKeyAuthGuard } from '../common/guards/api-key-auth.guard';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { PrismaService } from '../prisma/prisma.service';
 
 describe('WidgetController', () => {
   let controller: WidgetController;
@@ -18,7 +19,10 @@ describe('WidgetController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 10 }])],
       controllers: [WidgetController],
-      providers: [{ provide: WidgetService, useValue: service }],
+      providers: [
+        { provide: WidgetService, useValue: service },
+        { provide: PrismaService, useValue: {} },
+      ],
     })
       .overrideGuard(ApiKeyAuthGuard)
       .useValue({ canActivate: () => true })
