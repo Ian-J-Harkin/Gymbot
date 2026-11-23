@@ -2,6 +2,8 @@
 
 This document outlines the steps for manually verifying the core functionality of the Knowledge Base (RAG) feature.
 
+For proposed retrieval and answer-model upgrades, see [Evaluation_upgrade.md](Evaluation_upgrade.md). The ingestion, retrieval, deletion, and handbook-question scenarios below are the starting cases for that evaluation; they need expected source passages and repeatable scoring before they can be treated as a retrieval benchmark.
+
 ## 1. Environment Verification
 - **API**: Running on `http://localhost:3000`
 - **Admin UI**: Running on `http://localhost:3001`
@@ -29,6 +31,13 @@ This document outlines the steps for manually verifying the core functionality o
     - [ ] AI provides a correct answer derived from the document.
     - [ ] (Optional) Toggle "Why did I say this?" to verify the source and context used.
 
+### Test Case 3a: No Relevant Evidence (Deterministic Abstention)
+- **Action**: Keep at least one FAQ/document chunk that is unrelated to the question, then ask about information absent from the entire Knowledge Base.
+- **Verification**:
+    - [ ] The widget responds: "I could not find relevant information in the knowledge base to answer your question."
+    - [ ] No unrelated FAQ/document content is presented as evidence.
+    - [ ] The API does not call the configured answer provider for this request.
+
 ### Test Case 4: Knowledge Purge (Deletion)
 - **Action**: In the Admin Dashboard, delete one of the uploaded documents using the trash icon.
 - **Verification**:
@@ -43,13 +52,12 @@ This document outlines the steps for manually verifying the core functionality o
 
 ## 3. Iron Oasis Handbook Test Suite
 
-This suite uses the generated `Mock_Gym_Handbook.html` to verify high-accuracy RAG retrieval.
+This suite uses the checked-in Iron Oasis handbook DOCX to verify Knowledge Base retrieval. The bundled PDF currently produces only whitespace through the production parser, so use the DOCX fixture for these cases; OCR and PDF extraction diagnosis are outside this evaluation v1.
 
-### Setup: Generate the PDF
-1. Open `Mock_Gym_Handbook.html` in your browser.
-2. Press `Ctrl + P` (or `Cmd + P`).
-3. Select **"Save as PDF"** and name it `Iron_Oasis_Handbook.pdf`.
-4. Upload this file in the **Knowledge Base** tab.
+### Setup: Upload the DOCX Fixture
+1. Select `tests/iron_oasis_handbook.docx` from the repository.
+2. Upload it in the **Knowledge Base** tab.
+3. Confirm the uploaded filename is `iron_oasis_handbook.docx` and that the document has indexed chunks.
 
 ### Verification Challenges
 Ask the Bot these specific questions to verify it is reading the document accurately:
@@ -62,8 +70,51 @@ Ask the Bot these specific questions to verify it is reading the document accura
 | **"Who teaches Midnight Yoga?"** | Should identify **Master Zen**. |
 | **"How do I cancel without a fee?"** | Should mention the `29-day` notice period and the `15-mile` relocation waiver. |
 
----
-*Updated on: 2026-02-12*
+### Offline Retrieval Evaluation
 
-## 4. UI/UX Feedback & Known Issues
+From `fitbot-api`, run `npm run test:eval:retrieval`. This uses the versioned Iron Oasis dataset and frozen normalized DOCX text, applies the production chunk splitter, and calls the lexical `RagService.search()` directly. It does not connect to PostgreSQL or exercise tenant isolation, document deletion, semantic routing, or answer generation.
+
+The generated report is `fitbot-api/test/evaluation/reports/iron_oasis_v1.latest.json`. It includes evidence hits at K=4 and K=6, hits at each case's target K, and the separately scored unanswerable query. Production defaults to lexical retrieval (`HYBRID_RETRIEVAL_ENABLED=false`) while hybrid retrieval remains gated behind Phase 2 in [RAG_AND_ROUTING_DESIGN.md](RAG_AND_ROUTING_DESIGN.md). This small Iron Oasis smoke baseline is not evidence of broad retrieval quality; database-backed tenant-isolation and deletion tests remain separate.
+
+### Database-Backed Isolation and Deletion Regression
+
+From `fitbot-api`, run `npm run test:eval:integration`. The command starts a disposable PostgreSQL container on port `55432`, applies the Prisma migrations, runs the isolated integration suite, and removes the container and volume afterward. It verifies that two configuration-scoped tenants cannot retrieve one another's chunks using multiple query formulations, and that `deleteDocument` removes both the document and its chunks from subsequent widget retrieval. It uses no production database, AI provider, HTTP server, or MiniLM model.
+
+### Phase 1 Retrieval Decision
+
+Production defaults to in-memory lexical retrieval (`HYBRID_RETRIEVAL_ENABLED=false`) because the Task 3.6 hybrid gate failed on paraphrases (`60%` vs lexical `80%`). Hybrid retrieval redesign and its non-bypassable evaluation gate are tracked as Phase 2 in [RAG_AND_ROUTING_DESIGN.md](RAG_AND_ROUTING_DESIGN.md).
+
+---
+*Updated on: 2026-11-23*
+
+## 4. Semantic Routing Validation (New Implementation)
+
+The on-device `SemanticRouterService` pre-classifies queries before triggering LLM interactions. Its latency has not yet been benchmarked; measure cold-start/model-load time separately from warmed per-query latency.
+
+### Current Automated Testing
+The routing logic is verified in `widget.service.spec.ts`:
+- **`standard_search` test:** Verifies `topK` uses `RAG_TOP_K` (4) and the prompt enforces direct factual answers.
+- **`rag_synthesis` test:** Verifies `topK` uses `RAG_SYNTHESIS_TOP_K` (6) and the prompt enforces comprehensive synthesis.
+
+### Recommended Manual Testing Scenarios
+
+#### Scenario 1: standard_search vs rag_synthesis
+- **Action**: Ask a direct question like "What is the wifi password?". Then ask a complex question like "Can you explain the membership tiers?".
+- **Verification**:
+  - Check the Docker API logs to ensure the routing correctly identifies "What is the wifi password?" as `standard_search` and the other as `rag_synthesis`.
+    - Measure cold-start and warmed routing/query latency separately; the router uses local embeddings, but its speed has not yet been validated against a target.
+
+#### Scenario 2: Fallback / LLM Search Regression
+- **Action**: Force the router to fail (e.g., provide garbage text like "asdfghjkl") or fall below confidence thresholds (if configured).
+- **Verification**: The system should cleanly bypass RAG document lookup and use general instructions without throwing unhandled exceptions.
+
+#### Scenario 3: No Matching Context
+- **Action**: Retain FAQ/document content that does not answer the question, then submit an unanswerable query.
+- **Verification**: The API returns the deterministic abstention response and does not inject the first FAQ chunk or call the answer provider.
+
+#### Scenario 4: Routing Blocked by Validation
+- **Action**: Ask a prohibited question (e.g., explicit content) that *also* triggers a valid route.
+- **Verification**: The `validationService` should correctly intercept and return a safety response *before* any prompt is passed to the AI provider, preventing wasted LLM compute.
+
+## 5. UI/UX Feedback & Known Issues
 - [ ] **Identical/Buggy Source Cards**: The display of citation cards is currently unsatisfactory. Issues include layout squashing, name truncation, and potential duplicate cards despite deduplication efforts. Needs a visual overhaul and more robust testing across different browsers.

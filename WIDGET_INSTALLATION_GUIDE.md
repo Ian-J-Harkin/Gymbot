@@ -63,10 +63,17 @@ Once the script is added, follow these steps to ensure everything is working:
 ### Step 3: Message Test
 - Type a simple question like "What are your hours?"
 - You should see the response stream in real-time.
+- If the configured Knowledge Base has no relevant information for a question, the widget responds that it could not find an answer instead of using unrelated content or guessing.
 
 ### Step 4: Explanation Layer Test (New Feature)
 - Once the AI responds, look for a small link saying **"Why did I say this?"** at the bottom of the chat bubble.
-- Click it to see the "reasoning" behind the answer (Provider, Model, Latency). This helps you audit the AI's performance.
+- Click it to see the "reasoning" behind the answer (Provider, Model, Latency, and Route). This helps you audit the AI's performance.
+
+### Step 5: Knowledge Base Answer and No-Match Behavior
+- **Action**: Ask a question whose answer is present in the gym's configured Knowledge Base.
+- **Verification**: Confirm the response is based on the relevant information. Production retrieval defaults to keyword-based search (`HYBRID_RETRIEVAL_ENABLED=false`, pending Phase 2's evaluation gate in `RAG_AND_ROUTING_DESIGN.md`); a local MiniLM router classifies the question to pick concise vs. detailed answer style, it does not search document chunks (see `SEMANTIC_SEARCH_COMPARISON.md`). The configured LLM always generates the answer from the retrieved excerpts. The explanation layer may show the retrieval route and source snippets.
+- **Action**: Ask an unrelated question whose answer is not in the configured Knowledge Base.
+- **Verification**: The widget should say it could not find relevant information rather than answer from unrelated content. This behavior does not depend on router speed or an answer-model upgrade.
 
 ---
 
