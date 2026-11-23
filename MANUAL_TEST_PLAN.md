@@ -11,7 +11,8 @@
 | Step | Action | Expected Result |
 |------|--------|-----------------|
 | 0.1 | Run React Component Unit Tests: `cd packages/fitbot-react && npm test` | All 5 tests should pass. |
-| 0.2 | (Optional) Start Docker Environment: `docker compose -f docker-compose.react-test.yml up --build` | All containers (postgres, api, react-demo) should start without errors. |
+| 0.2 | Run API Unit Tests in Docker from the repository root: `docker compose -f docker-compose.react-test.yml run --rm --no-deps api npm test -- --runInBand` | All API Jest suites should pass. This runs the test container without starting Postgres or the demo app. |
+| 0.3 | (Optional) Start the Dockerized React Demo: `docker compose -f docker-compose.react-test.yml up --build` | All containers (postgres, api, react-demo) should start without errors. |
 
 ---
 

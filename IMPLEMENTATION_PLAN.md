@@ -2,7 +2,6 @@
 
 This document tracks the progress of the FitBot project implementation against the defined user stories.
 
-<<<<<<< HEAD
 ## 📌 Next Steps / Parking Lot (To Do)
 - [x] **Option A (Epic 6): Knowledge Base File Uploads** - Allow uploading PDF/DOCX files instead of just pasting text.
 - [x] **Option B (Story 8.1): Admin UX Polish** - Implement "Unsaved Changes" warning and better visual save feedback.
@@ -10,8 +9,7 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] **Deferred**: Move AI system instructions to the database and expose them in the Admin UI for customization.
 - [ ] **Deferred**: Create a "Allowed Domains" whitelist in the Configuration database model to dynamically serve CORS headers instead of hardcoding domains in `main.ts` environment variables.
 - [ ] **Maintenance**: Resolve git conflicts by merging/rebasing `main` into the `feat/kb-uploads-and-security` branch to keep it up to date.
-=======
-## 🚨 Priority Sprint: Core Development (Local Ecosystem)
+## 🚨 Priority Sprint: Core Development (Local Ecosystem; Feature-Branch Snapshot)
 
 > **Goal**: Complete all outstanding system features and tests within the local Dockerized ecosystem before pushing to the cloud.
 
@@ -38,7 +36,6 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] **Zero-Downtime Migrations**: Define a safe, zero-downtime database migration strategy for production CI/CD (e.g., expand-and-contract pattern) to handle Prisma schema drift.
 
 ---
->>>>>>> feat/kb-uploads-and-security
 
 ## 🟢 Epic 1: Project Setup & Database (Completed)
 - [x] **1.1 Initialize NestJS Project**: Project creation, ConfigModule setup.
@@ -113,11 +110,11 @@ This document tracks the progress of the FitBot project implementation against t
 
 ## 🟢 Epic 5: Admin Portal & Explanation Layer (Completed)
 - [x] **5.1 Initialize Vite React Project**.
-<<<<<<< HEAD
 - [x] **Components & UI**: Basic structures for Login, Register, and Dashboard exist.
 - [x] **Integration**: Connect frontend forms to the backend API (Code Updated).
 
 ## 🟢 Epic 6: Advanced Knowledge Base (Completed)
+
 ### Story 6.1: File Upload Support (Text/Markdown)
 - [x] Backend: Create `UploadsModule` or extend `ConfigurationsModule`.
 - [x] Backend: Implement `POST /configurations/knowledge/upload` for `.txt` and `.md`.
@@ -185,7 +182,8 @@ This document tracks the progress of the FitBot project implementation against t
 ### Story 8.1: Admin UX Polish (Completed via 9.3)
 - [x] **Unsaved Changes Indicator**: Show a warning if user tries to navigate away with unsaved changes.
 - [x] **Save Feedback**: Change "Save" button to "Saved!" (green) temporarily on success.
-## 🟡 Epic 6: Knowledge Base & Security Hardening (Partially Complete)
+## Additional Feature-Branch Roadmap Snapshot (Status Requires Reconciliation)
+### Epic 6: Knowledge Base & Security Hardening (Feature-Branch Status Snapshot)
 - [x] **6.1 Advanced Document Support**: Support for .pdf and .docx file uploads; automatic chunking and indexing.
 - [x] **6.2 Security Hardening** *(completed in Epic 14)*: CORS is now environment-driven; added `helmet` middleware; file-type validation uses MIME type.
 - [x] **6.3 Source Attribution**: API and Widget now support metadata tracking for cited documents.
@@ -193,11 +191,13 @@ This document tracks the progress of the FitBot project implementation against t
 - [ ] **6.5 Vector Search Evaluation**: Investigate `pgvector` in PostgreSQL (Neon) for semantic search vs. current basic keyword logic.
 
 ## 🟡 Epic 8: Quality Assurance & Testing (IN PROGRESS)
+### Epic 8: Quality Assurance (Feature-Branch Status Snapshot)
 - [x] **8.0 Frontend Unit Testing**: Configured Vitest + React Testing Library; implemented `KnowledgeBase` logic tests.
 - [x] **8.1 Backend Unit Testing**: Verified Configuration controller logic for new fields.
 - [x] **8.4 Security-First Code Review**: Comprehensive audit completed 2026-02-18 — findings captured in Epic 14 below.
 - [ ] **8.5 Cloud-First Architecture Review**: Evaluate system portability (Docker, secrets, statelessness).
 - *(Note: 8.2 and 8.3 moved to Priority Sprint above)*
+
 
 ## 🟡 Epic 9: UX Polish & Admin Features (IN PROGRESS)
 - [x] **9.2 Rate Limiting**: Install `@nestjs/throttler`; apply to `/auth/login`, `/auth/register`, `/widget/chat`, `/api-keys`.
@@ -347,4 +347,3 @@ Next.js 13+ (App Router) defaults to Server Components. Since the widget interac
 - [ ] **Data Import Logic**: Do we need to test Sales/customer import logic — is this in the context of bulk testing more customers for Stripe integration?
 - [ ] **System Prompt Strategy**: Decide whether the system prompt should be centralized in `constants.ts` (for developer-driven consistency) or moved to the database via the `Configuration` model (to allow gyms to customize their bot's "personality" and instructions).
 - [ ] **Infrastructure as Code (IaC) Evolution**: While the current deployment creates GitHub Actions automatically or uses Vercel's deep native integrations, we should eventually implement Terraform scripts in an `/infrastructure` directory to allow 100% automated, reproducible deployments.
->>>>>>> feat/kb-uploads-and-security
