@@ -46,3 +46,11 @@ fitbot-api/generated/
 
 # WordPress (local dev only)
 wp-content/
+
+# Local agent skills & saved reference pages
+/.claude/
+/How can I protect my WordPress plugin code from unauthorized use_ _ MoldStud.html
+/How can I protect my WordPress plugin code from unauthorized use_ _ MoldStud_files/
+
+# Generated evaluation reports (mutable local artifacts)
+fitbot-api/test/evaluation/reports/*.latest.json

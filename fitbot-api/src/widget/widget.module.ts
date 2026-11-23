@@ -13,9 +13,10 @@ import { OllamaProvider } from './providers/ollama.provider';
 import { HuggingFaceProvider } from './providers/huggingface.provider';
 import { ExplanationHelper } from './explanation.helper';
 import { SemanticRouterModule } from '../semantic-router/semantic-router.module';
+import { HybridRetrievalModule } from '../retrieval/hybrid-retrieval.module';
 
 @Module({
-  imports: [CommonModule, ChatLogsModule, ValidationModule, RagModule, PrismaModule, SemanticRouterModule],
+  imports: [CommonModule, ChatLogsModule, ValidationModule, RagModule, PrismaModule, SemanticRouterModule, HybridRetrievalModule],
   providers: [
     WidgetService,
     AiProviderService,

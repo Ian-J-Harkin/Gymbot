@@ -1,11 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { KnowledgeBaseService } from './knowledge-base.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmbeddingService } from '../embedding/embedding.service';
 
 // Mock dependencies
 const mockPrisma = {
     configuration: {
         findUnique: jest.fn(),
+        create: jest.fn(),
     },
     document: {
         create: jest.fn(),
@@ -16,8 +18,14 @@ const mockPrisma = {
     documentChunk: {
         createMany: jest.fn(),
         deleteMany: jest.fn(),
-        findMany: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
     },
+    $executeRaw: jest.fn(),
+};
+
+const mockEmbeddingService = {
+    embed: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
+    isReady: jest.fn().mockReturnValue(true),
 };
 
 // Mock external libraries
@@ -35,12 +43,15 @@ describe('KnowledgeBaseService', () => {
             providers: [
                 KnowledgeBaseService,
                 { provide: PrismaService, useValue: mockPrisma },
+                { provide: EmbeddingService, useValue: mockEmbeddingService },
             ],
         }).compile();
 
         service = module.get<KnowledgeBaseService>(KnowledgeBaseService);
         prisma = module.get<PrismaService>(PrismaService);
         jest.clearAllMocks();
+        mockPrisma.documentChunk.findMany.mockResolvedValue([]);
+        mockEmbeddingService.embed.mockResolvedValue([0.1, 0.2, 0.3]);
     });
 
     it('should be defined', () => {
@@ -73,6 +84,47 @@ describe('KnowledgeBaseService', () => {
             expect(result.documentId).toBe('doc-1');
         });
 
+        it('should embed created chunks and persist via raw SQL', async () => {
+            const mockFile = {
+                originalname: 'test.txt',
+                buffer: Buffer.from('hello world'),
+            } as Express.Multer.File;
+
+            mockPrisma.configuration.findUnique.mockResolvedValue(mockConfig);
+            mockPrisma.document.create.mockResolvedValue({ id: 'doc-1' });
+            mockPrisma.documentChunk.findMany.mockResolvedValue([
+                { id: 'chunk-1', content: 'hello world' },
+            ]);
+
+            await service.processFile(mockUserId, mockFile);
+
+            expect(mockEmbeddingService.embed).toHaveBeenCalledWith('hello world');
+            expect(mockPrisma.$executeRaw).toHaveBeenCalledTimes(1);
+            const rawSqlArgs = (mockPrisma.$executeRaw as jest.Mock).mock.calls[0];
+            // Tagged-template call: [strings, vectorLiteral, embeddingModel, embeddedAt, chunkId]
+            expect(rawSqlArgs[1]).toBe('[0.1,0.2,0.3]');
+            expect(rawSqlArgs[4]).toBe('chunk-1');
+        });
+
+        it('should leave a chunk unembedded when the embedding call fails, without blocking ingestion', async () => {
+            const mockFile = {
+                originalname: 'test.txt',
+                buffer: Buffer.from('hello world'),
+            } as Express.Multer.File;
+
+            mockPrisma.configuration.findUnique.mockResolvedValue(mockConfig);
+            mockPrisma.document.create.mockResolvedValue({ id: 'doc-1' });
+            mockPrisma.documentChunk.findMany.mockResolvedValue([
+                { id: 'chunk-1', content: 'hello world' },
+            ]);
+            mockEmbeddingService.embed.mockResolvedValue(null);
+
+            const result = await service.processFile(mockUserId, mockFile);
+
+            expect(mockPrisma.$executeRaw).not.toHaveBeenCalled();
+            expect(result.documentId).toBe('doc-1');
+        });
+
         it('should process a PDF file correctly', async () => {
             const mockFile = {
                 originalname: 'document.pdf',
@@ -93,11 +145,25 @@ describe('KnowledgeBaseService', () => {
             expect(result.chunksCount).toBeDefined();
         });
 
-        it('should throw error if config missing', async () => {
+        it('should create a default configuration if one is missing', async () => {
             mockPrisma.configuration.findUnique.mockResolvedValue(null);
-            const mockFile = { originalname: 'test.txt', buffer: Buffer.from('') } as any;
+            mockPrisma.configuration.create.mockResolvedValue(mockConfig);
+            mockPrisma.document.create.mockResolvedValue({ id: 'doc-3' });
+            const mockFile = {
+                originalname: 'test.txt',
+                buffer: Buffer.from('hello world'),
+            } as any;
 
-            await expect(service.processFile(mockUserId, mockFile)).rejects.toThrow('User configuration not found');
+            const result = await service.processFile(mockUserId, mockFile);
+
+            expect(mockPrisma.configuration.create).toHaveBeenCalledWith({
+                data: expect.objectContaining({
+                    userId: mockUserId,
+                    widgetColor: '#2563EB',
+                    aiProvider: 'openai',
+                }),
+            });
+            expect(result.documentId).toBe('doc-3');
         });
     });
 

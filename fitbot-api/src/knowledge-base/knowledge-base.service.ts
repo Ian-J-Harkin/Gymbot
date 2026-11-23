@@ -3,6 +3,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import * as mammoth from 'mammoth';
 import { RAG_CHUNK_SIZE, RAG_CHUNK_OVERLAP, MIN_EXTRACTED_CONTENT_LENGTH } from '../common/constants';
+import { EmbeddingService } from '../embedding/embedding.service';
+import { embedChunks } from '../embedding/chunk-embedding.util';
 
 @Injectable()
 export class KnowledgeBaseService {
@@ -12,7 +14,7 @@ export class KnowledgeBaseService {
         chunkOverlap: RAG_CHUNK_OVERLAP,
     });
 
-    constructor(private prisma: PrismaService) { }
+    constructor(private prisma: PrismaService, private embeddingService: EmbeddingService) { }
 
     async processFile(userId: string, file: Express.Multer.File): Promise<any> {
         let config = await this.prisma.configuration.findUnique({
@@ -100,7 +102,19 @@ export class KnowledgeBaseService {
             data: chunkData,
         });
 
-        this.logger.log(`Processed document ${file.originalname}: ${chunks.length} chunks created.`);
+        // 3. Embed each new chunk synchronously (local MiniLM, no external API).
+        // Embedding failures degrade gracefully: the chunk keeps content-only lexical
+        // search; see eval_implementation_plan.md Task 3.4.
+        const createdChunks = await this.prisma.documentChunk.findMany({
+            where: { documentId: document.id },
+            select: { id: true, content: true },
+        });
+        const { embedded, failed } = await embedChunks(this.prisma, this.embeddingService, createdChunks);
+        if (failed > 0) {
+            this.logger.warn(`${failed} of ${createdChunks.length} chunks for ${file.originalname} could not be embedded.`);
+        }
+
+        this.logger.log(`Processed document ${file.originalname}: ${chunks.length} chunks created, ${embedded} embedded.`);
 
         return {
             documentId: document.id,

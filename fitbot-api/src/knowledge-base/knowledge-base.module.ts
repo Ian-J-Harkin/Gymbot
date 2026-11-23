@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { KnowledgeBaseService } from './knowledge-base.service';
 import { KnowledgeBaseController } from './knowledge-base.controller';
 import { PrismaModule } from '../prisma/prisma.module';
+import { EmbeddingModule } from '../embedding/embedding.module';
 
 @Module({
-    imports: [PrismaModule],
+    imports: [PrismaModule, EmbeddingModule],
     providers: [KnowledgeBaseService],
     controllers: [KnowledgeBaseController],
     exports: [KnowledgeBaseService],

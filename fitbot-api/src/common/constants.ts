@@ -35,9 +35,16 @@ export const JWT_EXPIRY = '60m';
 // ─── RAG / Document Processing ───────────────────────────────────────────────
 
 export const RAG_TOP_K = 4;
+export const RAG_SYNTHESIS_TOP_K = 6;
 export const RAG_CHUNK_SIZE = 1000;
 export const RAG_CHUNK_OVERLAP = 200;
 export const MIN_EXTRACTED_CONTENT_LENGTH = 10;
+
+// ─── Hybrid Retrieval (gated behind Phase 2 evaluation; see RAG_AND_ROUTING_DESIGN.md) ──
+
+// Defaults to false until Phase 2's evaluation gate passes. Opt-in via env for testing.
+export const HYBRID_RETRIEVAL_ENABLED =
+    process.env.HYBRID_RETRIEVAL_ENABLED === 'true';
 
 // ─── File Upload ─────────────────────────────────────────────────────────────
 

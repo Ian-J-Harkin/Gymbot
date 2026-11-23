@@ -1,0 +1,229 @@
+{
+  "version": "1.0.0",
+  "dataset_name": "iron_oasis_handbook_v1",
+  "source_fixture": {
+    "file_name": "iron_oasis_handbook.docx",
+    "repository_path": "tests/iron_oasis_handbook.docx",
+    "sha256": "1f3f55bd34c6a9c7a2347595d6f7dc7793e5f89701b0a1a9e2b4a33f51a95774",
+    "extractor": "mammoth",
+    "extractor_version": "1.11.0",
+    "normalization": "KnowledgeBaseService sanitizer: allowed printable ASCII, selected Latin-1/punctuation; collapse whitespace; trim",
+    "normalized_text_fixture": "test/evaluation/fixtures/iron_oasis_handbook.normalized.txt",
+    "normalized_text_sha256": "6a4c51956d196b4c5d0da97e021011116e2078373ae7fb9c2a20aaa5a30327fd",
+    "splitter": {
+      "name": "RecursiveCharacterTextSplitter",
+      "chunk_size": 1000,
+      "chunk_overlap": 200,
+      "observed_chunk_count": 2
+    }
+  },
+  "scoring": {
+    "answerable_case_count": 6,
+    "paraphrase_case_count": 5,
+    "retrieval_hit": "At least one expected_text_contains anchor for the case is present in a retrieved chunk from expected_document_name.",
+    "reported_k_values": [4, 6],
+    "unanswerable_scored_separately": true
+  },
+  "test_cases": [
+    {
+      "id": "towel_policy",
+      "category": "exact_lookup",
+      "query": "What happens if I forget my sweat towel?",
+      "target_top_k": 6,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "No towel, no workout.",
+        "Blue towels can be rented for $2 at the front desk."
+      ],
+      "expected_answer_facts": [
+        "Members must bring a sweat towel; without one, they cannot work out.",
+        "Blue towels can be rented for $2 at the front desk."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "towel_policy_paraphrase",
+      "category": "paraphrase",
+      "paraphrase_of": "towel_policy",
+      "query": "What are the rules for bringing drying cloths or hygiene accessories?",
+      "target_top_k": 6,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "No towel, no workout.",
+        "Blue towels can be rented for $2 at the front desk."
+      ],
+      "expected_answer_facts": [
+        "Members must bring a sweat towel; without one, they cannot work out.",
+        "Blue towels can be rented for $2 at the front desk."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "sauna_access_code",
+      "category": "exact_lookup",
+      "query": "What is the code for the secret sauna?",
+      "target_top_k": 6,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "Oasis Secret Sauna",
+        "8822#"
+      ],
+      "expected_answer_facts": [
+        "The sauna is called the Oasis Secret Sauna.",
+        "The keypad code is 8822#."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "sauna_access_code_paraphrase",
+      "category": "paraphrase",
+      "paraphrase_of": "sauna_access_code",
+      "query": "How do I unlock the door to the hot steam room?",
+      "target_top_k": 6,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "Oasis Secret Sauna",
+        "8822#"
+      ],
+      "expected_answer_facts": [
+        "The sauna is called the Oasis Secret Sauna.",
+        "The keypad code is 8822#."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "low_impact_hours",
+      "category": "exact_lookup",
+      "query": "When are the low impact hours?",
+      "target_top_k": 6,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "2:00 PM and 4:00 PM daily",
+        "Low Impact Hours"
+      ],
+      "expected_answer_facts": [
+        "Low Impact Hours are observed daily from 2:00 PM to 4:00 PM."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "low_impact_hours_paraphrase",
+      "category": "paraphrase",
+      "paraphrase_of": "low_impact_hours",
+      "query": "At what time is dropping weights and playing heavy bass restricted?",
+      "target_top_k": 6,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "2:00 PM and 4:00 PM daily",
+        "Low Impact Hours"
+      ],
+      "expected_answer_facts": [
+        "Low Impact Hours are observed daily from 2:00 PM to 4:00 PM."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "midnight_yoga_instructor",
+      "category": "exact_lookup",
+      "query": "Who teaches Midnight Yoga?",
+      "target_top_k": 6,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "Midnight Yoga",
+        "Master Zen"
+      ],
+      "expected_answer_facts": [
+        "Master Zen teaches Midnight Yoga."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "midnight_yoga_instructor_paraphrase",
+      "category": "paraphrase",
+      "paraphrase_of": "midnight_yoga_instructor",
+      "query": "Who is the teacher for the 12AM stretching class?",
+      "target_top_k": 6,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "Midnight Yoga",
+        "Master Zen"
+      ],
+      "expected_answer_facts": [
+        "Master Zen teaches Midnight Yoga."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "cancellation_without_fee",
+      "category": "policy_lookup",
+      "query": "How do I cancel without a fee?",
+      "target_top_k": 4,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "written notice at least 29 days in advance",
+        "move more than 15 miles away",
+        "proof of address required"
+      ],
+      "expected_answer_facts": [
+        "To avoid the $50 early exit fee, members must provide written notice at least 29 days in advance.",
+        "The fee is waived for a move more than 15 miles away when proof of address is provided."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "cancellation_without_fee_paraphrase",
+      "category": "paraphrase",
+      "paraphrase_of": "cancellation_without_fee",
+      "query": "Is there a way to drop my subscription without getting penalized?",
+      "target_top_k": 4,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "written notice at least 29 days in advance",
+        "move more than 15 miles away",
+        "proof of address required"
+      ],
+      "expected_answer_facts": [
+        "To avoid the $50 early exit fee, members must provide written notice at least 29 days in advance.",
+        "The fee is waived for a move more than 15 miles away when proof of address is provided."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "distractor_sauna_towel",
+      "category": "distractor",
+      "query": "Are there any blue towels available in the sauna?",
+      "target_top_k": null,
+      "expected_document_name": null,
+      "expected_text_contains": [],
+      "expected_answer_facts": [],
+      "allow_abstention": true
+    },
+    {
+      "id": "distractor_yoga_code",
+      "category": "cross_reference",
+      "query": "What is the secret access code to join the midnight yoga class?",
+      "target_top_k": 6,
+      "expected_document_name": "iron_oasis_handbook.docx",
+      "expected_text_contains": [
+        "Oasis Secret Sauna",
+        "8822#",
+        "Midnight Yoga"
+      ],
+      "expected_answer_facts": [
+        "The access code 8822# is for the Oasis Secret Sauna, not the Midnight Yoga class.",
+        "Midnight Yoga is taught by Master Zen."
+      ],
+      "allow_abstention": false
+    },
+    {
+      "id": "unanswerable_out_of_scope",
+      "category": "unanswerable",
+      "query": "Does the facility host underwater basket-weaving workshops in Antarctica?",
+      "target_top_k": null,
+      "expected_document_name": null,
+      "expected_text_contains": [],
+      "expected_answer_facts": [],
+      "allow_abstention": true
+    }
+  ]
+}

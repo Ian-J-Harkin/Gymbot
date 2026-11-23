@@ -11,6 +11,7 @@ export type CreateChatLogDto = {
     contextLength: number;
     validationFlags: string[];
     responseTimeMs: number;
+    retrieval?: any;
 };
 
 @Injectable()
@@ -28,6 +29,7 @@ export class ChatLogsService {
                 contextLength: data.contextLength,
                 validationFlags: data.validationFlags,
                 responseTimeMs: data.responseTimeMs,
+                retrieval: data.retrieval ?? undefined,
             },
         });
     }

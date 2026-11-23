@@ -14,12 +14,15 @@ import {
     DEFAULT_OPENROUTER_MODEL,
     DEFAULT_OLLAMA_MODEL,
     RAG_TOP_K,
+    RAG_SYNTHESIS_TOP_K,
+    HYBRID_RETRIEVAL_ENABLED,
 } from '../common/constants';
 import { AiProviderService } from './providers/ai-provider.service';
 import { ExplanationHelper } from './explanation.helper';
 import { WidgetHistoryItem } from './providers/ai-provider.interface';
 
 import { SemanticRouterService } from '../semantic-router/semantic-router.service';
+import { HybridRetrievalService } from '../retrieval/hybrid-retrieval.service';
 
 @Injectable()
 export class WidgetService {
@@ -31,6 +34,7 @@ export class WidgetService {
         private aiProviderService: AiProviderService,
         private explanationHelper: ExplanationHelper,
         private semanticRouter: SemanticRouterService,
+        private hybridRetrievalService: HybridRetrievalService,
     ) { }
 
     getPublicConfig(configuration: Configuration) {
@@ -56,9 +60,44 @@ export class WidgetService {
             return;
         }
 
+        // --- Input Validation ---
+        // Runs before routing/retrieval so blocked messages don't pay for that work.
+        const inputValidation = await this.validationService.validate('input', message, { configuration, userMessage: message });
+
+        if (inputValidation.hasBlockingError) {
+            const blockingMsg = inputValidation.blockingMessage || "Your message triggered a safety rule.";
+
+            // Log the blocked attempt
+            try {
+                await this.chatLogsService.createLog({
+                    configurationId: configuration.id,
+                    userMessage: message,
+                    aiResponse: blockingMsg,
+                    provider: providerName,
+                    model,
+                    contextLength: 0,
+                    validationFlags: inputValidation.results.map(r => r.ruleId),
+                    responseTimeMs: Date.now() - startTime
+                });
+            } catch (loggingError) {
+                console.error('Failed to log blocked message:', loggingError);
+            }
+
+            yield blockingMsg;
+            return;
+        }
+
         // --- Mini-RAG: Context Retrieval ---
-        // Semantic Routing (Classify the query)
-        const { route, confidence } = await this.semanticRouter.routeQuery(message);
+        // Semantic Routing (Classify the query). Chunk-level semantic search is intentionally
+        // gated off by default in Phase 1 until Phase 2's evaluation gate passes; see
+        // RAG_AND_ROUTING_DESIGN.md.
+        let route: 'standard_search' | 'rag_synthesis' = 'standard_search';
+        let confidence = 0;
+        try {
+            ({ route, confidence } = await this.semanticRouter.routeQuery(message));
+        } catch (error) {
+            console.error('Semantic route failed; using standard search fallback:', error);
+        }
 
         const faqChunks = this.ragService.chunkText(configuration.faqText);
 
@@ -85,49 +124,63 @@ export class WidgetService {
             })),
         ];
 
-        const relevantChunks = this.ragService.search(message, allChunks as any, RAG_TOP_K);
+        const topK = route === 'rag_synthesis' ? RAG_SYNTHESIS_TOP_K : RAG_TOP_K;
+        // Hybrid (lexical + semantic, RRF-fused) retrieval is built and tested but
+        // gated off by default until Phase 2 passes; see RAG_AND_ROUTING_DESIGN.md.
+        const relevantChunks = HYBRID_RETRIEVAL_ENABLED
+            ? await this.hybridRetrievalService.search(message, configuration.id, allChunks as any, topK)
+            : this.ragService.search(message, allChunks as any, topK);
+
+        const retrievalMethod = HYBRID_RETRIEVAL_ENABLED ? 'hybrid' : 'lexical';
+        const retrievalData = {
+            route,
+            routeConfidence: confidence,
+            method: retrievalMethod,
+            chunks: relevantChunks.map((c: any, index: number) => ({
+                chunkId: c.id,
+                lexicalRank: c.lexicalRank ?? index + 1,
+                semanticRank: c.semanticRank ?? null,
+                rrfScore: c.rrfScore ?? c.score ?? null,
+            }))
+        };
 
         // Fallback or aggregate context
-        const contextContent = relevantChunks.length > 0
-            ? relevantChunks.map(c => c.content).join('\n\n')
-            : (faqChunks.length > 0 ? faqChunks[0].content : 'No FAQ information available.');
+        const contextContent = relevantChunks.map(c => c.content).join('\n\n');
 
         const contextUsedSummary = relevantChunks.length > 0
             ? `Retrieved ${relevantChunks.length} relevant sections`
             : "No specific match found (using general context)";
 
         const baseInstructions = configuration.systemInstructions || "You are a helpful assistant for a gym.";
-        const systemPrompt = `${baseInstructions}
+        let systemPrompt = '';
 
-Use the following EXCERPT from the gym's Knowledge Base to answer user questions:
----
-${contextContent}
----
-If the answer is not in this excerpt, politely say you don't know and suggest contacting support.`;
+        if (route === 'rag_synthesis') {
+            systemPrompt = `${baseInstructions}\n\nUse the following EXCERPT from the gym's Knowledge Base to answer user questions:\n---\n${contextContent}\n---\nIf the answer is not in this excerpt, politely say you don't know and suggest contacting support. Provide a detailed, comprehensive answer synthesizing the available information.`;
+        } else {
+            // standard_search
+            systemPrompt = `${baseInstructions}\n\nBased on the following facts:\n---\n${contextContent}\n---\nProvide a direct, concise, factual answer to the user's question. Do not provide extra unnecessary details.`;
+        }
 
-        // --- Input Validation ---
-        const inputValidation = await this.validationService.validate('input', message, { configuration, userMessage: message });
+        if (relevantChunks.length === 0) {
+            const abstentionMessage = 'I could not find relevant information in the knowledge base to answer your question.';
 
-        if (inputValidation.hasBlockingError) {
-            const blockingMsg = inputValidation.blockingMessage || "Your message triggered a safety rule.";
-
-            // Log the blocked attempt
             try {
                 await this.chatLogsService.createLog({
                     configurationId: configuration.id,
                     userMessage: message,
-                    aiResponse: blockingMsg,
-                    provider: providerName,
-                    model,
+                    aiResponse: abstentionMessage,
+                    provider: 'none',
+                    model: 'abstention',
                     contextLength: 0,
                     validationFlags: inputValidation.results.map(r => r.ruleId),
-                    responseTimeMs: Date.now() - startTime
+                    responseTimeMs: Date.now() - startTime,
+                    retrieval: retrievalData,
                 });
             } catch (loggingError) {
-                console.error('Failed to log blocked message:', loggingError);
+                console.error('Failed to log abstained message:', loggingError);
             }
 
-            yield blockingMsg;
+            yield abstentionMessage;
             return;
         }
 
@@ -176,7 +229,8 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
                     model,
                     contextLength: systemPrompt.length,
                     validationFlags: inputValidation.results.map(r => r.ruleId),
-                    responseTimeMs
+                    responseTimeMs,
+                    retrieval: retrievalData
                 });
             } catch (logError) {
                 console.error('Failed to save chat log:', logError);
@@ -197,7 +251,8 @@ If the answer is not in this excerpt, politely say you don't know and suggest co
                     model,
                     contextLength: systemPrompt.length,
                     validationFlags: ['ERROR'],
-                    responseTimeMs
+                    responseTimeMs,
+                    retrieval: retrievalData
                 });
             } catch (loggingError) {
                 console.error('Failed to log error state:', loggingError);

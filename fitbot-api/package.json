@@ -14,10 +14,14 @@
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
+    "test:eval:retrieval": "jest --config ./jest.eval.config.js --runInBand",
+    "test:eval:integration": "node ./test/evaluation/run-integration.js",
+    "test:eval:hybrid-gate": "node ./test/evaluation/run-hybrid-gate.js",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "backfill:chunk-embeddings": "ts-node -r tsconfig-paths/register scripts/backfill-chunk-embeddings.ts"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.0",

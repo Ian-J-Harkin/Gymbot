@@ -29,19 +29,19 @@ model User {
 }
 
 model Configuration {
-  id                String  @id @default(cuid())
-  faqText           String  @db.Text
-  widgetColor       String  @default("#2563EB")
-  widgetTitle       String? @default("FitBot Assistant")
-  openAiApiKey      String?
-  aiProvider        String  @default("openai") // "openai", "openrouter", "ollama", "huggingface"
-  openRouterApiKey  String?
-  huggingFaceApiKey String?
-  ollamaUrl         String? @default("http://localhost:11434")
-  ollamaModel       String? @default("llama3")
-  greetingMessage   String? @default("Hi! I'm FitBot, your gym assistant. How can I help you today?")
-  systemInstructions String? @db.Text
-  suggestedThemeColor String?  // Billing Instrumentation
+  id                  String  @id @default(cuid())
+  faqText             String  @db.Text
+  widgetColor         String  @default("#2563EB")
+  widgetTitle         String? @default("FitBot Assistant")
+  openAiApiKey        String?
+  aiProvider          String  @default("openai") // "openai", "openrouter", "ollama", "huggingface"
+  openRouterApiKey    String?
+  huggingFaceApiKey   String?
+  ollamaUrl           String? @default("http://localhost:11434")
+  ollamaModel         String? @default("llama3")
+  greetingMessage     String? @default("Hi! I'm FitBot, your gym assistant. How can I help you today?")
+  systemInstructions  String? @db.Text
+  suggestedThemeColor String? // Billing Instrumentation
   requireSubscription Boolean @default(false)
 
   createdAt DateTime   @default(now())
@@ -72,6 +72,7 @@ model ChatLog {
   contextLength   Int
   validationFlags String[]
   responseTimeMs  Int
+  retrieval       Json?
   createdAt       DateTime      @default(now())
   configuration   Configuration @relation(fields: [configurationId], references: [id])
 }
@@ -89,9 +90,12 @@ model Document {
 }
 
 model DocumentChunk {
-  id         String   @id @default(cuid())
-  content    String   @db.Text
-  tokenCount Int?
-  documentId String
-  document   Document @relation(fields: [documentId], references: [id])
+  id             String                      @id @default(cuid())
+  content        String                      @db.Text
+  tokenCount     Int?
+  documentId     String
+  document       Document                    @relation(fields: [documentId], references: [id])
+  embedding      Unsupported("vector(384)")?
+  embeddingModel String?
+  embeddedAt     DateTime?
 }
