@@ -7,7 +7,7 @@
     "assets": [
       {
         "include": "semantic-router/route-anchors.json",
-        "outDir": "dist/src"
+        "outDir": "dist"
       }
     ]
   }
