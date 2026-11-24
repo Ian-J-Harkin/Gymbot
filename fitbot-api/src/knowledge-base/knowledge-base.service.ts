@@ -6,6 +6,20 @@ import { RAG_CHUNK_SIZE, RAG_CHUNK_OVERLAP, MIN_EXTRACTED_CONTENT_LENGTH } from 
 import { EmbeddingService } from '../embedding/embedding.service';
 import { embedChunks } from '../embedding/chunk-embedding.util';
 
+/**
+ * Normalizes extracted document text while preserving line and paragraph breaks
+ * so RecursiveCharacterTextSplitter can split along section boundaries.
+ */
+export function sanitizeDocumentText(raw: string): string {
+    return raw
+        .replace(/\r\n?/g, '\n')
+        .replace(/[^\x20-\x7E\n\t\u00A0-\u00FF\u2010-\u201F\u2022]/g, ' ')
+        .replace(/[ \t\u00A0]+/g, ' ')
+        .replace(/ *\n */g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+}
+
 @Injectable()
 export class KnowledgeBaseService {
     private readonly logger = new Logger(KnowledgeBaseService.name);
@@ -66,13 +80,9 @@ export class KnowledgeBaseService {
             throw new BadRequestException('Unsupported file type');
         }
 
-        // Sanitize content: Preserve common text characters and basic punctuation
-        // This is more robust against weird PDF ligatures and artifacts
+        // Sanitize content: preserve line/paragraph structure while normalizing spaces and NBSPs
         const originalLength = content.length;
-        content = content
-            .replace(/[^\x20-\x7E\n\r\t\u00A0-\u00FF\u2010-\u201F\u2022]/g, " ") // Keep ASCII, common symbols, bullets
-            .replace(/\s+/g, " ")                                              // Collapse multiple whitespaces/newlines
-            .trim();
+        content = sanitizeDocumentText(content);
 
         this.logger.log(`Extracted content from ${file.originalname}: ${originalLength} chars (Sanitized to ${content.length} chars)`);
 

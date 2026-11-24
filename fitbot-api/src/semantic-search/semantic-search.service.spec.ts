@@ -10,7 +10,7 @@ describe('SemanticSearchService', () => {
 
   beforeEach(async () => {
     embeddingService = {
-      embed: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
+      embedQuery: jest.fn().mockResolvedValue([0.1, 0.2, 0.3]),
     };
     prismaService = {
       $queryRaw: jest.fn().mockResolvedValue([
@@ -18,6 +18,7 @@ describe('SemanticSearchService', () => {
           id: 'chunk-1',
           content: 'The sauna code is 8822#.',
           fileName: 'handbook.docx',
+          distance: 0.33,
         },
       ]),
     } as any;
@@ -34,7 +35,7 @@ describe('SemanticSearchService', () => {
   });
 
   it('returns an empty array when the embedding model is not ready', async () => {
-    (embeddingService.embed as jest.Mock).mockResolvedValue(null);
+    (embeddingService.embedQuery as jest.Mock).mockResolvedValue(null);
 
     const result = await service.search('sauna code', 'config-1', 4);
 
@@ -42,9 +43,10 @@ describe('SemanticSearchService', () => {
     expect(prismaService.$queryRaw).not.toHaveBeenCalled();
   });
 
-  it('queries DocumentChunk scoped to the given configurationId and applies the distance threshold', async () => {
+  it('queries DocumentChunk scoped to the given configurationId and applies the BGE distance threshold', async () => {
     const result = await service.search('sauna code', 'config-1', 4);
 
+    expect(embeddingService.embedQuery).toHaveBeenCalledWith('sauna code');
     expect(prismaService.$queryRaw).toHaveBeenCalledTimes(1);
     const [strings, ...values] = (prismaService.$queryRaw as jest.Mock).mock
       .calls[0];
@@ -52,14 +54,23 @@ describe('SemanticSearchService', () => {
     expect(strings.join('')).toContain('WHERE d."configurationId" =');
     expect(strings.join('')).toContain('WHERE distance <=');
     expect(values).toContain('config-1');
+    expect(values).toContain(0.52);
     expect(values).toContain(4);
-    expect(values).toContain(0.8);
     expect(result).toEqual([
       {
         id: 'chunk-1',
         content: 'The sauna code is 8822#.',
         fileName: 'handbook.docx',
+        distance: 0.33,
       },
     ]);
+  });
+
+  it('checks whether a configuration has any embedded document chunks', async () => {
+    (prismaService.$queryRaw as jest.Mock).mockResolvedValueOnce([{ exists: 1 }]);
+    expect(await service.hasEmbeddedChunks('config-1')).toBe(true);
+
+    (prismaService.$queryRaw as jest.Mock).mockResolvedValueOnce([]);
+    expect(await service.hasEmbeddedChunks('config-2')).toBe(false);
   });
 });

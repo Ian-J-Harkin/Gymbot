@@ -1,0 +1,230 @@
+{
+  "version": "2.0.0",
+  "dataset_name": "gym_eval_v2",
+  "fixtures": [
+    {
+      "file_name": "iron_oasis_handbook.docx",
+      "file_type": "docx",
+      "normalized_text_fixture": "test/evaluation/fixtures/iron_oasis_handbook.normalized.txt"
+    },
+    {
+      "file_name": "iron_oasis_billing_pt.txt",
+      "file_type": "txt",
+      "normalized_text_fixture": "test/evaluation/fixtures/iron_oasis_billing_pt.normalized.txt"
+    }
+  ],
+  "faq_text": "WiFi Access: Members can connect to the IronOasis-Member WiFi network using the password IronLift2026.\n\nHoliday Hours: On national holidays, the gym operates on a reduced schedule from 8:00 AM to 2:00 PM.\n\nChildcare Room: Supervised childcare is available free for up to 90 minutes per visit for children ages 2 to 10.\n\nSmoothie Bar: The protein and smoothie bar next to reception closes nightly at 9:00 PM.",
+  "scoring": {
+    "reported_k_values": [4, 6]
+  },
+  "test_cases": [
+    {
+      "id": "towel_policy",
+      "category": "literal",
+      "query": "What happens if I forget my sweat towel?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["No towel, no workout.", "Blue towels can be rented for $2 at the front desk."]],
+      "allow_abstention": false
+    },
+    {
+      "id": "sauna_access_code",
+      "category": "literal",
+      "query": "What is the code for the secret sauna?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["8822#"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "low_impact_hours",
+      "category": "literal",
+      "query": "When are the low impact hours?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["2:00 PM and 4:00 PM daily"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "midnight_yoga_instructor",
+      "category": "literal",
+      "query": "Who teaches Midnight Yoga?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["Master Zen"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "cancellation_without_fee",
+      "category": "literal",
+      "query": "How do I cancel without a fee?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["written notice at least 29 days in advance"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "pt_package_price",
+      "category": "literal",
+      "query": "How much does the Pro 12-pack personal training cost?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["Pro 12-pack costs $780"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "parking_validation_hours",
+      "category": "literal",
+      "query": "How many hours of parking validation do members get?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["3 hours of free validated parking in the North Garage"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "locker_rental_fee",
+      "category": "literal",
+      "query": "What is the price for permanent overnight locker rentals?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["$15 per month"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "towel_policy_paraphrase",
+      "category": "paraphrase",
+      "query": "What are the rules for bringing drying cloths or hygiene accessories?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["No towel, no workout.", "Blue towels can be rented for $2 at the front desk."]],
+      "allow_abstention": false
+    },
+    {
+      "id": "sauna_access_code_paraphrase",
+      "category": "paraphrase",
+      "query": "How do I unlock the door to the hot steam room?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["8822#"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "low_impact_hours_paraphrase",
+      "category": "paraphrase",
+      "query": "At what time is dropping weights and playing heavy bass restricted?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["2:00 PM and 4:00 PM daily"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "midnight_yoga_instructor_paraphrase",
+      "category": "paraphrase",
+      "query": "Who is the teacher for the 12AM stretching class?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["Master Zen"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "cancellation_without_fee_paraphrase",
+      "category": "paraphrase",
+      "query": "Is there a way to drop my subscription without getting penalized?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["written notice at least 29 days in advance"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "freeze_policy_paraphrase",
+      "category": "paraphrase",
+      "query": "Can I pause my account for a month while traveling abroad?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["60 days per calendar year", "$10 per month administrative freeze fee"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "guest_pass_paraphrase",
+      "category": "paraphrase",
+      "query": "Can I bring a friend to work out with me?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["2 complimentary guest passes", "single-day guest pass for $20"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "parking_paraphrase",
+      "category": "paraphrase",
+      "query": "Where should I leave my car and do I have to pay?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["North Garage", "reception validation kiosk"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "platinum_member_perks",
+      "category": "multi_chunk",
+      "query": "What perks and privileges do Platinum members get?",
+      "target_top_k": 6,
+      "expected_anchor_groups": [["Oasis Secret Sauna"], ["2 complimentary guest passes"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "youth_and_dress_requirements",
+      "category": "multi_chunk",
+      "query": "What are the age rules and shoe dress code for using the gym floor?",
+      "target_top_k": 6,
+      "expected_anchor_groups": [["Closed-toe athletic shoes only"], ["at least 16 years old"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "faq_wifi_password",
+      "category": "faq_only",
+      "query": "What is the WiFi password?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["IronLift2026"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "faq_holiday_hours",
+      "category": "faq_only",
+      "query": "When does the gym open and close on holidays?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["8:00 AM to 2:00 PM"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "faq_childcare_ages",
+      "category": "faq_only",
+      "query": "What ages are allowed in the childcare room?",
+      "target_top_k": 4,
+      "expected_anchor_groups": [["ages 2 to 10", "90 minutes per visit"]],
+      "allow_abstention": false
+    },
+    {
+      "id": "distractor_sauna_towel",
+      "category": "distractor",
+      "query": "Are there any blue towels available in the sauna?",
+      "target_top_k": null,
+      "expected_anchor_groups": [],
+      "allow_abstention": true
+    },
+    {
+      "id": "distractor_pt_free_locker",
+      "category": "distractor",
+      "query": "Is there a free overnight locker included in the 12-pack personal training bundle?",
+      "target_top_k": null,
+      "expected_anchor_groups": [],
+      "allow_abstention": true
+    },
+    {
+      "id": "unanswerable_antarctica",
+      "category": "unanswerable",
+      "query": "Does the facility host underwater basket-weaving workshops in Antarctica?",
+      "target_top_k": null,
+      "expected_anchor_groups": [],
+      "allow_abstention": true
+    },
+    {
+      "id": "unanswerable_car_insurance",
+      "category": "unanswerable",
+      "query": "Can you give me an auto insurance quote for a 2024 sedan?",
+      "target_top_k": null,
+      "expected_anchor_groups": [],
+      "allow_abstention": true
+    },
+    {
+      "id": "unanswerable_python_code",
+      "category": "unanswerable",
+      "query": "Write a Python function to sort a list using quicksort.",
+      "target_top_k": null,
+      "expected_anchor_groups": [],
+      "allow_abstention": true
+    }
+  ]
+}

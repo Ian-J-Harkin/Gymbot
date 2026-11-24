@@ -141,6 +141,7 @@ export class WidgetService {
                 lexicalRank: c.lexicalRank ?? index + 1,
                 semanticRank: c.semanticRank ?? null,
                 rrfScore: c.rrfScore ?? c.score ?? null,
+                rerankerScore: c.rerankerScore ?? null,
             }))
         };
 

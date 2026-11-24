@@ -1,6 +1,7 @@
 import { pipeline } from '@huggingface/transformers';
 import * as fs from 'fs';
 import * as path from 'path';
+import { EMBEDDING_MODEL } from '../src/embedding/embedding.service';
 
 const routes = [
   {
@@ -25,8 +26,10 @@ const routes = [
 ];
 
 async function generate() {
-  console.log("Loading model...");
-  const extractor = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+  console.log(`Loading model (${EMBEDDING_MODEL})...`);
+  const extractor = await pipeline('feature-extraction', EMBEDDING_MODEL, {
+    dtype: 'q8',
+  });
   
   const generatedRoutes: any[] = [];
 

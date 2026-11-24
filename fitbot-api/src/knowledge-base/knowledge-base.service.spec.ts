@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { KnowledgeBaseService } from './knowledge-base.service';
+import { KnowledgeBaseService, sanitizeDocumentText } from './knowledge-base.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { EmbeddingService } from '../embedding/embedding.service';
 
@@ -56,6 +56,15 @@ describe('KnowledgeBaseService', () => {
 
     it('should be defined', () => {
         expect(service).toBeDefined();
+    });
+
+    describe('sanitizeDocumentText', () => {
+        it('preserves paragraph breaks while normalizing CRLF, excess newlines, NBSPs, and horizontal spaces', () => {
+            const raw = 'Line one\r\n\r\n\r\nSection\u00A0Two:   blue   towels\t$2\n  Next line  ';
+            expect(sanitizeDocumentText(raw)).toBe(
+                'Line one\n\nSection Two: blue towels $2\nNext line',
+            );
+        });
     });
 
     describe('processFile', () => {

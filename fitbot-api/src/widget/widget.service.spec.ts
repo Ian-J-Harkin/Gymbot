@@ -59,7 +59,9 @@ describe('WidgetService', () => {
     };
 
     hybridRetrievalService = {
-      search: jest.fn(),
+      search: jest.fn().mockImplementation((_q, _configId, chunks, topK) =>
+        chunks.slice(0, Math.min(2, topK)),
+      ),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -136,7 +138,7 @@ describe('WidgetService', () => {
         aiResponse: 'chunk1chunk2',
         retrieval: expect.objectContaining({
           route: 'standard_search',
-          method: 'lexical',
+          method: 'hybrid',
           chunks: expect.arrayContaining([
             expect.objectContaining({
               chunkId: expect.anything(),
@@ -179,6 +181,7 @@ describe('WidgetService', () => {
     });
 
     it('should deterministically abstain without calling the answer provider when no chunks match', async () => {
+      hybridRetrievalService.search = jest.fn().mockResolvedValue([]);
       ragService.search = jest.fn().mockReturnValue([]);
 
       const config = {
@@ -216,7 +219,7 @@ describe('WidgetService', () => {
       const iterator = service.processChat(config, 'Hi', []);
       for await (const chunk of iterator) {}
       
-      expect(ragService.search).toHaveBeenCalledWith('Hi', expect.any(Array), 4);
+      expect(hybridRetrievalService.search).toHaveBeenCalledWith('Hi', 'config-1', expect.any(Array), 4);
       
       const calls = (mockProvider.generateResponse as jest.Mock).mock.calls[0];
       const messages = calls[1];
@@ -235,7 +238,7 @@ describe('WidgetService', () => {
       const iterator = service.processChat(config, 'Hi', []);
       for await (const chunk of iterator) {}
       
-      expect(ragService.search).toHaveBeenCalledWith('Hi', expect.any(Array), 6);
+      expect(hybridRetrievalService.search).toHaveBeenCalledWith('Hi', 'config-1', expect.any(Array), 6);
 
       const calls = (mockProvider.generateResponse as jest.Mock).mock.calls[0];
       const messages = calls[1];
@@ -244,28 +247,8 @@ describe('WidgetService', () => {
     });
   });
 
-  describe('hybrid retrieval gating (Task 3.5)', () => {
-    it('never calls HybridRetrievalService while HYBRID_RETRIEVAL_ENABLED is false (default)', async () => {
-      const mockStream = (async function* () { yield 'result'; })();
-      (aiProviderService.getProvider as jest.Mock).mockReturnValue({ generateResponse: jest.fn().mockReturnValue(mockStream) });
-
-      const config = { id: 'config-1', aiProvider: 'openai', faqText: 'FAQ' } as any;
-      for await (const _chunk of service.processChat(config, 'Hi', [])) { /* drain */ }
-
-      expect(hybridRetrievalService.search).not.toHaveBeenCalled();
-      expect(ragService.search).toHaveBeenCalled();
-    });
-
-    it('routes hybrid-fused results through the LLM provider, never as a raw passthrough, when enabled', async () => {
-      let IsolatedWidgetService!: typeof WidgetService;
-      jest.isolateModules(() => {
-        jest.doMock('../common/constants', () => ({
-          ...jest.requireActual('../common/constants'),
-          HYBRID_RETRIEVAL_ENABLED: true,
-        }));
-        IsolatedWidgetService = require('./widget.service').WidgetService;
-      });
-
+  describe('hybrid retrieval gating (Phase 2)', () => {
+    it('routes hybrid-fused results through the LLM provider by default, never as a raw passthrough', async () => {
       const fusedChunk = {
         id: 'doc-1',
         content: 'The sauna access code is 8822#.',
@@ -274,8 +257,40 @@ describe('WidgetService', () => {
         semanticRank: 1,
         rrfScore: 1 / 61 + 1 / 61,
       };
-      const localHybridRetrievalService = { search: jest.fn().mockResolvedValue([fusedChunk]) };
+      (hybridRetrievalService.search as jest.Mock).mockResolvedValue([fusedChunk]);
 
+      const mockStream = (async function* () { yield 'synthesized answer'; })();
+      (aiProviderService.getProvider as jest.Mock).mockReturnValue({ generateResponse: jest.fn().mockReturnValue(mockStream) });
+
+      const config = { id: 'config-1', aiProvider: 'openai', faqText: 'FAQ' } as any;
+      const values: (string | { explanation: unknown })[] = [];
+      for await (const chunk of service.processChat(config, 'What is the sauna code?', [])) {
+        values.push(chunk);
+      }
+
+      expect(hybridRetrievalService.search).toHaveBeenCalledWith(
+        'What is the sauna code?',
+        'config-1',
+        expect.any(Array),
+        expect.any(Number),
+      );
+      expect(ragService.search).not.toHaveBeenCalled();
+      // The fused result must flow through the LLM, never be returned verbatim.
+      expect(values.filter((v) => typeof v === 'string')).toEqual(['synthesized answer']);
+      expect(values.some((v) => typeof v === 'string' && v === fusedChunk.content)).toBe(false);
+    });
+
+    it('falls back to lexical RagService.search when HYBRID_RETRIEVAL_ENABLED is false', async () => {
+      let IsolatedWidgetService!: typeof WidgetService;
+      jest.isolateModules(() => {
+        jest.doMock('../common/constants', () => ({
+          ...jest.requireActual('../common/constants'),
+          HYBRID_RETRIEVAL_ENABLED: false,
+        }));
+        IsolatedWidgetService = require('./widget.service').WidgetService;
+      });
+
+      const localHybridRetrievalService = { search: jest.fn() };
       const isolatedService = new IsolatedWidgetService(
         chatLogsService as any,
         validationService as any,
@@ -287,24 +302,14 @@ describe('WidgetService', () => {
         localHybridRetrievalService as any,
       );
 
-      const mockStream = (async function* () { yield 'synthesized answer'; })();
+      const mockStream = (async function* () { yield 'result'; })();
       (aiProviderService.getProvider as jest.Mock).mockReturnValue({ generateResponse: jest.fn().mockReturnValue(mockStream) });
 
       const config = { id: 'config-1', aiProvider: 'openai', faqText: 'FAQ' } as any;
-      const values: (string | { explanation: unknown })[] = [];
-      for await (const chunk of isolatedService.processChat(config, 'What is the sauna code?', [])) {
-        values.push(chunk);
-      }
+      for await (const _chunk of isolatedService.processChat(config, 'Hi', [])) { /* drain */ }
 
-      expect(localHybridRetrievalService.search).toHaveBeenCalledWith(
-        'What is the sauna code?',
-        'config-1',
-        expect.any(Array),
-        expect.any(Number),
-      );
-      // The fused result must flow through the LLM, never be returned verbatim.
-      expect(values.filter((v) => typeof v === 'string')).toEqual(['synthesized answer']);
-      expect(values.some((v) => typeof v === 'string' && v === fusedChunk.content)).toBe(false);
+      expect(localHybridRetrievalService.search).not.toHaveBeenCalled();
+      expect(ragService.search).toHaveBeenCalled();
     });
   });
 });

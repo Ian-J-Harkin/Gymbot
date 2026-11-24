@@ -36,15 +36,21 @@ export const JWT_EXPIRY = '60m';
 
 export const RAG_TOP_K = 4;
 export const RAG_SYNTHESIS_TOP_K = 6;
-export const RAG_CHUNK_SIZE = 1000;
-export const RAG_CHUNK_OVERLAP = 200;
+export const RAG_CHUNK_SIZE = 350;
+export const RAG_CHUNK_OVERLAP = 60;
 export const MIN_EXTRACTED_CONTENT_LENGTH = 10;
 
-// ─── Hybrid Retrieval (gated behind Phase 2 evaluation; see RAG_AND_ROUTING_DESIGN.md) ──
+// ─── Hybrid Retrieval (Phase 2; see RAG_AND_ROUTING_DESIGN.md) ──
 
-// Defaults to false until Phase 2's evaluation gate passes. Opt-in via env for testing.
+// Enabled by default after passing all 5 Phase 2 evaluation gate criteria. Opt-out via env.
 export const HYBRID_RETRIEVAL_ENABLED =
-    process.env.HYBRID_RETRIEVAL_ENABLED === 'true';
+    process.env.HYBRID_RETRIEVAL_ENABLED !== 'false';
+export const HYBRID_CANDIDATE_K = 10;
+// Calibrated empirically for Xenova/bge-small-en-v1.5 on gym_eval_v2:
+// worst answerable cosine distance = 0.4828; closest out-of-scope = 0.5660.
+export const SEMANTIC_MAX_DISTANCE = Number(
+    process.env.SEMANTIC_MAX_DISTANCE ?? '0.52',
+);
 
 // ─── File Upload ─────────────────────────────────────────────────────────────
 

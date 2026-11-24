@@ -7,14 +7,14 @@
     "sha256": "1f3f55bd34c6a9c7a2347595d6f7dc7793e5f89701b0a1a9e2b4a33f51a95774",
     "extractor": "mammoth",
     "extractor_version": "1.11.0",
-    "normalization": "KnowledgeBaseService sanitizer: allowed printable ASCII, selected Latin-1/punctuation; collapse whitespace; trim",
+    "normalization": "KnowledgeBaseService sanitizeDocumentText: preserve line/paragraph breaks, normalize CRLF/NBSP/horizontal spaces, collapse 3+ newlines",
     "normalized_text_fixture": "test/evaluation/fixtures/iron_oasis_handbook.normalized.txt",
-    "normalized_text_sha256": "6a4c51956d196b4c5d0da97e021011116e2078373ae7fb9c2a20aaa5a30327fd",
+    "normalized_text_sha256": "dc72294e7164e969016b526b91c5e9c484a419b55e1e0e13d3a6283d0567d63f",
     "splitter": {
       "name": "RecursiveCharacterTextSplitter",
-      "chunk_size": 1000,
-      "chunk_overlap": 200,
-      "observed_chunk_count": 2
+      "chunk_size": 350,
+      "chunk_overlap": 60,
+      "observed_chunk_count": 5
     }
   },
   "scoring": {
