@@ -1,7 +1,7 @@
 # Experimental Phase 3 RFC: Semantic Router & 6 GB VRAM Local Stack
 
-**Date:** 2026-11-23  
-**Status:** Experimental RFC — **Do not implement until Phase 2's evaluation gate in [RAG_AND_ROUTING_DESIGN.md](RAG_AND_ROUTING_DESIGN.md) passes.**
+**Date:** 2026-11-23 (updated 2026-11-24)  
+**Status:** Experimental RFC — **Phase 2 retrieval gate in [RAG_AND_ROUTING_DESIGN.md](RAG_AND_ROUTING_DESIGN.md) passed 5/5 (2026-11-24); ready for Phase 3 execution when approved.**
 
 ---
 
@@ -24,9 +24,21 @@ Inspecting the current implementation in [`semantic-router.service.ts`](fitbot-a
 
 ---
 
-## 3. Two Competing Experimental Hypotheses
+## 3. Two-Stage Experimental Plan
 
-Phase 3 will run a head-to-head experiment between two clean designs rather than preserving the status quo:
+### Stage 3.1: Frozen-Context Answer-Model Baseline (`generation.eval.ts`)
+
+Before testing whether an upstream router improves quality or latency, establish the baseline performance of the answer LLMs themselves on Phase 2's retrieval output:
+- Build `test/evaluation/harnesses/generation.eval.ts` passing **identical frozen retrieved chunks and prompts** (including multi-chunk synthesis cases and lexical distractors like `distractor_sauna_towel` / `distractor_pt_free_locker` where the LLM must abstain from retrieved context) to candidate answer models.
+- Benchmark cloud providers alongside modern **6 GB VRAM** Ollama models (`qwen3:4b`, `qwen2.5:3b`, `gemma3:4b`, `phi4-mini`) vs. current legacy defaults (`mistral:7b`, `llama3`) on:
+  - Factual correctness and citation groundedness.
+  - Abstention faithfulness on tricky distractors (verifying the LLM refuses cleanly when chunks don't actually support the asked combination).
+  - Conciseness vs. synthesis compliance under a single prompt (directly informing Hypothesis A below).
+  - First-token latency and tokens/sec.
+
+### Stage 3.2: Competing Routing Hypotheses
+
+Once the Stage 3.1 answer-model baseline is measured, run a head-to-head experiment between two clean designs rather than preserving the status quo:
 
 ### Hypothesis A — Simplify / Remove the Router
 - **Premise:** Once Phase 2 provides clean, focused chunks (`~350` chars, reranked) and a modern answer LLM (cloud or 3B–4B local model), a single well-engineered system prompt handles both short factual questions and multi-fact synthesis naturally without an upstream classifier.

@@ -221,8 +221,6 @@ Once passed: enable `HYBRID_RETRIEVAL_ENABLED=true`, run the Neon migrations + b
      - **Runtime & Memory (`ts-node --transpile-only` + pgvector):** `359 ms` model init, `10.06 ms` p50 / `17.32 ms` p95 retrieval latency, **`264.4 MB` peak RSS** (≤ `512 MB`, **PASS**)
    - Result: `HYBRID_RETRIEVAL_ENABLED` enabled by default (`process.env.HYBRID_RETRIEVAL_ENABLED !== 'false'`). Note: apply `20261004193000_add_chunk_embeddings` + `20261123215500_add_chat_log_retrieval` and run `npm run backfill:chunk-embeddings` on production Neon (un-backfilled tenants fail open to lexical search automatically until backfilled).
 
-### 2.5 Deferred Follow-On: Answer-Generation Evaluation (`generation.eval.ts`)
+---
 
-After Phase 2 retrieval passes and stabilizes:
-- Build a frozen-context generation harness passing **identical retrieved chunks and prompts** to candidate answer models.
-- Benchmark cloud providers alongside modern **6 GB VRAM** Ollama models (`qwen2.5:3b`, `qwen3:4b`, `gemma3:4b`, `phi4-mini`) vs. current legacy defaults (`mistral:7b`, `llama3`) for groundedness, abstention obedience, and tokens/sec.
+**Next Phase:** Frozen-context answer-generation evaluation (`generation.eval.ts`), local 6 GB VRAM Ollama model selection, and the routing experiment live in [SEMANTIC_ROUTER_PHASE3_RFC.md](SEMANTIC_ROUTER_PHASE3_RFC.md).
