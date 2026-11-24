@@ -1,7 +1,7 @@
 # FitBot RAG & Routing Architecture Design
 
-**Date:** 2026-11-23  
-**Status:** Proposed Design (awaiting approval before implementation)  
+**Date:** 2026-11-23 (Phase 2 updated & verified 2026-11-24)  
+**Status:** Phase 1 & Phase 2 Implemented & Gate-Verified (Phase 3 RFC remains experimental)  
 **Baseline Commit:** `0b50ba9` (`pre-search semantic routing layer (2)`) + uncommitted Phase 1–3 working-tree changes in `Gymbot/`
 
 ## 1. Document Authority
@@ -205,6 +205,21 @@ Run all four strategies on the identical corpus and frozen splits:
 5. **Runtime & memory budget:** p95 retrieval latency and peak Node.js RSS (verified in a 512 MB memory-capped container with real ONNX inference) fit Render Free constraints without OOM.
 
 Once passed: enable `HYBRID_RETRIEVAL_ENABLED=true`, run the Neon migrations + backfill script, and update user/testing docs.
+
+#### Phase 2 Execution Results (2026-11-24 — Gate Passed 5/5)
+
+1. **Rejected Cross-Encoder Reranker (`Xenova/ms-marco-MiniLM-L-6-v2`):** Tested via `npm run test:eval:phase2-gate` and **rejected**:
+   - Penalized valid paraphrases (`12.5%` paraphrase recall, `1/8`) and even scored literal `towel_policy` at `-8.423`, overlapping unanswerable queries (`-10.87` to `-11.33`).
+   - Combined with `bge-small-en-v1.5`, pushed peak RSS to `552.2 MB` (> Render Free `512 MB`).
+2. **Accepted Phase 2 Architecture (`Xenova/bge-small-en-v1.5` `q8` + `350/60` Chunking + Cached FAQ Embeddings + `SEMANTIC_MAX_DISTANCE=0.52`):**
+   - `gym_eval_v2` corpus (`11` document chunks across 2 docs + `4` FAQ chunks = `15` total chunks, plus FAQ-only tenant):
+     - **Literal (8 cases):** Lexical `100%` (8/8) → Hybrid BGE RRF `100%` (8/8) (**PASS**)
+     - **FAQ (3 cases in full corpus & FAQ-only tenant):** `100%` (3/3) on both (**PASS**)
+     - **Hard Paraphrases (8 cases):** Lexical `62.5%` (5/8) → Hybrid BGE RRF `87.5%` (7/8, **+25.0 pp**) (**PASS**)
+     - **Multi-chunk synthesis (2 cases):** `100%` (2/2) (**PASS**)
+     - **Out-of-scope abstention (3 cases):** Lexical `0%` (0/3) → Hybrid BGE RRF `100%` (3/3); combined distractor+OOS abstention: Lexical `0%` (0/5) → Hybrid BGE RRF `60%` (3/5) (**PASS**)
+     - **Runtime & Memory (`ts-node --transpile-only` + pgvector):** `359 ms` model init, `10.06 ms` p50 / `17.32 ms` p95 retrieval latency, **`264.4 MB` peak RSS** (≤ `512 MB`, **PASS**)
+   - Result: `HYBRID_RETRIEVAL_ENABLED` enabled by default (`process.env.HYBRID_RETRIEVAL_ENABLED !== 'false'`). Note: apply `20261004193000_add_chunk_embeddings` + `20261123215500_add_chat_log_retrieval` and run `npm run backfill:chunk-embeddings` on production Neon (un-backfilled tenants fail open to lexical search automatically until backfilled).
 
 ### 2.5 Deferred Follow-On: Answer-Generation Evaluation (`generation.eval.ts`)
 

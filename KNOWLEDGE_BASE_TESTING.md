@@ -74,18 +74,18 @@ Ask the Bot these specific questions to verify it is reading the document accura
 
 From `fitbot-api`, run `npm run test:eval:retrieval`. This uses the versioned Iron Oasis dataset and frozen normalized DOCX text, applies the production chunk splitter, and calls the lexical `RagService.search()` directly. It does not connect to PostgreSQL or exercise tenant isolation, document deletion, semantic routing, or answer generation.
 
-The generated report is `fitbot-api/test/evaluation/reports/iron_oasis_v1.latest.json`. It includes evidence hits at K=4 and K=6, hits at each case's target K, and the separately scored unanswerable query. Production defaults to lexical retrieval (`HYBRID_RETRIEVAL_ENABLED=false`) while hybrid retrieval remains gated behind Phase 2 in [RAG_AND_ROUTING_DESIGN.md](RAG_AND_ROUTING_DESIGN.md). This small Iron Oasis smoke baseline is not evidence of broad retrieval quality; database-backed tenant-isolation and deletion tests remain separate.
+The generated report is `fitbot-api/test/evaluation/reports/iron_oasis_v1.latest.json`. It includes evidence hits at K=4 and K=6, hits at each case's target K, and the separately scored unanswerable query. Production enables hybrid retrieval by default (`HYBRID_RETRIEVAL_ENABLED !== 'false'`) after passing all 5 Phase 2 evaluation gate criteria in [RAG_AND_ROUTING_DESIGN.md](RAG_AND_ROUTING_DESIGN.md); use `npm run test:eval:phase2-gate` to re-run the multi-document + FAQ hybrid gate against disposable PostgreSQL. This small Iron Oasis smoke baseline is not evidence of broad retrieval quality; database-backed tenant-isolation and deletion tests remain separate.
 
 ### Database-Backed Isolation and Deletion Regression
 
-From `fitbot-api`, run `npm run test:eval:integration`. The command starts a disposable PostgreSQL container on port `55432`, applies the Prisma migrations, runs the isolated integration suite, and removes the container and volume afterward. It verifies that two configuration-scoped tenants cannot retrieve one another's chunks using multiple query formulations, and that `deleteDocument` removes both the document and its chunks from subsequent widget retrieval. It uses no production database, AI provider, HTTP server, or MiniLM model.
+From `fitbot-api`, run `npm run test:eval:integration`. The command starts a disposable PostgreSQL container on port `55432`, applies the Prisma migrations, runs the isolated integration suite, and removes the container and volume afterward. It verifies that two configuration-scoped tenants cannot retrieve one another's chunks using multiple query formulations, and that `deleteDocument` removes both the document and its chunks from subsequent widget retrieval. It uses no production database, AI provider, HTTP server, or embedding model.
 
-### Phase 1 Retrieval Decision
+### Phase 2 Retrieval Decision
 
-Production defaults to in-memory lexical retrieval (`HYBRID_RETRIEVAL_ENABLED=false`) because the Task 3.6 hybrid gate failed on paraphrases (`60%` vs lexical `80%`). Hybrid retrieval redesign and its non-bypassable evaluation gate are tracked as Phase 2 in [RAG_AND_ROUTING_DESIGN.md](RAG_AND_ROUTING_DESIGN.md).
+Production enables `HybridRetrievalService` by default (`Xenova/bge-small-en-v1.5`, newline-preserving `350/60` chunking, cached FAQ embeddings, and `SEMANTIC_MAX_DISTANCE=0.52` without a Semantic Veto). On the expanded `gym_eval_v2` gate, hybrid retrieval achieved `100%` (8/8) on literals, `100%` (3/3) on FAQ-only queries, `87.5%` (7/8) on hard paraphrases (+25pp over lexical's `62.5%`), `100%` (3/3) out-of-scope abstention, `17.32 ms` p95 latency, and `264.4 MB` peak RSS. See [RAG_AND_ROUTING_DESIGN.md](RAG_AND_ROUTING_DESIGN.md) for details.
 
 ---
-*Updated on: 2026-11-23*
+*Updated on: 2026-11-24*
 
 ## 4. Semantic Routing Validation (New Implementation)
 
