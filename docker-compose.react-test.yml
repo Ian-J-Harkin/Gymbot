@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     container_name: fitbot-postgres
     restart: always
     environment:
@@ -23,6 +23,7 @@ services:
       - "3005:3000"
     environment:
       DATABASE_URL: "postgresql://postgres:admin@postgres:5432/fitbot?schema=public"
+      DATABASE_URL_UNPOOLED: "postgresql://postgres:admin@postgres:5432/fitbot?schema=public"
       JWT_SECRET: "superSecretKey123"
       ENCRYPTION_KEY: "thisis32charslongsecretkeyphrase"
       IV_SECRET: "thisis16charsiv!"

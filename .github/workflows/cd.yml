@@ -61,9 +61,10 @@ jobs:
       - name: Run Prisma Migrate Deploy
         env:
           DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          DATABASE_URL_UNPOOLED: ${{ secrets.PROD_DATABASE_URL_UNPOOLED || secrets.PROD_DATABASE_URL }}
         run: |
           cd fitbot-api
-          npm install
+          npm install --legacy-peer-deps
           if [ -n "$DATABASE_URL" ]; then
             npx prisma migrate deploy
           else
