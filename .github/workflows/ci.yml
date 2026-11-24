@@ -23,7 +23,7 @@ jobs:
       - name: Install Monorepo Dependencies
         run: |
           npm install
-          cd fitbot-api && npm install
+          cd fitbot-api && npm install --legacy-peer-deps
           cd ../fitbot-admin && npm install
           cd ../packages/fitbot-react && npm install
 
@@ -59,9 +59,9 @@ jobs:
       - name: Install Dependencies
         run: |
           cd demos/fitbot-react-demo
-          npm install
+          npm install --legacy-peer-deps
           cd ../../packages/fitbot-react
-          npm install
+          npm install --legacy-peer-deps
 
       - name: Start Docker Services
         run: docker compose -f docker-compose.react-test.yml up -d

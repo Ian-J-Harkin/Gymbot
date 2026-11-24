@@ -24,13 +24,13 @@ jobs:
       - name: Build Next.js Adapter
         run: |
           cd packages/fitbot-nextjs
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
       - name: Build Angular Adapter
         run: |
           cd packages/fitbot-angular
-          npm install
+          npm install --legacy-peer-deps
           npm run build
 
   deploy-backend:
